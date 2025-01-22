@@ -1,1 +1,126 @@
+/* General Page Styling */
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
+}
 
+#homePage {
+    background-color: #140044; /* Dark background for the homepage */
+    min-height: 100vh; /* Ensure full screen coverage */
+    margin: 0;
+}
+
+/* Navbar Styling */
+#navBar, .navbar {
+    background-color: #00156D; /* Deep blue for the navbar background */
+    color: azure; /* Text color for readability */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
+    padding: 0.5rem 1rem; /* Add padding for consistency */
+}
+
+/* Align navbar items to the right for logged-out state */
+#navBar .navbar-nav {
+    margin-left: auto; /* Align nav items to the right */
+}
+
+/* Align navbar items to the right for logged-in state */
+#navBar .navbar-collapse {
+    padding-right: 2rem; /* Add padding on the right side for logged-in state */
+}
+
+/* Navbar Link Styling */
+.navbar .navbar-nav {
+    margin-left: auto; /* Ensure navbar items are aligned to the right */
+}
+
+.navbar .navbar-brand {
+    margin-right: auto; /* Ensure the brand title stays on the left */
+}
+
+.navbar-collapse {
+    justify-content: flex-end; /* Ensure content aligns to the right */
+}
+
+/* Navbar Link Styling */
+.navbar-brand, .nav-link {
+    color: azure !important; /* Ensure all links and brand text are consistent */
+    font-weight: bold; /* Add emphasis to navbar items */
+    font-size: 1.1rem; /* Slightly increase font size for readability */
+    transition: color 0.3s ease-in-out;
+}
+
+.navbar-brand:hover, .nav-link:hover {
+    color: #FFD700 !important; /* Gold color for hover effect */
+}
+
+/* Dropdown Menu Styling */
+.dropdown-menu {
+    background-color: #00156D; /* Match navbar background */
+    border: none;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+}
+
+.dropdown-item {
+    color: azure !important;
+    transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+}
+
+.dropdown-item:hover {
+    background-color: #FFD700; /* Highlight the dropdown item */
+    color: #00156D !important; /* Contrast text color */
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 768px) {
+    .nav-link {
+        font-size: 1rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+}
+
+
+/* Modal Styling */
+.modal-content {
+    background-color: #fff; /* White background for the modal */
+    color: black; /* Black text color */
+}
+
+/* Modal Header */
+.modal-header {
+    background-color: #f8f9fa; /* Light background for the header */
+    color: black; /* Black text for the header */
+}
+
+/* Modal Body */
+.modal-body {
+    background-color: #fff; /* White background for the body */
+    color: black; /* Black text color for readability */
+}
+
+/* Modal Footer */
+.modal-footer {
+    background-color: #f8f9fa; /* Light background for the footer */
+    color: black; /* Black text color */
+}
+
+/* Modal Input Fields */
+#unameCreateInput, #passCreateInput, #passConfirm {
+    background-color: #f1f1f1; /* Light background for input fields */
+    color: black; /* Black text for inputs */
+    border: 1px solid #ddd; /* Light border around input fields */
+}
+
+/* Button Styling */
+.btn-primary, .btn-secondary {
+    background-color: #007bff; /* Blue background for primary button */
+    border-color: #007bff; /* Border matching primary button color */
+}
+
+.btn-primary:hover, .btn-secondary:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    border-color: #0056b3; /* Darker border on hover */
+}
