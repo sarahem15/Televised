@@ -1,34 +1,66 @@
+/* General Body Styling */
 body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
     color: white;
 }
 
-#homePage {
-    background-color: #140044; 
+/* Page Background Styling */
+#homePage, #profileSettings {
+    background-color: #140044;
     min-height: 100vh; /* Ensure full screen coverage */
     margin: 0;
 }
 
+/* Input and Button Styling */
+input, textarea, select, button {
+    border-radius: 5px; /* Rounded edges */
+}
+
+input, textarea, select {
+    background-color: #3d266e; /* Input background color */
+    color: white;
+    border: 1px solid #9daef6;
+    width: 100%; /* Full column width */
+    padding: 8px; /* Padding for better appearance */
+    box-sizing: border-box;
+}
+
+button {
+    background-color: #9daef6; /* Button background color */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #768dd0; /* Slightly darker shade for hover */
+}
+
+/* Modal Styling */
+.modal-content {
+    background-color: #140044;
+    color: white;
+}
+
+.modal input, .modal textarea, .modal select {
+    background-color: #3d266e; /* Input background color in modals */
+    color: white;
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
 /* Navbar Styling */
 #navBar, .navbar {
-    background-color: #00156D; 
-    color: azure; 
+    background-color: #00156D;
+    color: azure;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3); /* Shadow for depth */
     padding: 0.5rem 1rem; /* Add padding for consistency */
 }
 
-/* Align navbar items to the right for logged-out state */
-#navBar .navbar-nav {
-    margin-left: auto; 
-}
-
-/* Align navbar items to the right for logged-in state */
-#navBar .navbar-collapse {
-    padding-right: 2rem; /* Add padding on the right side for logged-in state */
-}
-
-/* Navbar Link Styling */
 .navbar .navbar-nav {
     margin-left: auto; /* Ensure navbar items are aligned to the right */
 }
@@ -41,18 +73,16 @@ body {
     justify-content: flex-end; /* Ensure content aligns to the right */
 }
 
-/* Navbar Link Styling */
 .navbar-brand, .nav-link {
-    color: azure !important; 
-    font-weight: bold; 
-    font-size: 1.1rem; 
+    color: azure !important;
+    font-weight: bold;
+    font-size: 1.1rem;
     transition: color 0.3s ease-in-out;
 }
 
-
 /* Dropdown Menu Styling */
 .dropdown-menu {
-    background-color: #00156D; 
+    background-color: #00156D;
     border: none;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Shadow */
 }
@@ -67,7 +97,7 @@ body {
     color: #00156D !important; /* Contrast text color */
 }
 
-/* Adjustments for smaller screens */
+/* Responsive Adjustments for Smaller Screens */
 @media (max-width: 768px) {
     .nav-link {
         font-size: 1rem;
@@ -76,47 +106,4 @@ body {
     .navbar-brand {
         font-size: 1.2rem;
     }
-}
-
-
-/* Modal Styling */
-.modal-content {
-    background-color: #fff;
-    color: black; 
-}
-
-/* Modal Header */
-.modal-header {
-    background-color: #f8f9fa; 
-    color: black; 
-}
-
-/* Modal Body */
-.modal-body {
-    background-color: #fff; 
-    color: black; 
-}
-
-/* Modal Footer */
-.modal-footer {
-    background-color: #f8f9fa; 
-    color: black; 
-}
-
-/* Modal Input Fields */
-#unameCreateInput, #passCreateInput, #passConfirm {
-    background-color: #f1f1f1; 
-    color: black; 
-    border: 1px solid #ddd;
-}
-
-/* Button Styling */
-.btn-primary, .btn-secondary {
-    background-color: #007bff; 
-    border-color: #007bff; 
-}
-
-.btn-primary:hover, .btn-secondary:hover {
-    background-color: #0056b3; 
-    border-color: #0056b3; 
 }
