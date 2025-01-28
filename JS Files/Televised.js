@@ -97,7 +97,25 @@ function bindCreateAccountButton() {
     }
 }
 
-// Event listener to initialize the navbar and account creation logic
+// Autofill profile settings
+function autofillProfileSettings() {
+    const usernameInput = document.getElementById("userName");
+    const displayNameInput = document.getElementById("displayName");
+
+    const username = localStorage.getItem("username");
+
+    if (username) {
+        if (usernameInput) usernameInput.value = username;
+        if (displayNameInput) displayNameInput.value = username;
+    }
+}
+
+// Event listener to initialize the navbar, account creation logic, and autofill profile settings
 document.addEventListener("DOMContentLoaded", () => {
     updateNavbar(); // Initialize the navbar on page load
+
+    // Autofill profile settings if on the Profile Settings page
+    if (document.body.id === "profileSettings") {
+        autofillProfileSettings();
+    }
 });
