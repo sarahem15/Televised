@@ -5,7 +5,7 @@ body {
     color: white;
 }
 
-/* Page Background Styling */
+/* Alayna's Pages Background Styling */
 #homePage, #profileSettings {
     background-color: #140044;
     min-height: 100vh; /* Ensure full screen coverage */
@@ -19,11 +19,26 @@ input, textarea, select, button {
 
 input, textarea, select {
     background-color: #3d266e; /* Input background color */
-    color: white;
+    color: #cccccc; /* Input text color */
     border: 1px solid #9daef6;
     width: 100%; /* Full column width */
     padding: 8px; /* Padding for better appearance */
     box-sizing: border-box;
+}
+
+input::placeholder, textarea::placeholder {
+    color: #cccccc; /* Placeholder text color */
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+/* M'Kyiah's Pages Backgrounds */
+#discoverPage, #discoverTwo, #discoverAlphabet {
+    background-color: #140044;
+    min-height: 100vh;
+    margin: 0;
 }
 
 button {
@@ -107,3 +122,83 @@ button:hover {
         font-size: 1.2rem;
     }
 }
+
+/* Wrapper and Section Layout */
+.wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 100%);
+    overflow: hidden;
+    scroll-behavior: smooth;
+    margin-left: 8em;
+    margin-right: 5em;
+}
+
+.wrapper section {
+    width: 100%;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+    margin: 20px 0;
+}
+
+.wrapper .item {
+    padding: 0 2px;
+}
+
+.wrapper .item:hover {
+    margin: 0 40px;
+    transform: scale(1.2);
+}
+
+.wrapper a {
+    position: absolute;
+    color: #fff;
+    text-decoration: none;
+    font-size: 6em;
+    width: 80px;
+    padding: 20px;
+    text-align: center;
+    z-index: 1;
+}
+
+.wrapper a:nth-of-type(1) {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%);
+}
+
+.wrapper a:nth-of-type(2) {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%);
+}
+    
+
+/* Pagination */
+.pagination {
+    display: inline-block;
+}
+
+.pagination a {
+    color: white;
+    float: left;
+    padding: 8px 16px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.pagination a.active {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.pagination a:hover:not(.active) {
+    background-color: #ddd;
+}
+
+.center {
+    text-align: center;
+}
+
