@@ -119,3 +119,33 @@ document.addEventListener("DOMContentLoaded", () => {
         autofillProfileSettings();
     }
 });
+
+
+
+/* Row/Slideshow Functionality */
+let rowIndex = 1;
+showNextSlide(rowIndex);
+
+// Next/previous controls
+function plusSlides(n) {
+    showNextSlide(rowIndex += n);
+}
+
+function currentRow(n) {
+    showNextSlide(rowIndex = n);
+}
+
+function showNextSlide(n) {
+    let i;
+    let slides = document.getElementsByClassName("row");
+    if (n > slides.length) {
+        rowIndex = 1;
+    }
+    if (n < 1) {
+        rowIndex = slides.length;
+    }
+    for (i = 0; i < slides.length; i++) {
+        slides[i].style.display = "none";
+    }
+    slides[rowIndex - 1].style.display = "block";
+} 
