@@ -12,6 +12,26 @@ body {
     margin: 0;
 }
 
+/* Center H1 Under Header */
+#chaningWelcome {
+    text-align: center;
+    margin: 20px 0; /* Add margin to create spacing below the header */
+    position: relative;
+    top: 0;
+    left: 0;
+    transform: none; /* Remove centering transformation */
+    font-size: 3.5em;
+    color: white;
+}
+
+#slogan{
+    text-align: center;
+    position: relative;
+    top: 0;
+    left: 0;
+    color: #4ec5f5;
+}
+
 /* Input and Button Styling */
 input, textarea, select, button {
     border-radius: 5px; /* Rounded edges */
@@ -35,7 +55,7 @@ html {
 }
 
 /* M'Kyiah's Pages Backgrounds */
-#discoverPage, #discoverTwo, #discoverAlphabet {
+#discoverPage, #discoverTwo, #discoverAlphabet, #showsPage {
     background-color: #140044;
     min-height: 100vh;
     margin: 0;
@@ -95,6 +115,12 @@ button:hover {
     transition: color 0.3s ease-in-out;
 }
 
+.nav-link:hover {
+    color: #ffc107;
+    text-decoration: none;
+    transform: scale(1.1);
+}
+
 /* Dropdown Menu Styling */
 .dropdown-menu {
     background-color: #00156D;
@@ -120,6 +146,21 @@ button:hover {
 
     .navbar-brand {
         font-size: 1.2rem;
+    }
+
+    #chaningWelcome {
+        font-size: 2em;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    #chaningWelcome {
+        font-size: 1.5em;
+    }
+
+    button {
+        font-size: 0.9rem;
+        padding: 8px 15px;
     }
 }
 
@@ -174,7 +215,6 @@ button:hover {
     right: 0;
     background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%);
 }
-    
 
 /* Pagination */
 .pagination {
@@ -201,3 +241,81 @@ button:hover {
 .center {
     text-align: center;
 }
+
+
+/*Shows adding*/
+/* Dropdown for seasons */
+.dropbtn {
+    background-color: #140044;
+    color: white;
+    padding: 16px;
+    font-size: 20px;
+    border: none;
+  }
+  
+  /* Position the dropdown*/
+  .seasonDropdown{
+    position: relative;
+    display: inline-block;
+  }
+  
+  .dropseason-content {
+    display: none;
+    position: absolute;
+    background-color: #140044;
+    min-width: 160px;
+    font-size: 20px;
+    box-shadow: 0px 8px 16px 0px rba(0,0,0,0.2);
+    z-index: 1;
+  }
+  
+  .dropseason-content a {
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+  
+  .dropdown-content a:hover {background-color: #ddd;}
+  
+  .seasonDropdown:hover .dropseason-content {display: block;}
+  
+  .seasonDropdown:hover .dropbtn{background-color: #436eb1;}
+  .dropseason-content:hover {background-color: #436eb1}
+  
+  .showInfo {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    width: 900px;
+    padding: 5px;
+    .words{
+    .editButtons{
+      display: grid;
+      grid-template-columns: repeat(4, auto);
+    }
+  }
+  }
+  
+  .watchedButton{
+    background-color: #436eb1;
+    color: white;
+    padding: 10px;
+  }
+  
+  .reviewButton{
+    background-color: #436eb1;
+    color: white;
+    padding: 5px;
+  }
+  
+  .rateButton{
+    background-color: #436eb1;
+    color: white;
+    padding: 5px;
+  }
+  
+  .menuButton{
+    background-color: #436eb1;
+    color: white;
+    padding: 5px;
+  }
