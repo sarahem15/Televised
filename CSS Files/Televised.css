@@ -58,7 +58,7 @@ html {
 #discoverPage, #discoverTwo, #discoverAlphabet, #showsPage {
     background-color: #140044;
     min-height: 100vh;
-    margin: 0;
+    margin: auto;
 }
 
 button {
@@ -164,14 +164,17 @@ button:hover {
     }
 }
 
+
 /* Wrapper and Section Layout */
 .wrapper {
+    width: 70%;
     display: grid;
-    grid-template-columns: repeat(3, 100%);
+    grid-template-columns: repeat(5, 100%);
     overflow: hidden;
     scroll-behavior: smooth;
-    margin-left: 8em;
-    margin-right: 5em;
+    align-content: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .wrapper section {
@@ -184,6 +187,8 @@ button:hover {
 
 .wrapper .item {
     padding: 0 2px;
+    display: grid;
+    grid-template-rows: repeat(2, auto);
 }
 
 .wrapper .item:hover {
@@ -196,7 +201,7 @@ button:hover {
     color: #fff;
     text-decoration: none;
     font-size: 6em;
-    width: 80px;
+    width: .5%;
     padding: 20px;
     text-align: center;
     z-index: 1;
@@ -286,16 +291,22 @@ button:hover {
   .showInfo {
     display: grid;
     grid-template-columns: repeat(4, auto);
-    width: 900px;
+    width: 2000px;
     padding: 5px;
-    .words{
-    .editButtons{
-      display: grid;
-      grid-template-columns: repeat(4, auto);
-    }
-  }
   }
   
+  .seasonNav{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 700px;
+  }
+
+  .editButtons {
+      display: grid;
+      width:  900px;
+      grid-template-columns: repeat(4, auto);
+    }
+
   .watchedButton{
     background-color: #436eb1;
     color: white;
@@ -318,4 +329,12 @@ button:hover {
     background-color: #436eb1;
     color: white;
     padding: 5px;
+  }
+
+  .titles{
+    width: 220px;
+    padding: 5px;
+    color: white;
+    text-align: center;
+    font-size: 20px;
   }
