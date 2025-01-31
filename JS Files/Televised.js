@@ -4,36 +4,44 @@ console.log("Televised.js is loaded!");
 const seriesImgs = [
     "../images/series/AdventureTimeMain.jpg", 
     "../images/series/AgathaAllAlong.jpg",
-    "../images/series/ArcaneMain.jpg",
-    "../images/series/BlackMirror.jpg",
-    "../images/series/BojackHorsemanMain.jpg",
-    "../images/series/CommunityMain.jpg",
-    "../images/series/CriminalMindsMain.jpg",
+    "../images/series/ArcaneMain.jpg", 
+    "../images/series/BlackMirror.jpg", 
+    "../images/series/BojackHorsemanMain.jpg", 
+    "../images/series/CommunityMain.jpg", 
+    "../images/series/CriminalMindsMain.jpg", 
     "../images/series/DaughtersOfTheCultMain.jpg",
-    "../images/series/DexterMain.jpg",
-    "../images/series/EvilLivesHereMain.jpg",
-    "../images/series/FriendsMain.jpg",
-    "../images/series/FuturamaMain.jpg",
-    "../images/series/H2OMain.jpg",
-    "../images/series/MissingYouMain.jpg",
-    "../images/series/ModernFamilyMain.jpg",
+    "../images/series/DexterMain.jpg", 
+    "../images/series/EvilLivesHereMain.jpg", 
+    "../images/series/FriendsMain.jpg", 
+    "../images/series/FuturamaMain.jpg", 
+    "../images/series/H2OMain.jpg", 
+    "../images/series/MissingYouMain.jpg", 
+    "../images/series/ModernFamilyMain.jpg", 
     "../images/series/NewGirlMain.jpg",
-    "../images/series/OnlyMurdersInTheBuildingMain.jpg",
-    "../images/series/PercyJackson.jpg",
-    "../images/series/PlanetEarthMain.jpg",
+    "../images/series/OnlyMurdersInTheBuildingMain.jpg", 
+    "../images/series/PercyJackson.jpg", 
+    "../images/series/PlanetEarthMain.jpg", 
     "../images/series/Reacher.jpg",
     "../images/series/RipleyMain.jpg",
     "../images/series/SmilingFriendsMain.jpg",
     "../images/series/SprintMain.jpg",
     "../images/series/SquidGameMain.jpg",
-    "../images/series/Supacell.jpg",
-    "../images/series/SupernaturalMain.jpg",
-    "../images/series/That70sShowMain.jpg",
+    "../images/series/Supacell.jpg",  
+    "../images/series/SupernaturalMainTitle.jpg",
+    "../images/series/That70sShowMain.jpg", 
     "../images/series/The100.jpg",
     "../images/series/TheUmbrellaAcademy.jpg",
     "../images/series/WandaVision.jpg",
     "../images/series/Wednesday.jpg",
     "../images/series/WildWildCountryMain.jpg"
+];
+
+const userAccountInfo = [
+
+];
+
+const userAccountsArray = [
+
 ];
 
 // Shuffle function to randomize the array
@@ -135,6 +143,12 @@ function showCreateAccountModal() {
     createAccountModal.show();
 }
 
+function showSignInModal() {
+    const signIntModalEl = document.getElementById("SignIn");
+    const signInModal = bootstrap.Modal.getOrCreateInstance(signIntModalEl);
+    signInModal.show();
+}
+
 function handleAccountCreation() {
     const username = document.getElementById("unameCreateInput").value.trim();
     const password = document.getElementById("passCreateInput").value.trim();
@@ -152,6 +166,7 @@ function handleAccountCreation() {
 
     localStorage.setItem("userSignedIn", "true");
     localStorage.setItem("username", username);
+    localStorage.setItem("password", password);
 
     const createAccountModalEl = document.getElementById("CreateAccount");
     const createAccountModal = bootstrap.Modal.getOrCreateInstance(createAccountModalEl);
@@ -161,10 +176,43 @@ function handleAccountCreation() {
     updateWelcomeMessage();
 }
 
+function handleSigningIn() {
+    const inputtedUsername = document.getElementById("unameSignInInput").value.trim();
+    const inputtedPassword = document.getElementById("passSignInInput").value.trim();
+
+    if (!inputtedPassword || !inputtedUsername) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    const username = localStorage.getItem("username", username);
+    const password = localStorage.getItem("password", password);
+
+    if(username == inputtedUsername && password == inputtedPassword){
+        const signIntModalEl = document.getElementById("SignIn");
+        const signInModal = bootstrap.Modal.getOrCreateInstance(signIntModalEl);
+        signInModal.hide();
+    
+        updateNavbar();
+        updateWelcomeMessage();
+    }
+    else {
+        alert("The username or password that you have provided are invalid");
+        return;
+    }
+}
+
 function bindCreateAccountButton() {
     const createBtn = document.getElementById("createBtn");
     if (createBtn) {
         createBtn.addEventListener("click", handleAccountCreation);
+    }
+}
+
+function bindSignInButton() {
+    const signInBtn = document.getElementById("signInBtn");
+    if (signInBtn) {
+        signInBtn.addEventListener("click", handleSigningIn);
     }
 }
 
