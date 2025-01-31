@@ -39,32 +39,32 @@
   </nav>
 
   <!-- Create Account Modal -->
-  <div class="modal fade" id="CreateAccount" tabindex="-1" aria-labelledby="CreateAccountLabel" aria-hidden="true">
+  <div class="modal fade" id="CreateAccount" tabindex="-1" aria-labelledby="createAccountLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="CreateAccountLabel">Create Account</h5>
+          <h5 class="modal-title" id="createAccountLabel">Create Account</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <form id="createAccountForm">
             <div class="mb-3">
               <label for="unameCreateInput" class="form-label">Username</label>
-              <input type="text" class="form-control" id="unameCreateInput" placeholder="Enter Username">
+              <input type="text" class="form-control" id="unameCreateInput" placeholder="Enter your username" required>
             </div>
             <div class="mb-3">
               <label for="passCreateInput" class="form-label">Password</label>
-              <input type="password" class="form-control" id="passCreateInput" placeholder="Enter Password">
+              <input type="password" class="form-control" id="passCreateInput" placeholder="Enter your password" required>
             </div>
             <div class="mb-3">
               <label for="passConfirm" class="form-label">Confirm Password</label>
-              <input type="password" class="form-control" id="passConfirm" placeholder="Confirm Password">
+              <input type="password" class="form-control" id="passConfirm" placeholder="Confirm your password" required>
             </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color: #9daef6;">Cancel</button>
-          <button type="button" class="btn btn-primary" id="createBtn" type="button" style="background-color: #9daef6;">Create Account</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="createBtn">Create Account</button>
         </div>
       </div>
     </div>
@@ -82,17 +82,17 @@
           <form id="signinForm">
             <div class="mb-3">
               <label for="unameSignInInput" class="form-label">Username</label>
-              <input type="text" class="form-control" id="unameSignInInput" placeholder="Enter Username">
+              <input type="text" class="form-control" id="unameSignInInput" placeholder="Enter your username" required>
             </div>
             <div class="mb-3">
               <label for="passSignInInput" class="form-label">Password</label>
-              <input type="password" class="form-control" id="passSignInInput" placeholder="Enter Password">
+              <input type="password" class="form-control" id="passSignInInput" placeholder="Enter your password" required>
             </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color: #9daef6;">Cancel</button>
-          <button type="button" class="btn btn-primary" id="signInBtn" type="button" style="background-color: #9daef6;">Sign In</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="signInBtn">Sign In</button>
         </div>
       </div>
     </div>
