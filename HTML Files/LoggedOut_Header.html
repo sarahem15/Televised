@@ -47,19 +47,20 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="createAccountForm" method="post" action="createAccount.cgi">
+          <form id="createAccountForm" action="createAcc.cgi" method="POST">
             <div class="mb-3">
               <label for="unameCreateInput" class="form-label">Username</label>
-              <input type="text" class="form-control" id="unameCreateInput" placeholder="Enter your username" name="unameCreateInput" required>
+              <input type="text" class="form-control" id="unameCreateInput" name="unameCreateInput" placeholder="Enter your username" required>
             </div>
             <div class="mb-3">
               <label for="passCreateInput" class="form-label">Password</label>
-              <input type="password" class="form-control" id="passCreateInput" placeholder="Enter your password" name="passCreateInput" required>
+              <input type="password" class="form-control" id="passCreateInput" name="passCreateInput" placeholder="Enter your password" required>
             </div>
             <div class="mb-3">
               <label for="passConfirm" class="form-label">Confirm Password</label>
               <input type="password" class="form-control" id="passConfirm" placeholder="Confirm your password" required>
             </div>
+            <button type="submit" class="btn btn-primary">Create Account</button>
           </form>
         </div>
         <div class="modal-footer">
@@ -71,7 +72,7 @@
   </div>
 
   <!-- Sign In Modal -->
-  <div class="modal fade" id="SignIn" tabindex="-1" aria-labelledby="SignInLabel" aria-hidden="true">
+  <div class="modal fade" id="signIn" tabindex="-1" aria-labelledby="SignInLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -102,7 +103,6 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="Televised.js"></script>
-  <script src="server.js"></script>
 </body>
 
 </html>
