@@ -172,9 +172,8 @@ function handleAccountCreation() {
     // Set the user as signed in
     localStorage.setItem("userSignedIn", "true");
     localStorage.setItem("username", username);
-    localStorage.setItem("password", password);
 
-    //alert("Account created successfully!");
+    alert("Account created successfully!");
 
     // Hide the create account modal
     const createAccountModalEl = document.getElementById("CreateAccount");
@@ -211,7 +210,16 @@ function autofillProfileSettings() {
         if (usernameInput) usernameInput.value = username;
         if (displayNameInput) displayNameInput.value = username;
     }
+
+    // Set the text color to off-white for the inputs
+    const inputs = [usernameInput, displayNameInput, document.getElementById("bio"), document.getElementById("pronouns"), document.getElementById("replies")];
+    inputs.forEach(input => {
+        if (input) {
+            input.style.color = "#D8D8D8"; // Off-white text color
+        }
+    });
 }
+
 
 document.addEventListener("DOMContentLoaded", () => {
     updateNavbar();
