@@ -36,9 +36,8 @@ const seriesImgs = [
     "../images/series/WildWildCountryMain.jpg"
 ];
 
-const userAccountInfo = [];
-
-const userAccountsArray = [];
+// Initialize the array to store user account info
+let userAccountsArray = JSON.parse(localStorage.getItem("userAccountsArray") || "[]");
 
 // Shuffle function to randomize the array
 function shuffleArray(array) {
@@ -145,7 +144,7 @@ function showSignInModal() {
     signInModal.show();
 }
 
-// Updated function
+// Updated function to handle account creation
 function handleAccountCreation() {
     const username = document.getElementById("unameCreateInput").value.trim();
     const password = document.getElementById("passCreateInput").value.trim();
@@ -161,35 +160,32 @@ function handleAccountCreation() {
         return;
     }
 
-    // Send data to the CGI script
-    $.ajax({
-        url: 'ignore2.cgi',
-        type: 'POST',
-        data: { username: username, password: password },
-        success: function (response) {
-            const res = JSON.parse(response);
-            if (res.status === "success") {
-                alert("Account created successfully!");
-                localStorage.setItem("userSignedIn", "true");
-                localStorage.setItem("username", username);
+    // Define the user account info object
+    const userAccountInfo = { username: username, password: password };
 
-                const createAccountModalEl = document.getElementById("CreateAccount");
-                const createAccountModal = bootstrap.Modal.getOrCreateInstance(createAccountModalEl);
-                createAccountModal.hide();
+    // Add the new user account to the userAccountsArray
+    userAccountsArray.push(userAccountInfo);
 
-                updateNavbar();
-                updateWelcomeMessage();
-            } else {
-                alert("Error: " + res.message);
-            }
-        },
-        error: function () {
-            alert("Failed to communicate with the server.");
-        }
-    });
+    // Store the updated array in localStorage
+    localStorage.setItem("userAccountsArray", JSON.stringify(userAccountsArray));
+
+    // Set the user as signed in
+    localStorage.setItem("userSignedIn", "true");
+    localStorage.setItem("username", username);
+
+    alert("Account created successfully!");
+
+    // Hide the create account modal
+    const createAccountModalEl = document.getElementById("CreateAccount");
+    const createAccountModal = bootstrap.Modal.getOrCreateInstance(createAccountModalEl);
+    createAccountModal.hide();
+
+    // Update navbar and welcome message
+    updateNavbar();
+    updateWelcomeMessage();
 }
 
-// Bind other buttons
+// Bind buttons for account creation and sign-in
 function bindCreateAccountButton() {
     const createBtn = document.getElementById("createBtn");
     if (createBtn) {
@@ -203,7 +199,6 @@ function bindSignInButton() {
         signInBtn.addEventListener("click", handleSigningIn);
     }
 }
-
 
 function autofillProfileSettings() {
     const usernameInput = document.getElementById("userName");
@@ -225,7 +220,6 @@ document.addEventListener("DOMContentLoaded", () => {
         autofillProfileSettings();
     }
 });
-
 
 /* Row/Slideshow Functionality */
 let rowIndex = 1;
