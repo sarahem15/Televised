@@ -47,14 +47,14 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="createAccountForm">
+          <form id="createAccountForm" method="post" action="createAccount.cgi">
             <div class="mb-3">
               <label for="unameCreateInput" class="form-label">Username</label>
-              <input type="text" class="form-control" id="unameCreateInput" placeholder="Enter your username" required>
+              <input type="text" class="form-control" id="unameCreateInput" placeholder="Enter your username" name="unameCreateInput" required>
             </div>
             <div class="mb-3">
               <label for="passCreateInput" class="form-label">Password</label>
-              <input type="password" class="form-control" id="passCreateInput" placeholder="Enter your password" required>
+              <input type="password" class="form-control" id="passCreateInput" placeholder="Enter your password" name="passCreateInput" required>
             </div>
             <div class="mb-3">
               <label for="passConfirm" class="form-label">Confirm Password</label>
@@ -79,7 +79,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="signinForm" method="post" action="ignore2.cgi">
+          <form id="signinForm">
             <div class="mb-3">
               <label for="unameSignInInput" class="form-label">Username</label>
               <input type="text" class="form-control" id="unameSignInInput" placeholder="Enter your username" required>
