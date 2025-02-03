@@ -172,8 +172,9 @@ function handleAccountCreation() {
     // Set the user as signed in
     localStorage.setItem("userSignedIn", "true");
     localStorage.setItem("username", username);
+    localStorage.setItem("password", password);
 
-    alert("Account created successfully!");
+    //alert("Account created successfully!");
 
     // Hide the create account modal
     const createAccountModalEl = document.getElementById("CreateAccount");
