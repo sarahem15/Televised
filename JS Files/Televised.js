@@ -112,6 +112,7 @@ function attachLoggedInEvents() {
 
     if (logoutButton) {
         logoutButton.addEventListener("click", () => {
+            window.location.href = "Home.html";
             localStorage.removeItem("username");
             localStorage.setItem("userSignedIn", "false");
             updateNavbar();
