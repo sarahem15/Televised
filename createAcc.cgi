@@ -31,6 +31,7 @@ puts "<h3>Received Parameters:</h3>"
 puts "<p>Username: #{CGI.escapeHTML(username)}</p>"
 puts "<p>Password: #{CGI.escapeHTML(password)}</p>"
 
+=begin
 # Check if username and password are provided
 if username.strip.empty? || password.strip.empty?
   puts "<h2>Error: Username and password are required.</h2>"
@@ -61,6 +62,7 @@ rescue Mysql2::Error => e
 ensure
   db.close if db
 end
+=end
 
 # End HTML output
 puts "</div></body></html>"
