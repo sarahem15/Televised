@@ -1,4 +1,3 @@
-#!/usr/bin/ruby
 require 'mysql2'
 require 'cgi'
 
@@ -38,13 +37,12 @@ puts "<p>Password:" + cgi['passCreateInput'] + "</p>"
 # Connect to MySQL and insert data
 begin
   db = Mysql2::Client.new(
-    host: 'localhost', 
-    username: 'root', 
+    host: '10.20.3.4', 
+    username: 'seniorproject25', 
     password: 'TV_Group123!', 
-    database: 'media'
+    database: 'televised_w25'
   )
 
 
-  db.query("INSERT INTO accounts (username, password) VALUES ('" + cgi['unameCreateInput'] + "','" + cgi['passCreateInput'] + "');")
+  db.query("INSERT INTO account (username, password) VALUES ('" + cgi['unameCreateInput'] + "','" + cgi['passCreateInput'] + "');")
 end
-
