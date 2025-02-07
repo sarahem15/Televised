@@ -13,6 +13,7 @@ cgi = CGI.new
 unameCreateInput = cgi['unameCreateInput']
 passCreateInput = cgi['passCreateInput']
 
+=begin
 # Print HTTP header
 print "Content-type: text/html\r\n\r\n"
 
@@ -31,7 +32,7 @@ puts "<div class='container mt-5'>"
 puts "<h3>Received Parameters:</h3>"
 puts "<p>Username:" + cgi['unameCreateInput'] + "</p>"
 puts "<p>Password:" + cgi['passCreateInput'] + "</p>"
-
+=end
 
 # Connect to MySQL and insert data
 begin
