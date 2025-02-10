@@ -2,38 +2,80 @@ console.log("Televised.js is loaded!");
 
 // Image array for the series
 const seriesImgs = [
-    "../images/series/AdventureTimeMain.jpg",
-    "../images/series/AgathaAllAlong.jpg",
-    "../images/series/ArcaneMain.jpg",
-    "../images/series/BlackMirror.jpg",
-    "../images/series/BojackHorsemanMain.jpg",
-    "../images/series/CommunityMain.jpg",
-    "../images/series/CriminalMindsMain.jpg",
-    "../images/series/DaughtersOfTheCultMain.jpg",
-    "../images/series/DexterMain.jpg",
-    "../images/series/EvilLivesHereMain.jpg",
-    "../images/series/FriendsMain.jpg",
-    "../images/series/FuturamaMain.jpg",
-    "../images/series/H2OMain.jpg",
-    "../images/series/MissingYouMain.jpg",
-    "../images/series/ModernFamilyMain.jpg",
-    "../images/series/NewGirlMain.jpg",
-    "../images/series/OnlyMurdersInTheBuildingMain.jpg",
-    "../images/series/PercyJackson.jpg",
-    "../images/series/PlanetEarthMain.jpg",
-    "../images/series/Reacher.jpg",
-    "../images/series/RipleyMain.jpg",
-    "../images/series/SmilingFriendsMain.jpg",
-    "../images/series/SprintMain.jpg",
-    "../images/series/SquidGameMain.jpg",
-    "../images/series/Supacell.jpg",
-    "../images/series/SupernaturalMainTitle.jpg",
-    "../images/series/That70sShowMain.jpg",
-    "../images/series/The100.jpg",
-    "../images/series/TheUmbrellaAcademy.jpg",
-    "../images/series/WandaVision.jpg",
-    "../images/series/Wednesday.jpg",
-    "../images/series/WildWildCountryMain.jpg"
+    "ADiscoveryOfWitches.jpg",
+    "AdventureTime.jpg",
+    "AgathaAllAlong.jpg",
+    "AmericanHorrorStory.jpg",
+    "Arcane.jpg",
+    "BelowDeck.jpg",
+    "BlackMirror.jpg",
+    "BojackHorseman.jpg",
+    "BreakingBad.jpg",
+    "Bridgerton.jpg",
+    "Chernobyl.jpg",
+    "ClarksonsFarm.jpg",
+    "Community.jpg",
+    "ConversationsWithFriends.jpg",
+    "CriminalMinds.jpg",
+    "DaughtersOfTheCult.jpg",
+    "Dexter.jpg",
+    "DoctorWho.jpg",
+    "EveryWitchWAy.jpg",
+    "EvilLivesHere.jpg",
+    "Friends.jpg",
+    "Futurama.jpg",
+    "GameOfThrones.jpg",
+    "GossipGirl.jpg",
+    "H2O.jpg",
+    "JupitersLegacy.jpg",
+    "LessonsInChemistry.jpg",
+    "MissingYou.jpg",
+    "ModernFamily.jpg",
+    "NewGirl.jpg",
+    "NormalPeople.jpg",
+    "OnlyMurdersInTheBuilding.jpg",
+    "Outlander.jpg",
+    "PercyJackson.jpg",
+    "PlanetEarth.jpg",
+    "PrettyLittleLiars.jpg",
+    "Reacher.jpg",
+    "Ripley.jpg",
+    "RuPaulsDragRace.jpg",
+    "SharpObjects.jpg",
+    "SmilingFriends.jpg",
+    "Sprint.jpg",
+    "SquidGame.jpg",
+    "StarTrek.jpg",
+    "StrangerThings.jpg",
+    "Supacell.jpg",
+    "SupermanAndLois.jpg",
+    "Supernatural.jpg",
+    "That70sShow.jpg",
+    "The100.jpg",
+    "TheBabySittersClub.jpg",
+    "TheBachelor.jpg",
+    "TheEndOfTheFWorld.jpg",
+    "TheFallOfTheHouseOfUsher.jpg",
+    "TheFlash.jpg",
+    "TheGreat.jpg",
+    "TheHauntingOfHillHouse.jpg",
+    "TheHauntingOfBlyManor.jpg",
+    "TheLastOfUs.jpg",
+    "TheMandalorian.jpg",
+    "TheManInTheHighCastle.jpg",
+    "TheSandman.jpg",
+    "TheSecretLivesOfMormonWives.jpg",
+    "TheSummerITurnedPretty.jpg",
+    "TheTudors.jpg",
+    "TheUmbrellaAcademy.jpg",
+    "TheWitcher.jpg",
+    "Travelers.jpg",
+    "WandaVision.jpg",
+    "Wednesday.jpg",
+    "WildWildCountry.jpg",
+    "WizardsOfWaverlyPlace.jpg",
+    "XOKitty.jpg",
+    "You.jpg"
 ];
 
 // Initialize the array to store user account info
@@ -61,6 +103,8 @@ function populateCarousel(carouselId, imageArray) {
 function initializeHomeCarousels() {
     // Populate carousels
     populateCarousel("homePopularSection", seriesImgs);
+    populateCarousel("homePopularSection2", seriesImgs);
+    populateCarousel("homePopularSection3", seriesImgs);
     populateCarousel("homeNewSection", seriesImgs);
 }
 
@@ -304,5 +348,5 @@ function showNextSlide(n) {
     for (i = 0; i < slides.length; i++) {
         slides[i].style.display = "none";
     }
-    slides[rowIndex - 1].style.display = "block";
+    slides[rowIndex - 1].style.display = "in-line block";
 }
