@@ -46,4 +46,4 @@ puts "<p>Replies:" + cgi['replies'] + "</p>"
   )
 
 
-  db.query("INSERT INTO account (displayName, bio, pronouns, replies) VALUES ('" + cgi['displayName'] + "','" + cgi['bio'] + "','" + cgi['pronouns'] + "','" + cgi['replies'] + "');")
+  db.query("INSERT INTO account (displayName, bio, pronouns) VALUES ('" + cgi['displayName'] + "','" + cgi['bio'] + "','" + cgi['pronouns'] + "');")
