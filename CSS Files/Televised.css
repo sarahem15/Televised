@@ -216,6 +216,11 @@ button:hover {
     background: linear-gradient(90deg, rgba(0, 0, 0, 0) 0%);
 }
 
+.wrapper .item .titles {
+    color: white;
+    text-align: center;
+}
+
 /* Pagination */
 .pagination {
     display: inline-block;
