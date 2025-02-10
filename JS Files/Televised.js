@@ -20,7 +20,7 @@ const seriesImgs = [
     "DaughtersOfTheCult.jpg",
     "Dexter.jpg",
     "DoctorWho.jpg",
-    "EveryWitchWAy.jpg",
+    "EveryWitchWay.jpg",
     "EvilLivesHere.jpg",
     "Friends.jpg",
     "Futurama.jpg",
@@ -102,9 +102,7 @@ function populateCarousel(carouselId, imageArray) {
 // Function to initialize the homepage carousels
 function initializeHomeCarousels() {
     // Populate carousels
-    populateCarousel("homePopularSection", seriesImgs);
-    populateCarousel("homePopularSection2", seriesImgs);
-    populateCarousel("homePopularSection3", seriesImgs);
+    populateCarousel("homePopular", seriesImgs);
     populateCarousel("homeNewSection", seriesImgs);
 }
 
