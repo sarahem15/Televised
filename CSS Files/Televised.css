@@ -6,7 +6,13 @@ body {
 }
 
 /* Alayna's Pages Background Styling */
-#homePage, #profileSettings {
+#homePage {
+    background-color: #140044;
+    min-height: 100vh; /* Ensure full screen coverage */
+    margin: 0;
+    text-align: center;
+}
+#profileSettings {
     background-color: #140044;
     min-height: 100vh; /* Ensure full screen coverage */
     margin: 0;
@@ -54,7 +60,7 @@ html {
     scroll-behavior: smooth;
 }
 
-/* M'Kyiah's Pages Backgrounds */
+/* M'Kiyah's Pages Backgrounds */
 #discoverPage, #discoverTwo, #discoverAlphabet, #showsPage {
     background-color: #140044;
     min-height: 100vh;
@@ -170,8 +176,8 @@ button:hover {
     grid-template-columns: repeat(3, 100%);
     overflow: hidden;
     scroll-behavior: smooth;
-    margin-left: 8em;
-    margin-right: 5em;
+    width: 80%;
+    margin: auto;
 }
 
 .wrapper section {
@@ -179,16 +185,30 @@ button:hover {
     position: relative;
     display: grid;
     grid-template-columns: repeat(5, auto);
-    margin: 20px 0;
+    margin: 20px;
+    padding: 40px;
 }
 
 .wrapper .item {
-    padding: 0 2px;
+    position: relative;
+    padding: 2px;
+} 
+
+.wrapper img {
+    width: 220px;
+    height: 325px;
+    object-fit: cover;
+}
+
+.wrapper .item input {
+    width: 220px;
+    height: 325px;
+    object-fit: cover;
 }
 
 .wrapper .item:hover {
     margin: 0 40px;
-    transform: scale(1.2);
+    transform: scale(1.05);
 }
 
 .wrapper a {
@@ -220,7 +240,6 @@ button:hover {
     color: white;
     text-align: center;
 }
-
 /* Pagination */
 .pagination {
     display: inline-block;
@@ -249,6 +268,11 @@ button:hover {
 
 
 /*Shows adding*/
+.seasonNav {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+}
+
 /* Dropdown for seasons */
 .dropbtn {
     background-color: #140044;
@@ -262,6 +286,7 @@ button:hover {
   .seasonDropdown{
     position: relative;
     display: inline-block;
+    width: 120px;
   }
   
   .dropseason-content {
@@ -286,41 +311,120 @@ button:hover {
   .seasonDropdown:hover .dropseason-content {display: block;}
   
   .seasonDropdown:hover .dropbtn{background-color: #436eb1;}
-  .dropseason-content:hover {background-color: #436eb1}
+  .dropseason-content a:hover {background-color: #436eb1}
   
-  .showInfo {
+  .seriesPage .showInfo {
     display: grid;
     grid-template-columns: repeat(4, auto);
     width: 900px;
     padding: 5px;
-    .words{
+    
+  }
+
     .editButtons{
-      display: grid;
-      grid-template-columns: repeat(4, auto);
+        width: 30px;
+        height: 20px;
+        display: grid;
+        grid-template-columns: repeat(4, auto);
+        padding: 2px;
     }
+
+  .seriesPage {
+    margin: 70px;
   }
+
+  .seriesPage .showInfo img {
+    height: auto;
+    width: 350px;
+    padding-right: 10px;
   }
-  
+
   .watchedButton{
     background-color: #436eb1;
     color: white;
     padding: 10px;
+    width: 70px;
+    border-radius: 50%;
   }
   
   .reviewButton{
     background-color: #436eb1;
     color: white;
     padding: 5px;
+    width: 70px;
+    border-radius: 50%;
   }
   
   .rateButton{
     background-color: #436eb1;
     color: white;
     padding: 5px;
+    width: 100px;
+    border-radius: 50%;
   }
   
   .menuButton{
     background-color: #436eb1;
     color: white;
     padding: 5px;
+    width: 100px;
+    border-radius: 50%;
+  }
+
+
+  .homeReviews{
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    grid-template-rows: repeat(2, auto);
+    width: 900px;
+    height: 500px;
+    margin: auto;
+  }
+
+  .ReviewIndiv{
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    background-color: blue;
+    color: white;
+    padding:  5px;
+    border-radius: 10%;
+    height: 220px;
+    width: 420px;
+
+    h3 {
+        font-size: 15px;
+        margin: auto;
+    }
+    h4{
+        font-size: 20px;
+    }
+  }
+
+  .ReviewIndiv .ReviewContent .Likes {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    width: 35px;
+  }
+
+  .ReviewIndiv .ReviewContent {
+    padding: 20px;
+  }
+
+  .ReviewIndiv .SeriesImg img {
+    width: 160px;
+    height: auto;
+    padding: 20px;
+  }
+
+  .ReviewIndiv .ReviewContent .UserDisplay img{
+    height: 50px;
+    width:  50px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .ReviewIndiv .ReviewContent .UserDisplay {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    text-align: center;
+    width: 130px;
   }
