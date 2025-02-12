@@ -2,80 +2,38 @@ console.log("Televised.js is loaded!");
 
 // Image array for the series
 const seriesImgs = [
-    "ADiscoveryOfWitches.jpg",
-    "AdventureTime.jpg",
-    "AgathaAllAlong.jpg",
-    "AmericanHorrorStory.jpg",
-    "Arcane.jpg",
-    "BelowDeck.jpg",
-    "BlackMirror.jpg",
-    "BojackHorseman.jpg",
-    "BreakingBad.jpg",
-    "Bridgerton.jpg",
-    "Chernobyl.jpg",
-    "ClarksonsFarm.jpg",
-    "Community.jpg",
-    "ConversationsWithFriends.jpg",
-    "CriminalMinds.jpg",
-    "DaughtersOfTheCult.jpg",
-    "Dexter.jpg",
-    "DoctorWho.jpg",
-    "EveryWitchWay.jpg",
-    "EvilLivesHere.jpg",
-    "Friends.jpg",
-    "Futurama.jpg",
-    "GameOfThrones.jpg",
-    "GossipGirl.jpg",
-    "H2O.jpg",
-    "JupitersLegacy.jpg",
-    "LessonsInChemistry.jpg",
-    "MissingYou.jpg",
-    "ModernFamily.jpg",
-    "NewGirl.jpg",
-    "NormalPeople.jpg",
-    "OnlyMurdersInTheBuilding.jpg",
-    "Outlander.jpg",
-    "PercyJackson.jpg",
-    "PlanetEarth.jpg",
-    "PrettyLittleLiars.jpg",
-    "Reacher.jpg",
-    "Ripley.jpg",
-    "RuPaulsDragRace.jpg",
-    "SharpObjects.jpg",
-    "SmilingFriends.jpg",
-    "Sprint.jpg",
-    "SquidGame.jpg",
-    "StarTrek.jpg",
-    "StrangerThings.jpg",
-    "Supacell.jpg",
-    "SupermanAndLois.jpg",
-    "Supernatural.jpg",
-    "That70sShow.jpg",
-    "The100.jpg",
-    "TheBabySittersClub.jpg",
-    "TheBachelor.jpg",
-    "TheEndOfTheFWorld.jpg",
-    "TheFallOfTheHouseOfUsher.jpg",
-    "TheFlash.jpg",
-    "TheGreat.jpg",
-    "TheHauntingOfHillHouse.jpg",
-    "TheHauntingOfBlyManor.jpg",
-    "TheLastOfUs.jpg",
-    "TheMandalorian.jpg",
-    "TheManInTheHighCastle.jpg",
-    "TheSandman.jpg",
-    "TheSecretLivesOfMormonWives.jpg",
-    "TheSummerITurnedPretty.jpg",
-    "TheTudors.jpg",
-    "TheUmbrellaAcademy.jpg",
-    "TheWitcher.jpg",
-    "Travelers.jpg",
-    "WandaVision.jpg",
-    "Wednesday.jpg",
-    "WildWildCountry.jpg",
-    "WizardsOfWaverlyPlace.jpg",
-    "XOKitty.jpg",
-    "You.jpg"
+    "../images/series/AdventureTimeMain.jpg",
+    "../images/series/AgathaAllAlong.jpg",
+    "../images/series/ArcaneMain.jpg",
+    "../images/series/BlackMirror.jpg",
+    "../images/series/BojackHorsemanMain.jpg",
+    "../images/series/CommunityMain.jpg",
+    "../images/series/CriminalMindsMain.jpg",
+    "../images/series/DaughtersOfTheCultMain.jpg",
+    "../images/series/DexterMain.jpg",
+    "../images/series/EvilLivesHereMain.jpg",
+    "../images/series/FriendsMain.jpg",
+    "../images/series/FuturamaMain.jpg",
+    "../images/series/H2OMain.jpg",
+    "../images/series/MissingYouMain.jpg",
+    "../images/series/ModernFamilyMain.jpg",
+    "../images/series/NewGirlMain.jpg",
+    "../images/series/OnlyMurdersInTheBuildingMain.jpg",
+    "../images/series/PercyJackson.jpg",
+    "../images/series/PlanetEarthMain.jpg",
+    "../images/series/Reacher.jpg",
+    "../images/series/RipleyMain.jpg",
+    "../images/series/SmilingFriendsMain.jpg",
+    "../images/series/SprintMain.jpg",
+    "../images/series/SquidGameMain.jpg",
+    "../images/series/Supacell.jpg",
+    "../images/series/SupernaturalMainTitle.jpg",
+    "../images/series/That70sShowMain.jpg",
+    "../images/series/The100.jpg",
+    "../images/series/TheUmbrellaAcademy.jpg",
+    "../images/series/WandaVision.jpg",
+    "../images/series/Wednesday.jpg",
+    "../images/series/WildWildCountryMain.jpg"
 ];
 
 // Initialize the array to store user account info
@@ -102,7 +60,7 @@ function populateCarousel(carouselId, imageArray) {
 // Function to initialize the homepage carousels
 function initializeHomeCarousels() {
     // Populate carousels
-    populateCarousel("homePopular", seriesImgs);
+    populateCarousel("homePopularSection", seriesImgs);
     populateCarousel("homeNewSection", seriesImgs);
 }
 
@@ -194,9 +152,10 @@ function showSignInModal() {
     signInModal.show();
 }
 
-// Updated function to handle account creation
+// Function to handle account creation
 function handleAccountCreation() {
-    const username = document.getElementById("unameCreateInput").value.trim();
+    const usernameInput = document.getElementById("unameCreateInput");
+    let username = usernameInput.value.trim();
     const password = document.getElementById("passCreateInput").value.trim();
     const confirmPassword = document.getElementById("passConfirm").value.trim();
 
@@ -205,32 +164,33 @@ function handleAccountCreation() {
         return;
     }
 
+    // Check if username already exists in localStorage
+    const existingUser = userAccountsArray.some(account => account.username === username);
+    if (existingUser) {
+        alert("Username is already taken. Please choose a different one.");
+        usernameInput.value = "";  // Clear input field for new entry
+        usernameInput.focus();  // Refocus on the username input field
+        return;
+    }
+
     if (password !== confirmPassword) {
         alert("Passwords do not match!");
         return;
     }
 
-    // Regular expression to check if the password contains:
-    // 1. At least one uppercase letter
-    // 2. At least one number
-    // 3. At least one special character
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).+$/;
-
+    // Password validation: At least 12 characters, 1 uppercase, 1 number, 1 special character
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{12,}$/;
     if (!passwordRegex.test(password)) {
-        alert("Password must contain at least one capital letter, one number, and one symbol.");
+        alert("Password must be at least 12 characters long and contain at least one capital letter, one number, and one special character.");
         return;
     }
 
-    // Define the user account info object
+    // Add new user account
     const userAccountInfo = { username: username, password: password };
-
-    // Add the new user account to the userAccountsArray
     userAccountsArray.push(userAccountInfo);
-
-    // Store the updated array in localStorage
     localStorage.setItem("userAccountsArray", JSON.stringify(userAccountsArray));
 
-    // Set the user as signed in
+    // Set user as signed in
     localStorage.setItem("userSignedIn", "true");
     localStorage.setItem("username", username);
 
@@ -245,6 +205,8 @@ function handleAccountCreation() {
     updateNavbar();
     updateWelcomeMessage();
 }
+
+
 
 // Bind buttons for account creation and sign-in
 function bindCreateAccountButton() {
@@ -295,21 +257,60 @@ function handleSigningIn() {
         alert("Invalid username or password!");
     }
 }
-
-// Autofill profile settings
+//Autofill user information
 function autofillProfileSettings() {
     const usernameInput = document.getElementById("userName");
     const displayNameInput = document.getElementById("displayName");
+    const bioInput = document.getElementById("bio");
+    const pronounsSelect = document.getElementById("pronouns");
+    const repliesSelect = document.getElementById("replies");
 
     const username = localStorage.getItem("username");
+    if (!username) return;
 
-    if (username) {  // Ensure username exists in localStorage
-        usernameInput.placeholder = username;  // Set the username as the placeholder text
-        displayNameInput.placeholder = username;  // Set the username as the placeholder text for display name
-    } else {
-        console.log("No username found in localStorage.");
+    usernameInput.value = username;
+
+    let userAccounts = JSON.parse(localStorage.getItem("userAccountsArray") || "[]");
+    let user = userAccounts.find(acc => acc.username === username);
+
+    if (user) {
+        displayNameInput.value = user.displayName || "";
+        bioInput.value = user.bio || "";
+        pronounsSelect.value = user.pronouns || "Prefer Not to Answer";
+        repliesSelect.value = user.replies || "Public";
     }
 }
+
+// Profile Settings - Save changes
+document.getElementById("saveProfile")?.addEventListener("click", function (event) {
+    event.preventDefault();
+
+    const username = localStorage.getItem("username");
+    if (!username) {
+        alert("User not found. Please sign in again.");
+        return;
+    }
+
+    const displayName = document.getElementById("displayName").value;
+    const bio = document.getElementById("bio").value.trim();
+    const pronouns = document.getElementById("pronouns").value;
+    const replies = document.getElementById("replies").value;
+
+    let userAccounts = JSON.parse(localStorage.getItem("userAccountsArray") || "[]");
+    let userIndex = userAccounts.findIndex(acc => acc.username === username);
+
+    if (userIndex !== -1) {
+        userAccounts[userIndex].displayName = displayName;
+        userAccounts[userIndex].bio = bio;
+        userAccounts[userIndex].pronouns = pronouns;
+        userAccounts[userIndex].replies = replies;
+
+        localStorage.setItem("userAccountsArray", JSON.stringify(userAccounts));
+        alert("Profile updated successfully!");
+    } else {
+        alert("User account not found.");
+    }
+});
 
 document.addEventListener("DOMContentLoaded", () => {
     // Check if we're on the Profile Settings page and autofill the fields
@@ -346,5 +347,5 @@ function showNextSlide(n) {
     for (i = 0; i < slides.length; i++) {
         slides[i].style.display = "none";
     }
-    slides[rowIndex - 1].style.display = "in-line block";
+    slides[rowIndex - 1].style.display = "block";
 }
