@@ -19,13 +19,14 @@
                 <div class="col-5" id="profileRow">
                     <form id="profileSettinsForm" method="post" action="editProfile.cgi">
                     <span>Username</span>
-                    <input type="text" id="userName" class="form-control" disabled>
+                    <input type="hidden" id="userNameX" class="form-control" name="userNameX" value="">
+                    <input type="text" id="userName" name="userNameX" class="form-control" readonly>
                     <br>
                     <span>Display Name</span>
-                    <input type="text" id="displayName" class="form-control">
+                    <input type="text" id="displayName" name="displayName" class="form-control">
                     <br>
                     <span>Bio</span>
-                    <textarea id="bio" class="form-control" rows="5"></textarea>
+                    <textarea id="bio" name="bio" class="form-control" rows="5"></textarea>
                     <br>
                     <label for="pronouns">Pronouns</label>
                     <select id="pronouns" name="pronouns" class="form-control">
