@@ -224,16 +224,13 @@ function handleAccountCreation() {
         return;
     }
 
-    // Regular expression to check if the password contains:
-    // 1. At least one uppercase letter
-    // 2. At least one number
-    // 3. At least one special character
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).+$/;
-
+    // Password validation: At least 12 characters, 1 uppercase, 1 number, 1 special character
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{12,}$/;
     if (!passwordRegex.test(password)) {
-        alert("Password must contain at least one capital letter, one number, and one symbol.");
+        alert("Password must be at least 12 characters long and contain at least one capital letter, one number, and one special character.");
         return;
     }
+
 
     // Define the user account info object
     const userAccountInfo = { username: username, password: password };
