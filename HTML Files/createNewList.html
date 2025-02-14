@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Televised</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="Televised.css">
+</head>
+
+<body id="createNewList">
+    <nav id="changingNav"></nav> <!-- Navbar dynamically loaded -->
+    <div class="container-fluid">
+        <br>
+        <h2 style="text-align: center;">Create a New List</h2>
+        <br>
+        <div class="container">
+                <div class="col-5" id="listRow">
+                    <form id="newListForm" method="post" action="newList.cgi">
+                    <span>Name</span>
+                    <input type="text" id="Name" name="listName" class="form-control">
+                    <br>
+                    
+                    <label for="Type">Type</label>
+                    <select id="Type" name="type" class="form-control">
+                        <option value="Series">Series</option>
+                        <option value="Seasons">Seasons</option>
+                        <option value="Episodes">Episodes</option>
+                    </select>
+                    <br>
+                    <label for="Views">Who Can View</label>
+                    <select id="views" name="views" class="form-control">
+                        <option value="Public">Public - anyone can view</option>
+                        <option value="Private">Private - no one can view</option>
+                    </select>
+                    <br>
+
+                    <span>Description</span>
+                    <textarea id="Description" name="description" class="form-control" rows="10"></textarea>
+                    <br>
+
+                    <br>
+                    <button id="saveList" class="btn" style="background-color: #9daef6;" type="submit">CREATE LIST</button>
+                </form>
+                </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="Televised.js"></script>
+</body>
+
+</html>
