@@ -18,10 +18,10 @@ db = Mysql2::Client.new(
 
 
 series = db.query("SELECT * FROM series WHERE imageName = '" + seriesImage + "';")
-#series = db.query("SELECT " + seriesImage + " FROM series;")
+mainCast = db.query("SELECT season.mainCast FROM season JOIN series ON season.seriesId = series.showId WHERE series.imageName = '" + seriesImage + "';")
 
 #  genre = db.query("SELECT showName FROM series WHERE genre = 'Comedy';")
-#  puts "<p>am:" + genre.first['showName'].to_s + "</p>"
+#  puts "<p>am:" + mainCast.first['mainCast'].to_s + "</p>"
 
 puts "<!DOCTYPE html>"
 puts "<html lang=\"en\">"
@@ -53,9 +53,9 @@ puts "<body id=\"showsPage\">"
 
       puts "<h2 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + series.first['genre'] + "</h2>"
       puts "<br>"
-      puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + series.first['description']+ "</h4>"
+      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + series.first['description']+ "</h4>"
       puts "<br>"
-      puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + series.first['year'].to_s + "</h4>"
+      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + series.first['year'].to_s + "</h4>"
       puts "<br>"
     puts "</div>"
    puts "</div>" 
@@ -65,7 +65,7 @@ puts "<body id=\"showsPage\">"
 
   #NEED FROM SEASON
   puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">Main Cast: "
-    puts "<span>  the main cast</span>"
+    puts "<span>" + mainCast.first['mainCast'] + "</span>"
   puts "</h4>"
 
   puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">Streaming: "
