@@ -6,16 +6,11 @@ body {
 }
 
 /* Alayna's Pages Background Styling */
-#homePage {
+#homePage, #profileSettings, #createNewList {
     background-color: #140044;
     min-height: 100vh; /* Ensure full screen coverage */
     margin: 0;
-    text-align: center;
-}
-#profileSettings {
-    background-color: #140044;
-    min-height: 100vh; /* Ensure full screen coverage */
-    margin: 0;
+    
 }
 
 /* Center H1 Under Header */
@@ -61,7 +56,7 @@ html {
 }
 
 /* M'Kiyah's Pages Backgrounds */
-#discoverPage, #discoverTwo, #discoverAlphabet, #showsPage {
+#discoverPage, #discoverTwo, #discoverAlphabet, #showsPage, #listContent {
     background-color: #140044;
     min-height: 100vh;
     margin: 0;
@@ -192,6 +187,7 @@ button:hover {
 .wrapper .item {
     position: relative;
     padding: 2px;
+    width: 220px;
 } 
 
 .wrapper img {
@@ -336,9 +332,12 @@ button:hover {
   .seriesPage .showInfo img {
     height: auto;
     width: 350px;
-    padding-right: 10px;
+    padding-right: 20px;
   }
 
+  .seriesPage .showWords {
+    padding-left: 20px;
+  }
   .watchedButton{
     background-color: #436eb1;
     color: white;
@@ -427,4 +426,39 @@ button:hover {
     grid-template-columns: repeat(2, auto);
     text-align: center;
     width: 130px;
+  }
+
+  .listContents {
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+    width: 1000px;
+  }
+
+  .listContents .listItem {
+    width: 100%;
+    height: auto;
+    display: inline-block;
+    padding: 5px;
+  }
+
+.UserDisplay img{
+    height: 50px;
+    width:  50px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+.UserDisplay {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    text-align: center;
+    width: 130px;
+  }
+
+  .contentList {
+    margin: 70px;
+  }
+
+ .contents {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
   }
