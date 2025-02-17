@@ -93,6 +93,7 @@ puts "<body id=\"showsPage\">"
 
   puts "<hr>"
   
+  # EP INFO FOR EACH
   puts "<div class=\"showInfo\">"
     puts "<img src=\"./Episodes/adventureTime1.1.jpg\" alt=\"Adventure Time\" width=\"300\" height=\"225\">"
     puts "<div class=\"words\">"
