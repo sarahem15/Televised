@@ -7,7 +7,8 @@ require 'mysql2'
 require 'cgi'
 
 cgi = CGI.new
-episodeImage = cgi['clicked_image']
+episodeName = cgi['ep_name']
+showName = cgi['show_name']
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -16,12 +17,7 @@ db = Mysql2::Client.new(
     database: 'televised_w25'
   )
 
-
-epImage = db.query("SELECT * FROM episodes WHERE imageName = '" + episodeImage + "';")
-#mainCast = db.query("SELECT episode.mainCast FROM season JOIN series ON season.seriesId = series.showId WHERE series.imageName = '" + seriesImage + "';")
-
-#  genre = db.query("SELECT showName FROM series WHERE genre = 'Comedy';")
-#  puts "<p>am:" + mainCast.first['mainCast'].to_s + "</p>"
+episode = db.query("SELECT * FROM episode WHERE epName = '" + episodeName + "';")
 
 puts "<!DOCTYPE html>"
 puts "<html lang=\"en\">"
@@ -45,10 +41,10 @@ puts "<body id=\"episodePage\">"
 
   #HERE
   
-    puts "<img src=\"" + epImage + "\"alt=\"" + epImage + "\">" 
+    puts "<img src=\"H2O.jpg\"alt=\"placeholder\">" 
     puts "<br>"
 
-      puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + series.first['showName'] + "</h1>"
+      puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + showName + "</h1>"
       puts "<div class=\"epWords\">"
       puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\"> Season 1 </h2>"
       puts "<br>"
@@ -62,7 +58,7 @@ puts "<body id=\"episodePage\">"
       puts "<br>"
       puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + episode.first['releaseDate'] + "</h4>"
       puts "<br>"
-      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\"" + episode.first['runTime'] + "</h4>"
+      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\"" + episode.first['runTime'].to_s + "</h4>"
       puts "<br>"
     puts "</div>"
    puts "<br>"
@@ -72,7 +68,7 @@ puts "<body id=\"episodePage\">"
 #Buttons!
 
   puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">Cast: "
-    puts "<span>" + mainCast.first['mainCast'] + "</span>"
+    puts "<span>" + episode.first['topCast'] + "</span>"
   puts "</h4>"
 
   puts "<br>"
