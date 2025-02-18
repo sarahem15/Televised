@@ -56,7 +56,7 @@ html {
 }
 
 /* M'Kiyah's Pages Backgrounds */
-#discoverPage, #discoverTwo, #discoverAlphabet, #showsPage, #listContent {
+#discoverPage, #discoverTwo, #discoverAlphabet, #showsPage, #listContent, #episodePage, #profile {
     background-color: #140044;
     min-height: 100vh;
     margin: 0;
@@ -338,6 +338,17 @@ button:hover {
   .seriesPage .showWords {
     padding-left: 20px;
   }
+
+
+#showsPage .words{
+    width: 1300px;
+    padding-left: 20px;
+}
+
+#showsPage .words a{
+    text-decoration: none;
+}
+
   .watchedButton{
     background-color: #436eb1;
     color: white;
@@ -462,3 +473,108 @@ button:hover {
     display: grid;
     grid-template-columns: repeat(2, auto);
   }
+
+.profileHeader {
+    display: grid;
+    grid-template-columns: repeat(7, auto);
+    width: 80%;
+    margin:  auto;
+}
+.profileHeader a {
+    color: #5c70c4;
+    float: left;
+    padding: 2px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    font-size: 25px;
+    margin:  auto;
+}
+
+.profileHeader a.active {
+    text-decoration: underline;
+    color: white;
+}
+
+
+.profileListHeader {
+    display: grid;
+    grid-template-columns: repeat(7, auto);
+    width: 30%;
+    margin-left:  70px;
+}
+.profileListHeader a {
+    color: #5c70c4;
+    float: left;
+    padding-right: 2px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    font-size: 20px;
+    margin:  auto;
+}
+
+.profileListHeader a.active {
+    text-decoration: underline;
+    color: white;
+}
+
+.topFiveFavs p {
+    font-size: 20px;
+    margin-left: 80px;
+}
+
+.listWrapper section{
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+    width: 220px;
+    height: auto;
+}
+
+.listWrapper .itemS img {
+    width: 10%;
+    max-height: 260px;
+    object-fit: cover;
+    position: absolute;
+}
+
+.listWrapper {
+    margin-left: 70px;
+    min-height: 240px;
+}
+
+.listImages {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    margin: auto;
+}
+
+.titleDate {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    width: 300px;
+    padding-right: 5px;
+}
+
+.titleDate h4 {
+    color:  #93a1db;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.listProfileButtons {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+}
+
+.listProfileButtons button {
+    width: 200px;
+    background-color: #5c70c4;
+}
+.listProfileButtons button a {
+    color: white;
+    text-decoration: none;
+}
+
+#episodePage img{
+    max-height: 400px;
+    width: auto;
+}
