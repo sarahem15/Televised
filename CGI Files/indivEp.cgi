@@ -9,7 +9,7 @@ require 'cgi'
 cgi = CGI.new
 episodeName = cgi['ep_name']
 showName = cgi['show_name']
-
+epNum = cgi['ep_num']
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -41,14 +41,14 @@ puts "<body id=\"episodePage\">"
 
   #HERE
   
-    puts "<img src=\"H2O.jpg\"alt=\"placeholder\">" 
+    puts "<img src=\"H2O.jpg\"alt=\"placeholder\">\n" 
     puts "<br>"
 
       puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + showName + "</h1>"
       puts "<div class=\"epWords\">"
       puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\"> Season 1 </h2>"
       puts "<br>"
-      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\"> Episode 1 </h4>"
+      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\"> Episode " + epNum.to_s + "</h4>"
       puts "<br>"
       puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\"> RATING </h4>"
       puts "<br>"
@@ -62,7 +62,7 @@ puts "<body id=\"episodePage\">"
       puts "<br>"
     puts "</div>"
    puts "<br>"
-  puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">Creator: "
+  puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">Description: "
   puts "<span>" + episode.first['description'] + "</span></h4>"
 
 #Buttons!
