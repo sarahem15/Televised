@@ -2,39 +2,82 @@ console.log("Televised.js is loaded!");
 
 // Image array for the series
 const seriesImgs = [
-    "../images/series/AdventureTimeMain.jpg",
-    "../images/series/AgathaAllAlong.jpg",
-    "../images/series/ArcaneMain.jpg",
-    "../images/series/BlackMirror.jpg",
-    "../images/series/BojackHorsemanMain.jpg",
-    "../images/series/CommunityMain.jpg",
-    "../images/series/CriminalMindsMain.jpg",
-    "../images/series/DaughtersOfTheCultMain.jpg",
-    "../images/series/DexterMain.jpg",
-    "../images/series/EvilLivesHereMain.jpg",
-    "../images/series/FriendsMain.jpg",
-    "../images/series/FuturamaMain.jpg",
-    "../images/series/H2OMain.jpg",
-    "../images/series/MissingYouMain.jpg",
-    "../images/series/ModernFamilyMain.jpg",
-    "../images/series/NewGirlMain.jpg",
-    "../images/series/OnlyMurdersInTheBuildingMain.jpg",
-    "../images/series/PercyJackson.jpg",
-    "../images/series/PlanetEarthMain.jpg",
-    "../images/series/Reacher.jpg",
-    "../images/series/RipleyMain.jpg",
-    "../images/series/SmilingFriendsMain.jpg",
-    "../images/series/SprintMain.jpg",
-    "../images/series/SquidGameMain.jpg",
-    "../images/series/Supacell.jpg",
-    "../images/series/SupernaturalMainTitle.jpg",
-    "../images/series/That70sShowMain.jpg",
-    "../images/series/The100.jpg",
-    "../images/series/TheUmbrellaAcademy.jpg",
-    "../images/series/WandaVision.jpg",
-    "../images/series/Wednesday.jpg",
-    "../images/series/WildWildCountryMain.jpg"
+    "ADiscoveryOfWitches.jpg",
+    "AdventureTime.jpg",
+    "AgathaAllAlong.jpg",
+    "AmericanHorrorStory.jpg",
+    "Arcane.jpg",
+    "BelowDeck.jpg",
+    "BlackMirror.jpg",
+    "BojackHorseman.jpg",
+    "BreakingBad.jpg",
+    "Bridgerton.jpg",
+    "Chernobyl.jpg",
+    "ClarksonsFarm.jpg",
+    "Community.jpg",
+    "ConversationsWithFriends.jpg",
+    "CriminalMinds.jpg",
+    "DaughtersOfTheCult.jpg",
+    "Dexter.jpg",
+    "DoctorWho.jpg",
+    "EveryWitchWay.jpg",
+    "EvilLivesHere.jpg",
+    "Friends.jpg",
+    "Futurama.jpg",
+    "GameOfThrones.jpg",
+    "GossipGirl.jpg",
+    "H2O.jpg",
+    "JupitersLegacy.jpg",
+    "LessonsInChemistry.jpg",
+    "MissingYou.jpg",
+    "ModernFamily.jpg",
+    "NewGirl.jpg",
+    "NormalPeople.jpg",
+    "OnlyMurdersInTheBuilding.jpg",
+    "Outlander.jpg",
+    "PercyJackson.jpg",
+    "PlanetEarth.jpg",
+    "PrettyLittleLiars.jpg",
+    "Reacher.jpg",
+    "Ripley.jpg",
+    "RuPaulsDragRace.jpg",
+    "SharpObjects.jpg",
+    "SmilingFriends.jpg",
+    "Sprint.jpg",
+    "SquidGame.jpg",
+    "StarTrek.jpg",
+    "StrangerThings.jpg",
+    "Supacell.jpg",
+    "SupermanAndLois.jpg",
+    "Supernatural.jpg",
+    "That70sShow.jpg",
+    "The100.jpg",
+    "TheBabySittersClub.jpg",
+    "TheBachelor.jpg",
+    "TheEndOfTheFWorld.jpg",
+    "TheFallOfTheHouseOfUsher.jpg",
+    "TheFlash.jpg",
+    "TheGreat.jpg",
+    "TheHauntingOfHillHouse.jpg",
+    "TheHauntingOfBlyManor.jpg",
+    "TheLastOfUs.jpg",
+    "TheMandalorian.jpg",
+    "TheManInTheHighCastle.jpg",
+    "TheSandman.jpg",
+    "TheSecretLivesOfMormonWives.jpg",
+    "TheSummerITurnedPretty.jpg",
+    "TheTudors.jpg",
+    "TheUmbrellaAcademy.jpg",
+    "TheWitcher.jpg",
+    "Travelers.jpg",
+    "WandaVision.jpg",
+    "Wednesday.jpg",
+    "WildWildCountry.jpg",
+    "WizardsOfWaverlyPlace.jpg",
+    "XOKitty.jpg",
+    "You.jpg"
 ];
+
 
 // Initialize the array to store user account info
 let userAccountsArray = JSON.parse(localStorage.getItem("userAccountsArray") || "[]");
@@ -48,11 +91,19 @@ function shuffleArray(array) {
 function populateCarousel(carouselId, imageArray) {
     const carousel = document.getElementById(carouselId);
     if (carousel) {
-        const items = carousel.querySelectorAll(".item img");
-        const shuffledImages = shuffleArray([...imageArray]); // Shuffle a copy of the array
-        items.forEach((img, index) => {
+        //const items = carousel.querySelectorAll(".item img");
+        //const shuffledImages = shuffleArray([...imageArray]); // Shuffle a copy of the array
+        /*items.forEach((img, index) => {
             img.src = shuffledImages[index % shuffledImages.length];
             img.alt = `Image ${index + 1}`;
+        });*/
+
+        const itemx = carousel.querySelectorAll(".item input");
+        const shuffledImages = shuffleArray([...imageArray]); // Shuffle a copy of the array
+        itemx.forEach((input, index) => {
+            input.src = shuffledImages[index % shuffledImages.length];
+            input.alt = `Image ${index + 1}`;
+            input.value = shuffledImages[(index - 1) % shuffledImages.length];  
         });
     }
 }
@@ -60,8 +111,8 @@ function populateCarousel(carouselId, imageArray) {
 // Function to initialize the homepage carousels
 function initializeHomeCarousels() {
     // Populate carousels
-    populateCarousel("homePopularSection", seriesImgs);
-    populateCarousel("homeNewSection", seriesImgs);
+    populateCarousel("homePopular", seriesImgs);
+    populateCarousel("homeNew", seriesImgs);
 }
 
 // Initialize the homepage carousels on DOMContentLoaded
@@ -152,24 +203,14 @@ function showSignInModal() {
     signInModal.show();
 }
 
-// Function to handle account creation
+// Updated function to handle account creation
 function handleAccountCreation() {
-    const usernameInput = document.getElementById("unameCreateInput");
-    let username = usernameInput.value.trim();
+    const username = document.getElementById("unameCreateInput").value.trim();
     const password = document.getElementById("passCreateInput").value.trim();
     const confirmPassword = document.getElementById("passConfirm").value.trim();
 
     if (!username || !password || !confirmPassword) {
         alert("Please fill in all fields.");
-        return;
-    }
-
-    // Check if username already exists in localStorage
-    const existingUser = userAccountsArray.some(account => account.username === username);
-    if (existingUser) {
-        alert("Username is already taken. Please choose a different one.");
-        usernameInput.value = "";  // Clear input field for new entry
-        usernameInput.focus();  // Refocus on the username input field
         return;
     }
 
@@ -185,12 +226,17 @@ function handleAccountCreation() {
         return;
     }
 
-    // Add new user account
+
+    // Define the user account info object
     const userAccountInfo = { username: username, password: password };
+
+    // Add the new user account to the userAccountsArray
     userAccountsArray.push(userAccountInfo);
+
+    // Store the updated array in localStorage
     localStorage.setItem("userAccountsArray", JSON.stringify(userAccountsArray));
 
-    // Set user as signed in
+    // Set the user as signed in
     localStorage.setItem("userSignedIn", "true");
     localStorage.setItem("username", username);
 
@@ -205,8 +251,6 @@ function handleAccountCreation() {
     updateNavbar();
     updateWelcomeMessage();
 }
-
-
 
 // Bind buttons for account creation and sign-in
 function bindCreateAccountButton() {
@@ -257,60 +301,23 @@ function handleSigningIn() {
         alert("Invalid username or password!");
     }
 }
-//Autofill user information
+
+// Autofill profile settings
 function autofillProfileSettings() {
     const usernameInput = document.getElementById("userName");
     const displayNameInput = document.getElementById("displayName");
-    const bioInput = document.getElementById("bio");
-    const pronounsSelect = document.getElementById("pronouns");
-    const repliesSelect = document.getElementById("replies");
+    //const userInput = document.getElementsById("userName");
 
     const username = localStorage.getItem("username");
-    if (!username) return;
 
-    usernameInput.value = username;
-
-    let userAccounts = JSON.parse(localStorage.getItem("userAccountsArray") || "[]");
-    let user = userAccounts.find(acc => acc.username === username);
-
-    if (user) {
-        displayNameInput.value = user.displayName || "";
-        bioInput.value = user.bio || "";
-        pronounsSelect.value = user.pronouns || "Prefer Not to Answer";
-        repliesSelect.value = user.replies || "Public";
+    if (username) {  // Ensure username exists in localStorage
+        usernameInput.placeholder = username;  // Set the username as the placeholder text
+        displayNameInput.placeholder = username;  // Set the username as the placeholder text for display name
+        //userInput = username;
+    } else {
+        console.log("No username found in localStorage.");
     }
 }
-
-// Profile Settings - Save changes
-document.getElementById("saveProfile")?.addEventListener("click", function (event) {
-    event.preventDefault();
-
-    const username = localStorage.getItem("username");
-    if (!username) {
-        alert("User not found. Please sign in again.");
-        return;
-    }
-
-    const displayName = document.getElementById("displayName").value;
-    const bio = document.getElementById("bio").value.trim();
-    const pronouns = document.getElementById("pronouns").value;
-    const replies = document.getElementById("replies").value;
-
-    let userAccounts = JSON.parse(localStorage.getItem("userAccountsArray") || "[]");
-    let userIndex = userAccounts.findIndex(acc => acc.username === username);
-
-    if (userIndex !== -1) {
-        userAccounts[userIndex].displayName = displayName;
-        userAccounts[userIndex].bio = bio;
-        userAccounts[userIndex].pronouns = pronouns;
-        userAccounts[userIndex].replies = replies;
-
-        localStorage.setItem("userAccountsArray", JSON.stringify(userAccounts));
-        alert("Profile updated successfully!");
-    } else {
-        alert("User account not found.");
-    }
-});
 
 document.addEventListener("DOMContentLoaded", () => {
     // Check if we're on the Profile Settings page and autofill the fields
@@ -347,5 +354,5 @@ function showNextSlide(n) {
     for (i = 0; i < slides.length; i++) {
         slides[i].style.display = "none";
     }
-    slides[rowIndex - 1].style.display = "block";
+    slides[rowIndex - 1].style.display = "in-line block";
 }
