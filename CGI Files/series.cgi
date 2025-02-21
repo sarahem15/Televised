@@ -24,7 +24,7 @@ seasons = db.query("SELECT season.* FROM season JOIN series ON season.seriesId =
 seasonsArray = seasons.to_a
 seasonId = seasonsArray[0]['seasonId']
 episodes = db.query("SELECT episode.* FROM episode JOIN season ON episode.seasonId = season.seasonId WHERE season.seasonId = '" + seasonId.to_s + "';")
-
+seriesId = series.first['showId']
 #seasonsArray = seasons.to_a
 #episodesArray = episodes.to_a
 
@@ -89,7 +89,10 @@ puts "<body id=\"showsPage\">"
     puts "</div>"
   puts "</div>"
   puts "<div class=\"editButtons\">"
+  puts '<form action="threebuttons.cgi" method="POST">'
     puts "<button class=\"watchedButton\">EYE</button>"
+    puts '<input type="hidden" name="watchedButton" value="' + seriesId.to_s + '">'
+    puts '</form>'
     puts "<button class=\"reviewButton\">REVIEW</button>"
     puts "<button class=\"rateButton\">STARS</button>"
     puts "<button class=\"menuButton\">MENU</button>"
@@ -108,7 +111,11 @@ puts "<body id=\"showsPage\">"
       puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + episode['runtime'].to_s + " minutes</h4>"
       puts "<h5 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + episode['description'] + "</h5>"
       puts "<div class=\"editButtons\">"
+      puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button class=\"watchedButton\">EYE</button>"
+        puts '<input type="hidden" name="watchedButton" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="watchedEp" value="' + episode['epId'].to_s + '">'
+        puts '</form>'
         puts "<button class=\"reviewButton\">REVIEW</button>"
         puts "<button class=\"rateButton\">STARS</button>"
         puts "<button class=\"menuButton\">MENU</button>"
