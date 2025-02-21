@@ -33,7 +33,7 @@ puts "<p>Username:" + cgi['unameCreateInput'] + "</p>"
 puts "<p>Password:" + cgi['passCreateInput'] + "</p>"
 
 # Connect to MySQL and insert data
-begin
+#begin
   db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -42,5 +42,17 @@ begin
   )
 
 
-  db.query("INSERT INTO account (username, password) VALUES ('" + cgi['unameCreateInput'] + "','" + cgi['passCreateInput'] + "');")
-end
+db.query("INSERT INTO account (username, password) VALUES ('" + cgi['unameCreateInput'] + "','" + cgi['passCreateInput'] + "');")
+# accountId = db.query("SELECT accountId FROM account WHERE username = '" + unameCreateInput + "';")
+user = unameCreateInput.split('@')[0].strip 
+tableName = user.to_s + "ListInfo"
+# ADD DATE CREATED AND UPDATED AND PRIVACY
+db.query("create table " + tableName + " (listInfoId int NOT NULL AUTO_INCREMENT, name char(50), 
+  mediaType char(7), description char(200), primary key (listInfoId));")
+puts "INSERT INTO " + tableName.to_s + " VALUES ('Want to Watch', 'series', 'N/A');"
+#db.query("insert into " + tableName.to_s + " values ('Want to Watch', 'series', 'N/A');")
+
+# automatically public
+# top 5 by media
+# have watched by media
+# wtow by media

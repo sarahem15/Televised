@@ -42,6 +42,9 @@ puts '</head>'
 puts '<body id="discoverPage">'
 puts '<nav id="changingNav"></nav>'
 puts '<div class="container-fluid">'
+puts "<script src=\"https://code.jquery.com/jquery-3.6.0.min.js\"></script>"
+    puts "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js\"></script>"
+    puts "<script src=\"Televised.js\"></script>"
 puts '<h1 class="text-center text-white mt-5">Discover Something New!</h1>'
 puts '<section id="discoverStreams">'
 

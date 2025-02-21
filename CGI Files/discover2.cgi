@@ -45,6 +45,10 @@ puts '<div class="container-fluid">'
 puts '<h1 class="text-center text-white mt-5">Discover Something New!</h1>'
 puts '<section id="discoverGenreOne">'
 
+puts "<script src=\"https://code.jquery.com/jquery-3.6.0.min.js\"></script>"
+    puts "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js\"></script>"
+    puts "<script src=\"Televised.js\"></script>"
+
 
 (6...11).each do |j|
     series = db.query("SELECT imageName FROM series WHERE genre = '" + genres[j]['genre'] + "';")

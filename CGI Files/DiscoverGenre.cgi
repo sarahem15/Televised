@@ -18,7 +18,12 @@ db = Mysql2::Client.new(
     database: 'televised_w25'
   )
 
+genres = db.query("SELECT DISTINCT genre FROM series;")
+genres = genres.to_a
 actionSeries = db.query("SELECT imageName FROM series WHERE genre = 'Action/Adventure';")
+actionSeries = actionSeries.to_a
+
+
 puts "<!DOCTYPE html>"
 puts '<html lang="en">'
 
@@ -40,16 +45,17 @@ puts '<nav id="changingNav"></nav>'
 puts '<div class="container-fluid">'
 puts '<h1 class="text-center text-white mt-5">Discover Something New!</h1>'
 puts '<section id="discoverGenreOne">'
-puts '<h3 class="text-white ms-4">Action/Adventure</h3>'
+puts '<h3 class="text-white ms-4">' + genres[1]['genre'] + '</h3>'
+
+
 puts '<div class="wrapper">'
 puts '<section class="carousel-section" id="section1">'
 puts '<a href="#section3">‹</a>'
-
-(1...6).each do |i|
+(0...5).each do |i|
 	puts '<div class="item">'
 	puts '<form action="series.cgi" method="POST">'
-              puts '<input type="image" src="' + actionSeries.first['imageName'] + '" alt="' + actionSeries.first['imageName'] + '">'
-              puts '<input type="hidden" name="clicked_image" value="' + actionSeries.first['imageName'] + '">'
+              puts '<input type="image" src="' + actionSeries[i]['imageName'] + '" alt="' + actionSeries[i]['imageName'] + '">'
+              puts '<input type="hidden" name="clicked_image" value="' + actionSeries[i]['imageName'] + '">'
     puts '</form>'
     puts '</div>'
 end
@@ -58,11 +64,11 @@ puts '</section>'
 
 puts '<section class="carousel-section" id="section2">'
 puts '<a href="#section1">‹</a>'
-(1...6).each do |i|
+(0...5).each do |i|
 	puts '<div class="item">'
 	puts '<form action="series.cgi" method="POST">'
-              puts '<input type="image" src="' + actionSeries.first['imageName'] + '" alt="' + actionSeries.first['imageName'] + '">'
-              puts '<input type="hidden" name="clicked_image" value="' + actionSeries.first['imageName'] + '">'
+              puts '<input type="image" src="' + actionSeries[i]['imageName'] + '" alt="' + actionSeries[i]['imageName'] + '">'
+              puts '<input type="hidden" name="clicked_image" value="' + actionSeries[i]['imageName'] + '">'
     puts '</form>'
     puts '</div>'
 end
@@ -71,11 +77,11 @@ puts '</section>'
 
 puts '<section class="carousel-section" id="section3">'
 puts '<a href="#section2">‹</a>'
-(1...6).each do |i|
+(0...5).each do |i|
 	puts '<div class="item">'
 	puts '<form action="series.cgi" method="POST">'
-              puts '<input type="image" src="' + actionSeries.first['imageName'] + '" alt="' + actionSeries.first['imageName'] + '">'
-              puts '<input type="hidden" name="clicked_image" value="' + actionSeries.first['imageName'] + '">'
+              puts '<input type="image" src="' + actionSeries[i]['imageName'] + '" alt="' + actionSeries[i]['imageName'] + '">'
+              puts '<input type="hidden" name="clicked_image" value="' + actionSeries[i]['imageName'] + '">'
     puts '</form>'
     puts '</div>'
 end
