@@ -10,6 +10,7 @@ $stderr.reopen $stdout
 cgi = CGI.new
 
 # Retrieve form parameters
+userName = cgi['userNameX']
 displayName = cgi['displayName']
 bio = cgi['bio']
 pronouns = cgi['pronouns']
@@ -25,16 +26,18 @@ puts "<head>"
 puts "<meta charset='UTF-8'>"
 puts "<title>Edit Settings</title>"
 puts "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
+print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/Home.cgi'>\n"
 puts "</head>"
 puts "<body>"
 puts "<div class='container mt-5'>"
 
 # Debugging: Print received parameters
-puts "<h3>Received Parameters:</h3>"
-puts "<p>Display name:" + cgi['displayName'] + "</p>"
-puts "<p>Bio:" + cgi['bio'] + "</p>"
-puts "<p>Pronouns:" + cgi['pronouns'] + "</p>"
-puts "<p>Replies:" + cgi['replies'] + "</p>"
+#puts "<h3>Received Parameters:</h3>"
+#puts "<p>Username:" + cgi['userNameX'] + "</p>"
+#puts "<p>Display name:" + cgi['displayName'] + "</p>"
+#puts "<p>Bio:" + cgi['bio'] + "</p>"
+#puts "<p>Pronouns:" + cgi['pronouns'] + "</p>"
+#puts "<p>Replies:" + cgi['replies'] + "</p>"
 
 # Connect to MySQL and insert data
 #begin
@@ -46,4 +49,7 @@ puts "<p>Replies:" + cgi['replies'] + "</p>"
   )
 
 
-  db.query("INSERT INTO account (displayName, bio, pronouns) VALUES ('" + cgi['displayName'] + "','" + cgi['bio'] + "','" + cgi['pronouns'] + "');")
+  #db.query("update account set displayName = '" + displayName.to_s + "', bio = '" + bio.to_s + "', pronouns = '" + pronouns.to_s + "' where username = '" + username "';")
+puts "</body>"
+puts "</html>"
+

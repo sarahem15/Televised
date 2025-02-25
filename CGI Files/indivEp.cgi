@@ -17,7 +17,8 @@ db = Mysql2::Client.new(
     database: 'televised_w25'
   )
 
-episode = db.query("SELECT * FROM episode WHERE epName = '" + episodeName + "';")
+episode = db.query("SELECT episode.* FROM episode JOIN season ON episode.seasonId = season.seasonId
+  JOIN series ON season.seriesId = series.showId WHERE episode.epName = '" + episodeName.gsub("'", "\\\\'") + "' AND series.showName = '" + showName.gsub("'", "\\\\'") + "';")
 
 puts "<!DOCTYPE html>"
 puts "<html lang=\"en\">"
@@ -64,6 +65,8 @@ puts "<body id=\"episodePage\">"
    puts "<br>"
   puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">Description: "
   puts "<span>" + episode.first['description'] + "</span></h4>"
+  puts "<br>"
+  puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\"> Writers: " + episode.first['writers'] + "</h4>"
 
 #Buttons!
 
