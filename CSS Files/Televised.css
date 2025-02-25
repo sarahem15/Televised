@@ -276,6 +276,7 @@ button:hover {
     padding: 16px;
     font-size: 20px;
     border: none;
+    width: 160px;
   }
   
   /* Position the dropdown*/
@@ -311,11 +312,22 @@ button:hover {
   
   .seriesPage .showInfo {
     display: grid;
-    grid-template-columns: repeat(4, auto);
-    width: 900px;
+    grid-template-columns: repeat(3, auto);
+    width: 90%;
     padding: 5px;
-    
   }
+
+.seriesPage .epInfo {
+    display: grid;
+    grid-template-columns: auto 100%;
+    width: 950px;
+    padding: 5px;
+  }
+
+.seriesPage .epInfo img {
+    padding-right: 20px;
+}
+
 
     .editButtons{
         width: 30px;
@@ -341,13 +353,20 @@ button:hover {
 
 
 #showsPage .words{
-    width: 1300px;
-    padding-left: 20px;
+    width: 100%;
 }
+
+.words h3{
+    width: 100%;
+    color: white;
+}
+
 
 #showsPage .words a{
     text-decoration: none;
 }
+
+.words h3:hover {color: #ffabe2;}
 
   .watchedButton{
     background-color: #436eb1;
