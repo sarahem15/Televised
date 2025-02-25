@@ -109,11 +109,11 @@ function populateCarousel(carouselId, imageArray) {
 }
 
 // Function to initialize the homepage carousels
-function initializeHomeCarousels() {
+/*function initializeHomeCarousels() {
     // Populate carousels
     populateCarousel("homePopular", seriesImgs);
     populateCarousel("homeNew", seriesImgs);
-}
+}*/
 
 // Initialize the homepage carousels on DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
@@ -163,14 +163,16 @@ function attachLoggedInEvents() {
     const username = localStorage.getItem("username");
     const displayName = document.getElementById("displayName");
     const logoutButton = document.querySelector(".dropdown-item[href='#']");
+    const displayNameS = document.getElementById("displayNameS");
 
     if (username && displayName) {
         displayName.textContent = username;
+        displayNameS.value = username;
     }
 
     if (logoutButton) {
         logoutButton.addEventListener("click", () => {
-            window.location.href = "Home.html";
+            window.location.href = "Home.cgi";
             localStorage.removeItem("username");
             localStorage.setItem("userSignedIn", "false");
             updateNavbar();
@@ -329,7 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
     updateWelcomeMessage();
 });
 
-/* Row/Slideshow Functionality */
+/* Row/Slideshow Functionality
 let rowIndex = 1;
 showNextSlide(rowIndex);
 
@@ -344,7 +346,7 @@ function currentRow(n) {
 
 function showNextSlide(n) {
     let i;
-    let slides = document.getElementsByClassName("row");
+    let slides = document.getElementsByI("carousel-section");
     if (n > slides.length) {
         rowIndex = 1;
     }
@@ -356,3 +358,4 @@ function showNextSlide(n) {
     }
     slides[rowIndex - 1].style.display = "in-line block";
 }
+*/
