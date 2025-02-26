@@ -51,12 +51,14 @@ puts "<p>Password:" + cgi['passCreateInput'] + "</p>"
     database: 'televised_w25'
   )
 
-db.query("INSERT INTO account (username, password) VALUES ('" + cgi['unameCreateInput'] + "','" + cgi['passCreateInput'] + "');")
+db.query("INSERT INTO account (username, password, replies) VALUES ('" + cgi['unameCreateInput'] + "','" + cgi['passCreateInput'] + "', '1');")
 
-# automatically public
+# automatically public = 1
 # top 5 by media
 # have watched by media
 # wtow by media
 
 puts "</body>"
 puts "</html>"
+
+session.close
