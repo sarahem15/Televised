@@ -167,8 +167,8 @@ function attachLoggedInEvents() {
 
     if (username && displayName) {
         displayName.textContent = username;
-        displayNameS.value = username;
     }
+    //displayNameS.value = username;
 
     if (logoutButton) {
         logoutButton.addEventListener("click", () => {
@@ -221,12 +221,19 @@ function handleAccountCreation() {
         return;
     }
 
-    // Password validation: At least 12 characters, 1 uppercase, 1 number, 1 special character
-    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{12,}$/;
-    if (!passwordRegex.test(password)) {
-        alert("Password must be at least 12 characters long and contain at least one capital letter, one number, and one special character.");
+    const atSymbol = "@";
+    if (!(username.includes(atSymbol))) {
+        alert("Username must be a valid email address.");
         return;
     }
+
+    // REMEMBER TO ADD BACK
+    // Password validation: At least 12 characters, 1 uppercase, 1 number, 1 special character
+    //const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{12,}$/;
+    //if (!passwordRegex.test(password)) {
+    //    alert("Password must be at least 12 characters long and contain at least one capital letter, one number, and one special character.");
+    //    return;
+    //}
 
 
     // Define the user account info object
