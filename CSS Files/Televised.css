@@ -10,7 +10,6 @@ body {
     background-color: #140044;
     min-height: 100vh; /* Ensure full screen coverage */
     margin: 0;
-    
 }
 
 /* Center H1 Under Header */
@@ -289,11 +288,18 @@ button:hover {
   .dropseason-content {
     display: none;
     position: absolute;
-    background-color: #140044;
+    background-color: #7989cd;
     min-width: 160px;
     font-size: 20px;
     box-shadow: 0px 8px 16px 0px rba(0,0,0,0.2);
     z-index: 1;
+  }
+
+  .dropseason-content form button{
+    background-color: #7989cd;
+    font-size: 12px;
+    border-radius: 0%;
+    width: 100%;
   }
   
   .dropseason-content a {
@@ -309,6 +315,8 @@ button:hover {
   
   .seasonDropdown:hover .dropbtn{background-color: #436eb1;}
   .dropseason-content a:hover {background-color: #436eb1}
+
+  .dropseason-content form button:hover {background-color: #436eb1;}
   
   .seriesPage .showInfo {
     display: grid;
@@ -330,8 +338,8 @@ button:hover {
 
 
     .editButtons{
-        width: 30px;
-        height: 20px;
+        width: 400px;
+        height: auto;
         display: grid;
         grid-template-columns: repeat(4, auto);
         padding: 2px;
@@ -371,33 +379,33 @@ button:hover {
   .watchedButton{
     background-color: #436eb1;
     color: white;
-    padding: 10px;
     width: 70px;
-    border-radius: 50%;
+    height: 100%;
+    border-radius: 40%;
   }
   
   .reviewButton{
     background-color: #436eb1;
     color: white;
-    padding: 5px;
-    width: 70px;
-    border-radius: 50%;
+    width: 95px;
+    height: 100%;
+    border-radius: 40%;
   }
   
   .rateButton{
     background-color: #436eb1;
     color: white;
-    padding: 5px;
-    width: 100px;
-    border-radius: 50%;
+    width: 95px;
+    height: 100%;
+    border-radius: 40%;
   }
   
   .menuButton{
     background-color: #436eb1;
     color: white;
-    padding: 5px;
-    width: 100px;
-    border-radius: 50%;
+    width: 95px;
+    height: 100%;
+    border-radius: 40%;
   }
 
 
@@ -413,12 +421,12 @@ button:hover {
   .ReviewIndiv{
     display: grid;
     grid-template-columns: repeat(2, auto);
-    background-color: blue;
+    background-color: #00156d;
     color: white;
     padding:  5px;
-    border-radius: 10%;
-    height: 220px;
-    width: 420px;
+    border-radius: 5%;
+    height: 90%;
+    width: 90%;
 
     h3 {
         font-size: 15px;
@@ -596,4 +604,56 @@ button:hover {
 #episodePage img{
     max-height: 400px;
     width: auto;
+}
+
+.epWords {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    width: 50%;
+    margin: auto;
+    padding: 10px;
+}
+
+.epWords h3 {
+    font-family: Times New Roman, Times, serif;
+    color: white;
+    text-align: center;
+}
+
+.epDes {
+    font-family: Times New Roman, Times, serif;
+    color: white;
+    text-align: center;
+    width: 60%;
+    margin: auto;
+    background-color: #00156d;
+    border-radius: 2%;
+    padding: 25px;
+}
+
+#episodePage .editButtons {
+    margin: auto;
+    width: 450px;
+}
+
+.epInfo .editButtons {
+    width: 50%;
+}
+
+.episodesPage {
+    margin: 30px;
+}
+
+.epReviews {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    margin: auto;
+    width: 70%;
+    height: 90%;
+    padding-bottom: 100px;
+}
+
+#homePage p {
+    margin-left: 80px;
+    font-size: 25px;
 }
