@@ -20,6 +20,10 @@ db = Mysql2::Client.new(
 episode = db.query("SELECT episode.* FROM episode JOIN season ON episode.seasonId = season.seasonId
   JOIN series ON season.seriesId = series.showId WHERE episode.epName = '" + episodeName.gsub("'", "\\\\'") + "' AND series.showName = '" + showName.gsub("'", "\\\\'") + "';")
 
+
+
+
+
 puts "<!DOCTYPE html>"
 puts "<html lang=\"en\">"
 puts "<head>"
@@ -42,33 +46,59 @@ puts "<body id=\"episodePage\">"
 
   #HERE
   
-    puts "<img src=\"H2O.jpg\"alt=\"placeholder\">\n" 
+    puts "<img src=\"H2O.jpg\"alt=\"placeholder\">" 
     puts "<br>"
-
+    puts "<br>"
       puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + showName + "</h1>"
       puts "<div class=\"epWords\">"
-      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\"> Season 1 </h2>"
-      puts "<br>"
-      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\"> Episode " + epNum.to_s + "</h4>"
-      puts "<br>"
-      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\"> RATING </h4>"
-      puts "<br>"
-    puts "</div>"
-    puts "<div class=\"epWords\">"
-      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + episode.first['epName'] + "</h2>"
-      puts "<br>"
-      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + episode.first['releaseDate'] + "</h4>"
-      puts "<br>"
-      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\"" + episode.first['runTime'].to_s + "</h4>"
-      puts "<br>"
+      puts "<h3> Season 1 </h2>"
+      puts "<h3> Episode " + epNum.to_s + "</h4>"
+      puts "<h3> RATING </h4>"
+      puts "<h3>" + episode.first['epName'] + "</h2>"
+      puts "<h3>" + episode.first['releaseDate'] + "</h4>"
+      puts "<h3>" + episode.first['runtime'].to_s + "m</h4>"
     puts "</div>"
    puts "<br>"
-  puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">Description: "
+  puts "<h4 class=\"epDes\">"
   puts "<span>" + episode.first['description'] + "</span></h4>"
   puts "<br>"
+  puts "<br>"
+  puts "<div class=\"editButtons\">"
+      puts '<form action="threebuttons.cgi" method="POST">'
+        puts "<button class=\"watchedButton\">EYE</button>"
+        #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="watchedButton" value="TRUE">'
+        #puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
+        puts '</form>'
+        puts "<button class=\"reviewButton\">REVIEW</button>"
+        puts "<button class=\"rateButton\">STARS</button>"
+        puts "<div class=\"seasonDropdown\">"
+        puts "<button class=\"menuButton\">MENU</button>"
+        puts "<div class=\"dropseason-content\">"
+        puts '<form action="threebuttons.cgi" method="POST">'
+        puts "<button>Add to Want to Watch</button>"
+        #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '</form>'
+        puts '<form action="threebuttons.cgi" method="POST">'
+        puts "<button>Add to Existing List</button>"
+        #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '</form>'
+        puts '<form action="threebuttons.cgi" method="POST">'
+        puts "<button>Add to New List</button>"
+        #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '</form>'
+        puts '<form action="threebuttons.cgi" method="POST">'
+        puts "<button>View on Other's Lists</button>"
+        #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '</form>'
+        puts "</div>"
+        puts "</div>"
+      puts "</div>"
+        puts "<br>"
   puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\"> Writers: " + episode.first['writers'] + "</h4>"
-
+  puts "<br>"
 #Buttons!
+
 
   puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">Cast: "
     puts "<span>" + episode.first['topCast'] + "</span>"
@@ -78,107 +108,25 @@ puts "<body id=\"episodePage\">"
   puts "<hr>"
 
   puts '<section class="epReviews">'
-  puts '<div class="ReviewIndiv">'
-  puts '<div class="ReviewContent">'
-      puts '<section class="UserDisplay">'
-          puts '<img src="./Episodes/adventureTime1.1.jpg" alt="here">'
-          puts '<h3> Username </h3>'
-          #RATING!
-      puts '</section>'
-      puts '<br>'
-      puts '<br>'
-      puts '<h4> This show is great! </h4>'
-      puts '<section class="Likes">'
-        puts '<h5>&#9829</h5>'
-        puts '<h4>12</h4>' #db query to get likes
-      puts '</section>'
+  (0...6).each do |i|
+    puts '<div class="ReviewIndiv">'
+    puts '<div class="ReviewContent">'
+        puts '<section class="UserDisplay">'
+            puts '<img src="./Episodes/adventureTime1.1.jpg" alt="here">'
+            puts '<h3> Username </h3>'
+            #RATING!
+        puts '</section>'
+        puts '<br>'
+        puts '<br>'
+        puts '<h4> This show is great! </h4>'
+        puts '<section class="Likes">'
+          puts '<h5>&#9829</h5>'
+          puts '<h4>12</h4>' #db query to get likes
+        puts '</section>'
+    puts '</div>'
   puts '</div>'
-puts '</div>'
-puts '<div class="ReviewIndiv">'
-  puts '<div class="ReviewContent">'
-      puts '<section class="UserDisplay">'
-          puts '<img src="./Episodes/adventureTime1.1.jpg" alt="here">'
-          puts '<h3> Username </h3>'
-          #RATING!
-      puts '</section>'
-      puts '<br>'
-      puts '<br>'
-      puts '<h4> This show is great! </h4>'
-      puts '<section class="Likes">'
-        puts '<h5>&#9829</h5>'
-        puts '<h4>12</h4>' #db query to get likes
-      puts '</section>'
-  puts '</div>'
-puts '</div>'
-puts '<div class="ReviewIndiv">'
-  puts '<div class="ReviewContent">'
-      puts '<section class="UserDisplay">'
-          puts '<img src="./Episodes/adventureTime1.1.jpg" alt="here">'
-          puts '<h3> Username </h3>'
-          #RATING!
-      puts '</section>'
-      puts '<br>'
-      puts '<br>'
-      puts '<h4> This show is great! </h4>'
-      puts '<section class="Likes">'
-        puts '<h5>&#9829</h5>'
-        puts '<h4>12</h4>' #db query to get likes
-      puts '</section>'
-  puts '</div>'
-puts '</div>'
-puts '<div class="ReviewIndiv">'
-  puts '<div class="ReviewContent">'
-      puts '<section class="UserDisplay">'
-          puts '<img src="./Episodes/adventureTime1.1.jpg" alt="here">'
-          puts '<h3> Username </h3>'
-          #RATING!
-      puts '</section>'
-      puts '<br>'
-      puts '<br>'
-      puts '<h4> This show is great! </h4>'
-      puts '<section class="Likes">'
-        puts '<h5>&#9829</h5>'
-        puts '<h4>12</h4>' #db query to get likes
-      puts '</section>'
-  puts '</div>'
-puts '</div>'
-puts '<div class="ReviewIndiv">'
-  puts '<div class="ReviewContent">'
-      puts '<section class="UserDisplay">'
-          puts '<img src="./Episodes/adventureTime1.1.jpg" alt="here">'
-          puts '<h3> Username </h3>'
-          #RATING!
-      puts '</section>'
-      puts '<br>'
-      puts '<br>'
-      puts '<h4> This show is great! </h4>'
-      puts '<section class="Likes">'
-        puts '<h5>&#9829</h5>'
-        puts '<h4>12</h4>' #db query to get likes
-      puts '</section>'
-  puts '</div>'
-puts '</div>'
-puts '<div class="ReviewIndiv">'
-  puts '<div class="ReviewContent">'
-      puts '<section class="UserDisplay">'
-          puts '<img src="./Episodes/adventureTime1.1.jpg" alt="here">'
-          puts '<h3> Username </h3>'
-          #RATING!
-      puts '</section>'
-      puts '<br>'
-      puts '<br>'
-      puts '<h4> This show is great! </h4>'
-      puts '<section class="Likes">'
-        puts '<h5>&#9829</h5>'
-        puts '<h4>12</h4>' #db query to get likes
-      puts '</section>'
-  puts '</div>'
-puts '</div>'
-
-
+end
 puts '</section>'
-
 puts "</div>"
-
 puts "</body>"
 puts "</html>"
