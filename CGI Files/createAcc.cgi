@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 require 'mysql2'
 require 'cgi'
+require 'cgi/session'
 
 # Enable debugging
 $stdout.sync = true
@@ -8,10 +9,17 @@ $stderr.reopen $stdout
 
 # Initialize CGI
 cgi = CGI.new
+session = CGI::Session.new(cgi)
 
 # Retrieve form parameters
 unameCreateInput = cgi['unameCreateInput']
 passCreateInput = cgi['passCreateInput']
+
+session['username'] = unameCreateInput
+session.close
+print cgi.header(
+  'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
+)
 
 # Print HTTP header
 print "Content-type: text/html\r\n\r\n"
@@ -43,16 +51,7 @@ puts "<p>Password:" + cgi['passCreateInput'] + "</p>"
     database: 'televised_w25'
   )
 
-
 db.query("INSERT INTO account (username, password) VALUES ('" + cgi['unameCreateInput'] + "','" + cgi['passCreateInput'] + "');")
-# accountId = db.query("SELECT accountId FROM account WHERE username = '" + unameCreateInput + "';")
-user = unameCreateInput.split('@')[0].strip 
-tableName = user.to_s + "ListInfo"
-# ADD DATE CREATED AND UPDATED AND PRIVACY
-db.query("create table " + tableName + " (listInfoId int NOT NULL AUTO_INCREMENT, name char(50), 
-  mediaType char(7), description char(200), primary key (listInfoId));")
-puts "INSERT INTO " + tableName.to_s + " VALUES ('Want to Watch', 'series', 'N/A');"
-#db.query("insert into " + tableName.to_s + " values ('Want to Watch', 'series', 'N/A');")
 
 # automatically public
 # top 5 by media
