@@ -7,9 +7,13 @@ $stderr.reopen $stdout
 puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
+require 'cgi/session'
 
 # Initialize CGI
 cgi = CGI.new
+session = CGI::Session.new(cgi)
+username = session['username']
+
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -21,6 +25,9 @@ db = Mysql2::Client.new(
 #listImages = db.query("SELECT imageName FROM list;")
 seriesImages = db.query("SELECT imageName FROM series;")
 seriesImages = seriesImages.to_a()
+displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
+bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
+pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
 
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -37,17 +44,20 @@ puts '<body id="profile">'
   puts '<nav id="changingNav"></nav> <!-- This is where the navbar will be dynamically loaded -->'
   puts '<div class="container-fluid">'
   puts '<br>'
+  puts '<section class="ProfileInfo">'
   puts '<section class="UserDisplay">'
     puts '<img src="./Episodes/adventureTime1.1.jpg" alt="testing123">'
-    puts '<h3 id=" DisplayName"> DisplayName </h3>'
+    puts '<h3 id="DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
   puts '</section>'
-
+  puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
+  puts '<h4>' + bio.first['bio'].to_s + '</h4>'
+  puts '</section>'
   puts '<hr>'
      puts '<div class="profileHeader">'
-      puts '<a href="Profile.html">Profile</a>'
-      puts '<a href="Have_Watched.html">Have Watched</a>'
-      puts '<a href="Want_to_Watch.html">Want to Watch</a>'
-      puts '<a href="#"class="active">Lists</a>'
+      puts '<a href="Profile.cgi">Profile</a>'
+      puts '<a href="Have_Watched.cgi">Have Watched</a>'
+      puts '<a href="Want_to_Watch.cgi">Want to Watch</a>'
+      puts '<a href="#!"class="active">Lists</a>'
       puts '<a href="#">Reviews</a>'
       puts '<a href="Likes_Lists.cgi">Likes</a>'
       puts '<a href="#">Ratings</a>'
@@ -61,7 +71,7 @@ puts '<body id="profile">'
       puts '<a href="#">Seasons</a>'
       puts '<a href="#">Episodes</a>'
     puts '</div>'
-    puts '<button id="newListProfile" class="createListButton"> <a href="createNewList.html"> Create a New List </a> </button>'
+    puts '<button id="newListProfile" class="createListButton"> <a href="createNewList.cgi"> Create a New List </a> </button>'
 puts '</div>'
 
 (0...5).each do |i|
@@ -78,7 +88,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       puts '</div>'
       puts '<div>'
       puts '<section class="titleDate">'
-      puts '<h1>LIST TITLE</h1>'
+      puts '<a href="listContents.cgi?title=LIST TITLE">LIST TITLE</a>'
       puts '<h4>DATE</h4>'
       puts '</section>'
 
@@ -93,3 +103,4 @@ end
   puts '<script src="Televised.js"></script>'
 puts '</body>'
 puts '</html>'
+session.close

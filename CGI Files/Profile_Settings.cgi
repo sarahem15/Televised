@@ -1,0 +1,135 @@
+#!/usr/bin/ruby
+require 'mysql2'
+require 'cgi'
+require 'cgi/session'
+
+# Enable debugging
+$stdout.sync = true
+$stderr.reopen $stdout
+
+# Initialize CGI
+cgi = CGI.new
+session = CGI::Session.new(cgi)
+username = session['username']
+
+db = Mysql2::Client.new(
+    host: '10.20.3.4', 
+    username: 'seniorproject25', 
+    password: 'TV_Group123!', 
+    database: 'televised_w25'
+  )
+
+displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
+bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
+pronouns =db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
+replies = db.query("SELECT replies FROM account WHERE username = '" + username.to_s + "';")
+
+puts "Content-type: text/html\n\n"
+
+
+puts '<!DOCTYPE html>'
+puts '<html lang="en">'
+
+puts '<head>'
+    puts '<meta charset="UTF-8">'
+    puts '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+    puts '<title>Televised</title>'
+    puts '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">'
+    puts '<link rel="stylesheet" href="Televised.css">'
+puts '</head>'
+
+puts '<body id="profileSettings">'
+    puts '<nav id="changingNav"></nav>' # <!-- Navbar dynamically loaded -->
+    puts '<div class="container-fluid">'
+        puts '<br>'
+        puts '<h2 style="text-align: center;">Profile Settings</h2>'
+        puts '<br>'
+        puts '<div class="container">'
+                puts '<div class="col-5" id="profileRow">'
+                    puts '<form id="profileSettinsForm" method="post" action="editProfile.cgi">'
+                    puts '<span>Username</span>'
+                    puts '<input type="text" id="userName" name="userNameX" class="form-control" readonly>'
+                    puts '<br>'
+                    puts '<span>Display Name</span>'
+                    puts '<input type="text" id="displayName" value="' + displayName.first['displayName'].to_s + '" name="displayName" class="form-control" >'
+                    puts '<br>'
+                    puts '<span>Bio</span>'
+                    puts '<textarea id="bio" name="bio" class="form-control" rows="5">' + bio.first['bio'].to_s + '</textarea>'
+                    puts '<br>'
+                    puts '<label for="pronouns">Pronouns</label>'
+                    puts '<select id="pronouns" name="pronouns" class="form-control">'
+                    if pronouns.first['pronouns'].to_s == 'She/Her'
+                        puts '<option value="She/Her" selected>She/Her</option>'
+                        puts '<option value="She/They">She/They</option>'
+                        puts '<option value="He/They">He/They</option>'
+                        puts '<option value="He/Him">He/Him</option>'
+                        puts '<option value="They/Them">They/Them</option>'
+                        puts '<option value="Prefer Not to Answer">Prefer Not to Answer</option>'
+                    elsif pronouns.first['pronouns'].to_s == 'She/They'
+                        puts '<option value="She/Her">She/Her</option>'
+                        puts '<option value="She/They" selected>She/They</option>'
+                        puts '<option value="He/They">He/They</option>'
+                        puts '<option value="He/Him">He/Him</option>'
+                        puts '<option value="They/Them">They/Them</option>'
+                        puts '<option value="Prefer Not to Answer">Prefer Not to Answer</option>'
+                    elsif pronouns.first['pronouns'].to_s == 'He/They'
+                        puts '<option value="She/Her">She/Her</option>'
+                        puts '<option value="She/They">She/They</option>'
+                        puts '<option value="He/They" selected>He/They</option>'
+                        puts '<option value="He/Him">He/Him</option>'
+                        puts '<option value="They/Them">They/Them</option>'
+                        puts '<option value="Prefer Not to Answer">Prefer Not to Answer</option>'
+                    elsif pronouns.first['pronouns'].to_s == 'He/Him'
+                        puts '<option value="She/Her">She/Her</option>'
+                        puts '<option value="She/They">She/They</option>'
+                        puts '<option value="He/They">He/They</option>'
+                        puts '<option value="He/Him" selected>He/Him</option>'
+                        puts '<option value="They/Them">They/Them</option>'
+                        puts '<option value="Prefer Not to Answer">Prefer Not to Answer</option>'
+                    elsif pronouns.first['pronouns'].to_s == 'They/Them'
+                        puts '<option value="She/Her">She/Her</option>'
+                        puts '<option value="She/They">She/They</option>'
+                        puts '<option value="He/They">He/They</option>'
+                        puts '<option value="He/Him">He/Him</option>'
+                        puts '<option value="They/Them" selected>They/Them</option>'
+                        puts '<option value="Prefer Not to Answer">Prefer Not to Answer</option>'
+                    else 
+                        puts '<option value="She/Her">She/Her</option>'
+                        puts '<option value="She/They">She/They</option>'
+                        puts '<option value="He/They">He/They</option>'
+                        puts '<option value="He/Him">He/Him</option>'
+                        puts '<option value="They/Them">They/Them</option>'
+                        puts '<option value="Prefer Not to Answer" selected>Prefer Not to Answer</option>'
+                    end
+                    puts '</select>'
+                    puts '<br>'
+                    puts '<label for="replies">Replies</label>'
+                    puts '<select id="replies" name="replies" class="form-control">'
+
+                    if replies.first['replies'].to_i == 1
+                        puts '<option value="Public" selected>Public - anyone can reply</option>'
+                        puts '<option value="Private">Private - no one can reply</option>'
+                    else
+                        puts '<option value="Private" selected>Private - no one can reply</option>'
+                        puts '<option value="Public">Public - anyone can reply</option>'
+                    end
+                    puts '</select>'
+                    puts '<br>'
+                    puts '<span>Avatar</span>'
+                    puts '<input type="image" src="" alt="Avatar">'
+                    puts '<br>'
+                    puts '<br>'
+                    puts '<br>'
+                    puts '<button id="saveProfile" class="btn" style="background-color: #9daef6;" type="submit">Save Changes</button>'
+                puts '</form>'
+                puts '</div>'
+        puts '</div>'
+    puts '</div>'
+    # <!-- Scripts -->
+    puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
+    puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
+    puts '<script src="Televised.js"></script>'
+puts '</body>'
+
+puts '</html>'
+session.close

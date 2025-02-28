@@ -120,7 +120,7 @@ puts "<body id=\"episodePage\">"
         puts '<br>'
         puts '<h4> This show is great! </h4>'
         puts '<section class="Likes">'
-          puts '<h5>&#9829</h5>'
+          puts '<h5 id="Heart">&#9829</h5>'
           puts '<h4>12</h4>' #db query to get likes
         puts '</section>'
     puts '</div>'

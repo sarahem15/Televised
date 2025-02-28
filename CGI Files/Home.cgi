@@ -30,6 +30,7 @@ puts'<head>'
   puts'<title>Televised</title>'
   puts'<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">'
   puts'<link rel="stylesheet" href="Televised.css">'
+  puts '<script src="fetch-data-loader.js"></script>'
 puts'</head>'
 
 puts'<body id="homePage">'

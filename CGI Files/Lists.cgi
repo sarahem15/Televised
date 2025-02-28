@@ -14,6 +14,7 @@ cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
 
+
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -27,7 +28,6 @@ seriesImages = seriesImages.to_a()
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
-
 
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -44,35 +44,8 @@ puts '<body id="profile">'
   puts '<nav id="changingNav"></nav> <!-- This is where the navbar will be dynamically loaded -->'
   puts '<div class="container-fluid">'
   puts '<br>'
-  puts '<section class="ProfileInfo">'
-  puts '<section class="UserDisplay">'
-    puts '<img src="./Episodes/adventureTime1.1.jpg" alt="testing123">'
-    if (displayName.first['displayName'].to_s == "")
-      puts '<h3 id="DisplayName">' + username.to_s + '</h3>'
-    else
-    puts '<h3 id="DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
-  end
-  puts '</section>'
-  puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
-  puts '<h4>' + bio.first['bio'].to_s + '</h4>'
-  puts '</section>'
-  puts '<hr>'
-     puts '<div class="profileHeader">'
-      puts '<a href="Profile.cgi">Profile</a>'
-      puts '<a href="Have_Watched.cgi">Have Watched</a>'
-      puts '<a href="Want_to_Watch.cgi">Want to Watch</a>'
-      puts '<a href="Profile_Lists.cgi">Lists</a>'
-      puts '<a href="#">Reviews</a>'
-      puts '<a href="#" class="active">Likes</a>'
-      puts '<a href="#">Ratings</a>'
-    puts '</div>'
-  puts '<hr>'
+  puts '<h1>Find a List!</h1>'
   puts '<br>'
-  
-  puts '<div class="profileListHeader">'
-      puts '<a href="#">Reviews</a>'
-      puts '<a href="#" class="active">Lists</a>'
-    puts '</div>'
 
 (0...5).each do |i|
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
@@ -92,18 +65,6 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       puts '<h4>DATE</h4>'
       puts '</section>'
 
-      puts '<section class="listInfo">'
-        puts '<section class="UserDisplay">'
-          puts '<img src="./Episodes/adventureTime1.1.jpg" alt="testing123">'
-          puts '<h3 id=" DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
-        puts '</section>'
-      puts '<h3> shows </h3>'
-      puts '<section class="Likes">'
-        puts '<button id="Heart">&#9829</button>'
-        puts '<h4>12</h4>'
-      puts '</section>'
-      puts '</section>'
-
       puts '<h3>DESCRIPTION of the list goes here!!</h3>'
       puts '</div>'
     puts '</div>'
@@ -115,3 +76,4 @@ end
   puts '<script src="Televised.js"></script>'
 puts '</body>'
 puts '</html>'
+session.close

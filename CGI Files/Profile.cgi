@@ -1,22 +1,14 @@
 #!/usr/bin/ruby
-# Switch images to queries from the database
-# Enable debugging
-$stdout.sync = true
-$stderr.reopen $stdout
-
 require 'mysql2'
 require 'cgi'
 require 'cgi/session'
 
+# Enable debugging
+$stdout.sync = true
+$stderr.reopen $stdout
+
 # Initialize CGI
 cgi = CGI.new
-=begin
-session_id = cgi.cookies['CGISESSID']&.value.first
-if session_id
-  session = CGI::Session.new(cgi, 'session_id' => session_id)
-else
-  session = CGI::Session.new(cgi)
-=end
 session = CGI::Session.new(cgi)
 username = session['username']
 
@@ -26,20 +18,12 @@ db = Mysql2::Client.new(
     password: 'TV_Group123!', 
     database: 'televised_w25'
   )
-
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
 
-images = db.query("SELECT series.imageName FROM haveWatchedSeries JOIN series ON haveWatchedSeries.seriesId = series.showId WHERE haveWatchedSeries.username = '" + username.to_s + "';")
-images = images.to_a
-
-series = db.query("SELECT imageName FROM series;")
-series = series.to_a
-
 
 puts "Content-type: text/html\n\n"
-puts username
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
 
@@ -59,14 +43,14 @@ puts '<body id="profile">'
   puts '<section class="UserDisplay">'
     puts '<img src="./Episodes/adventureTime1.1.jpg" alt="testing123">'
     puts '<h3 id="DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
-  puts '</section>'
-puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
+  puts '</section>' 
+  puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
   puts '<h4>' + bio.first['bio'].to_s + '</h4>'
   puts '</section>'
   puts '<hr>'
     puts '<div class="profileHeader">'
-      puts '<a href="Profile.cgi">Profile</a>'
-      puts '<a href="#" class="active">Have Watched</a>'
+      puts '<a href="#!" class="active">Profile</a>'
+      puts '<a href="Have_Watched.cgi">Have Watched</a>'
       puts '<a href="Want_to_Watch.cgi">Want to Watch</a>'
       puts '<a href="Profile_Lists.cgi">Lists</a>'
       puts '<a href="#">Reviews</a>'
@@ -77,53 +61,51 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
   puts '<br>'
 
   puts '<section class="topFiveFavs">'
+    puts '<p>Top 5 Favorite Series</p>'
     puts '<hr style="margin-left: 80px; margin-right: 80px">'
     puts '<div class="wrapper">'
       puts '<section class="carousel-section" id="topFiveSeries">'
-
-      # INPUT IMAGES  
-      (0...2).each do |i|
+      (0...5).each do |i|
         puts '<div class="item">'
           puts '<form action="series.cgi" method="POST">'
-            puts '<input type="image" src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '">'
-            puts '<input type="hidden" name="clicked_image" value="' + images[i]['imageName'] + '">'
-            puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+            puts '<input type="image" src="" alt="">'
+            puts '<input type="hidden" name="clicked_image" value="">'
           puts '</form>'
         puts '</div>'
       end
-        puts '</section>'
+      puts '</section>'
     puts '</div>'
-=begin
+
+    puts '<p>Top 5 Favorite Seasons</p>'
     puts '<hr style="margin-left: 80px; margin-right: 80px">'
     puts '<div class="wrapper">'
-    puts '<section class="carousel-section" id="topFiveSeries">'
-      (0...5).each do |i|
+      puts '<section class="carousel-section" id="topFiveSeasons">'
+        (0...5).each do |i|
         puts '<div class="item">'
           puts '<form action="series.cgi" method="POST">'
-            puts '<input type="image" src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '">'
-            puts '<input type="hidden" name="clicked_image" value="' + images[i]['imageName'] + '">'
-            puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+            puts '<input type="image" src="" alt="">'
+            puts '<input type="hidden" name="clicked_image" value="">'
           puts '</form>'
         puts '</div>'
       end
-        puts '</section>'
+      puts '</section>'
     puts '</div>'
 
-puts '<hr style="margin-left: 80px; margin-right: 80px">'
+
+    puts '<p>Top 5 Favorite Episodes</p>'
+    puts '<hr style="margin-left: 80px; margin-right: 80px">'
     puts '<div class="wrapper">'
-    puts '<section class="carousel-section" id="topFiveSeries">'
-      (0...5).each do |i|
+      puts '<section class="carousel-section" id="topFiveEpisodes">'
+        (0...5).each do |i|
         puts '<div class="item">'
           puts '<form action="series.cgi" method="POST">'
-            puts '<input type="image" src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '">'
-            puts '<input type="hidden" name="clicked_image" value="' + images[i]['imageName'] + '">'
-            puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+            puts '<input type="image" src="" alt="">'
+            puts '<input type="hidden" name="clicked_image" value="">'
           puts '</form>'
         puts '</div>'
       end
-        puts '</section>'
+      puts '</section>'
     puts '</div>'
-=end
 
     puts '<!-- Scripts -->'
   puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'

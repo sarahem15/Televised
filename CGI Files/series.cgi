@@ -66,7 +66,7 @@ puts "<body id=\"showsPage\">"
         puts "<button class=\"watchedButton\">EYE</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
-        puts '<input type="hidden" id="displayNameS" name="displayName" value="" class="form-control">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts "<button class=\"reviewButton\">REVIEW</button>"
         puts "<button class=\"rateButton\">STARS</button>"
@@ -76,18 +76,22 @@ puts "<body id=\"showsPage\">"
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Want to Watch</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="wantToWatch" value="TRUE">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Existing List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
-        puts '<form action="threebuttons.cgi" method="POST">'
+        puts '<form action="createNewList.cgi" method="POST">'
         puts "<button>Add to New List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '</form>'
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>View on Other's Lists</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts "</div>"
         puts "</div>"
@@ -109,7 +113,11 @@ puts "<body id=\"showsPage\">"
 
   puts "<div class=\"seasonNav\">"
   puts "<div class=\"seasonDropdown\">"
+    if numOfSeasons > 1
       puts "<button class=\"dropbtn\">Season " + seasonNumber.to_s + " &#9660"
+    elsif numOfSeasons = 1
+    puts "<button class=\"dropbtn\">Season " + seasonNumber.to_s 
+    end
       puts "<a href=\"series.cgi\"></a>"
     puts "</button>"
     puts "<div class=\"dropseason-content\">"
@@ -134,7 +142,7 @@ puts "<body id=\"showsPage\">"
         puts "<button class=\"watchedButton\">EYE</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
-        puts '<input type="hidden" id="displayNameS" name="displayName" value="" class="form-control">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts "<button class=\"reviewButton\">REVIEW</button>"
         puts "<button class=\"rateButton\">STARS</button>"
@@ -145,23 +153,22 @@ puts "<body id=\"showsPage\">"
         puts "<button>Add to Want to Watch</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="wantToWatch" value="TRUE">'
-        puts '<input type="hidden" id="displayNameS" name="displayName" value="" class="form-control">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Existing List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
-        puts '<input type="hidden" id="displayNameS" name="displayName" value="" class="form-control">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
-        puts '<form action="threebuttons.cgi" method="POST">'
+        puts '<form action="createNewList.cgi" method="POST">'
         puts "<button>Add to New List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
-        puts '<input type="hidden" name="addToExisting" value="TRUE">'
-        puts '<input type="hidden" id="displayNameS" name="displayName" value="" class="form-control">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>View on Other's Lists</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
-        puts '<input type="hidden" id="displayNameS" name="displayName" value="" class="form-control">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts "</div>"
         puts "</div>"
@@ -185,7 +192,7 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
-        puts '<input type="hidden" id="displayNameS" name="displayName" value="" class="form-control">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts "<button class=\"reviewButton\">REVIEW</button>"
         puts "<button class=\"rateButton\">STARS</button>"
@@ -197,28 +204,26 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
         puts '<input type="hidden" name="wantToWatch" value="TRUE">'
-        puts '<input type="hidden" id="displayNameS" name="displayName" value="" class="form-control">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Existing List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
         puts '<input type="hidden" name="addToExisting" value="TRUE">'
-        puts '<input type="hidden" id="displayNameS" name="displayName" value="" class="form-control">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
-        puts '<form action="threebuttons.cgi" method="POST">'
+        puts '<form action="createNewList.cgi" method="POST">'
         puts "<button>Add to New List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
-        puts '<input type="hidden" name="addToNew" value="TRUE">'
-        puts '<input type="hidden" id="displayNameS" name="displayName" value="" class="form-control">'
         puts '</form>'
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>View on Other's Lists</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
         puts '<input type="hidden" name="viewOnOthers" value="TRUE">'
-        puts '<input type="hidden" id="displayNameS" name="displayName" value="" class="form-control">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts "</div>"
         puts "</div>"
