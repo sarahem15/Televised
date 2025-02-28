@@ -125,10 +125,21 @@ function updateNavbar() {
     const userSignedIn = localStorage.getItem("userSignedIn") === "true";
     const navbarContainer = document.getElementById("changingNav");
 
+    console.log(userSignedIn);
     if (userSignedIn) {
-        fetchNavbar("LoggedIn_Header.html", attachLoggedInEvents);
+      //        fetchNavbar("LoggedIn_Header.html", attachLoggedInEvents);
+      fetch("LoggedIn_Header.html")
+        .then(response => response.text())
+        .then(data => {
+        document.getElementById("changingNav").innerHTML = data;
+        //loadData(data, '#changingNav');
+            attachLoggedInEvents();
+              })
+        .catch(error => console.error("Error loading navbar:", error));
+
     } else {
-        fetchNavbar("LoggedOut_Header.html", attachLoggedOutEvents);
+        fetchNavbar("LoggedOut_Header.cgi", attachLoggedOutEvents);
+    console.log("Why!!!!!!!!! to save the day")
     }
 }
 
@@ -136,7 +147,8 @@ function fetchNavbar(navbarFile, callback) {
     fetch(navbarFile)
         .then(response => response.text())
         .then(data => {
-            document.getElementById("changingNav").innerHTML = data;
+            //document.getElementById("changingNav").innerHTML = data;
+            loadData(data, '#changingNav')
             if (callback) callback();
         })
         .catch(error => console.error("Error loading navbar:", error));
@@ -164,6 +176,9 @@ function attachLoggedInEvents() {
     const displayName = document.getElementById("displayName");
     const logoutButton = document.querySelector(".dropdown-item[href='#']");
     const displayNameS = document.getElementById("displayNameS");
+
+    console.log("****> " + displayName); 
+    console.log("****> " + username);
 
     if (username && displayName) {
         displayName.textContent = username;
@@ -205,27 +220,44 @@ function showSignInModal() {
     signInModal.show();
 }
 
+function validateAccountCreation() {
+  const username = document.getElementById("unameCreateInput").value.trim();
+  const password = document.getElementById("passCreateInput").value.trim();
+  const confirmPassword = document.getElementById("passConfirm").value.trim();
+
+  console.log("Yeppers");
+  if (!username || !password || !confirmPassword) {
+    alert("Please fill in all fields.");
+    return false;
+  }
+  
+  if (password !== confirmPassword) {
+    alert("Passwords do not match!");
+    return false;
+  }
+
+  const atSymbol = "@";
+    if (!(username.includes(atSymbol))) {
+        alert("Username must be a valid email address.");
+        return false;
+    }
+
+  // Password validation: At least 12 characters, 1 uppercase, 1 number, 1 special character
+  //const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{12,}$/;
+  //if (!passwordRegex.test(password)) {
+  //    alert("Password must be at least 12 characters long and contain at least one capital letter, one number, and one special character.");
+  //    return;
+  //}
+
+  localStorage.setItem("FalseFlag", "false");
+  return true;
+}
+
 // Updated function to handle account creation
 function handleAccountCreation() {
     const username = document.getElementById("unameCreateInput").value.trim();
     const password = document.getElementById("passCreateInput").value.trim();
     const confirmPassword = document.getElementById("passConfirm").value.trim();
-
-    if (!username || !password || !confirmPassword) {
-        alert("Please fill in all fields.");
-        return;
-    }
-
-    if (password !== confirmPassword) {
-        alert("Passwords do not match!");
-        return;
-    }
-
-    const atSymbol = "@";
-    if (!(username.includes(atSymbol))) {
-        alert("Username must be a valid email address.");
-        return;
-    }
 
     // REMEMBER TO ADD BACK
     // Password validation: At least 12 characters, 1 uppercase, 1 number, 1 special character
@@ -265,14 +297,14 @@ function handleAccountCreation() {
 function bindCreateAccountButton() {
     const createBtn = document.getElementById("createBtn");
     if (createBtn) {
-        createBtn.addEventListener("click", handleAccountCreation);
+        //createBtn.addEventListener("click", handleAccountCreation);
     }
 }
 
 function bindSignInButton() {
     const signInBtn = document.getElementById("signInBtn");
     if (signInBtn) {
-        signInBtn.addEventListener("click", handleSigningIn);
+        //signInBtn.addEventListener("click", handleSigningIn);
     }
 }
 
