@@ -270,8 +270,8 @@ if pageNumber.to_i == 10
     service = 'Paramount+'
 end
 
-streamings = db.query("SELECT * FROM series WHERE streaming ='" + service + "';")
-streamings = streamings.to_a
+series = db.query("SELECT series.imageName FROM streaming JOIN series ON streaming.seriesid = series.showid WHERE streaming.service = '" + service.to_s + "';")
+streamings = series.to_a
 size = streamings.size
 size = 0
 beginArray = 0
