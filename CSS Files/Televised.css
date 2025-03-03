@@ -6,7 +6,7 @@ body {
 }
 
 /* Alayna's Pages Background Styling */
-#homePage, #profileSettings, #createNewList {
+#homePage, #profileSettings, #createNewList, #LO_Disc {
     background-color: #140044;
     min-height: 100vh; /* Ensure full screen coverage */
     margin: 0;
@@ -334,6 +334,7 @@ button:hover {
 
 .seriesPage .epInfo img {
     padding-right: 20px;
+    object-fit: cover;
 }
 
 
@@ -353,6 +354,7 @@ button:hover {
     height: auto;
     width: 350px;
     padding-right: 20px;
+
   }
 
   .seriesPage .showWords {
