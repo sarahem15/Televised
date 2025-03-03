@@ -33,13 +33,13 @@ pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username
 
 images = db.query("SELECT series.imageName FROM haveWatchedSeries JOIN series ON haveWatchedSeries.seriesId = series.showId WHERE haveWatchedSeries.username = '" + username.to_s + "';")
 images = images.to_a
-
+size = 0
 series = db.query("SELECT imageName FROM series;")
 series = series.to_a
+seriesSize = series.size
 
 
 puts "Content-type: text/html\n\n"
-puts username
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
 
@@ -75,24 +75,36 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
     puts '</div>'
   puts '<hr>'
   puts '<br>'
-
+  puts '<div class="profileListHeader">'
+      puts '<a href="#"class="active">Series</a>'
+      puts '<a href="#">Seasons</a>'
+      puts '<a href="#">Episodes</a>'
+    puts '</div>'
   puts '<section class="topFiveFavs">'
     puts '<hr style="margin-left: 80px; margin-right: 80px">'
+
+    (0...images.size).each do |h|
+    if (images[size])
     puts '<div class="wrapper">'
       puts '<section class="carousel-section" id="topFiveSeries">'
 
       # INPUT IMAGES  
-      (0...2).each do |i|
+      (0...5).each do |i|
+        if (images[size])
         puts '<div class="item">'
           puts '<form action="series.cgi" method="POST">'
-            puts '<input type="image" src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '">'
-            puts '<input type="hidden" name="clicked_image" value="' + images[i]['imageName'] + '">'
+            puts '<input type="image" src="' + images[size]['imageName'] + '" alt="' + images[size]['imageName'] + '">'
+            puts '<input type="hidden" name="clicked_image" value="' + images[size]['imageName'] + '">'
             puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+            size = size + 1
           puts '</form>'
         puts '</div>'
       end
+      end
         puts '</section>'
     puts '</div>'
+  end
+end
 =begin
     puts '<hr style="margin-left: 80px; margin-right: 80px">'
     puts '<div class="wrapper">'

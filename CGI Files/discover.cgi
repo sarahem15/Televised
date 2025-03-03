@@ -159,44 +159,84 @@ if (pageNumber.to_i == 3)
 
 end
 
+#AZ
 if (sortBy == 'az') 
+    if (pageNumber.to_i == 1)
+        firstCharacterSort = db.query("SELECT imageName from series where showName like 'a%' or showName like 'b%' or showName like 'c%' or showName like 'd%' ORDER BY showName ASC;")
+    elsif (pageNumber.to_i == 2)
+        firstCharacterSort = db.query("SELECT imageName from series where showName like 'e%' or showName like 'f%' or showName like 'g%' or showName like 'h%' ORDER BY showName ASC;")
+    elsif (pageNumber.to_i == 3)
+        firstCharacterSort = db.query("SELECT imageName from series where showName like 'i%' or showName like 'j%' or showName like 'k%' or showName like 'l%' ORDER BY showName ASC;")
+    elsif (pageNumber.to_i == 4)
+        firstCharacterSort = db.query("SELECT imageName from series where showName like 'm%' or showName like 'n%' or showName like 'o%' or showName like 'p%' ORDER BY showName ASC;")
+    elsif (pageNumber.to_i == 5)
+        firstCharacterSort = db.query("SELECT imageName from series where showName like 'q%' or showName like 'r%' or showName like 's%' or showName like 't%' ORDER BY showName ASC;")
+    else 
+        firstCharacterSort = db.query("SELECT imageName from series where showName like 'u%' or showName like 'v%' or showName like 'w%' or showName like 'x%' or showName like 'y%'or showName like 'z%' ORDER BY showName ASC;")
+    end
 
-series = db.query("SELECT * FROM series ORDER BY showName ASC;")
-size = 0
-series = series.to_a
-    puts '<section id="discoverAlphabet">'
-(0...5).each do |h|
-    puts '<div class="wrapper">'
-    puts '<section class="carousel-section" id="section' + size.to_s() + '">'
-        (0...5).each do |i|
-            puts '<div class="item">'
-            puts '<form action="series.cgi" method="POST">'
-                puts '<input type="image" src="' + series[size]['imageName'] + '" alt="' + series[size]['imageName'] + '">'
-                puts '<input type="hidden" name="clicked_image" value="' + series[size]['imageName'] + '">'
-                puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
-                size = size + 1
-            puts '</form>'
+        firstCharacterSort = firstCharacterSort.to_a
+        size = 0
+        
+        (0...firstCharacterSort.size).each do |h|
+            if (firstCharacterSort[size])
+            puts '<div class="wrapper">'
+            puts '<section class="carousel-section" id="section' + size.to_s() + '">'
+                (0...5).each do |i|
+                    if (firstCharacterSort[size])
+                    puts '<div class="item">'
+                    puts '<form action="series.cgi" method="POST">'
+                        puts '<input type="image" src="' + firstCharacterSort[size]['imageName'] + '" alt="' + firstCharacterSort[size]['imageName'] + '">'
+                        puts '<input type="hidden" name="clicked_image" value="' + firstCharacterSort[size]['imageName'] + '">'
+                        puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+                        size = size + 1
+                    puts '</form>'
+                    puts '</div>'
+                    end
+                end
+                puts '</section>'
             puts '</div>'
+            puts '<br>'
         end
-        puts '</section>'
-    puts '</div>'
-    puts '<br>'
-end
+    end
 
-puts '<div class="center mt-5">'
-puts '<div class="pagination">'
+
+    puts '<div class="center mt-5">'
+    puts '<div class="pagination">'
+    if (pageNumber.to_i == 1)
         puts '<a class="active" href="discover.cgi?sort=az&pageNumber=1">A-D</a>'
-        puts '<a href="##">E-H</a>'
-        puts '<a href="#">I-L</a>'
-        puts '<a href="#">M-P</a>'
-        puts '<a href="#">Q-T</a>'
-        puts '<a href="#">U-Z</a>'
-      puts '</div>'
-    puts '</div>'
-  puts '</div>'
-  puts '<br>'
+    else
+        puts '<a href="discover.cgi?sort=az&pageNumber=1">A-D</a>'
+    end
+    if (pageNumber.to_i == 2)
+        puts '<a class="active" href="discover.cgi?sort=az&pageNumber=2">E-H</a>'
+    else
+        puts '<a href="discover.cgi?sort=az&pageNumber=2">E-H</a>'
+    end
+    if (pageNumber.to_i == 3)
+        puts '<a class="active" href="discover.cgi?sort=az&pageNumber=3">I-L</a>'
+    else
+        puts '<a href="discover.cgi?sort=az&pageNumber=3">I-L</a>'
+    end
+    if (pageNumber.to_i == 4)
+        puts '<a class="active" href="discover.cgi?sort=az&pageNumber=4">M-P</a>'
+    else
+        puts '<a href="discover.cgi?sort=az&pageNumber=4">M-P</a>'
+    end
+    if (pageNumber.to_i == 5)
+        puts '<a class="active" href="discover.cgi?sort=az&pageNumber=5">Q-T</a>'
+    else
+        puts '<a href="discover.cgi?sort=az&pageNumber=5">Q-T</a>'
+    end
+    if (pageNumber.to_i == 6)
+        puts '<a class="active" href="discover.cgi?sort=az&pageNumber=6">U-Z</a>'
+    else
+        puts '<a href="discover.cgi?sort=az&pageNumber=6">U-Z</a>'
+    end
+          puts '</div>'
+        puts '</div>'
+      puts '<br>'
 end
-
 if (sortBy == 'streaming')
 if pageNumber.to_i == 1
     service = 'Disney+'
@@ -220,46 +260,98 @@ end
 if pageNumber.to_i == 7
     service = 'Peacock'
 end
+if pageNumber.to_i == 8
+    service = 'Tubi'
+end
+if pageNumber.to_i == 9
+    service = 'Hulu'
+end
+if pageNumber.to_i == 10
+    service = 'Paramount+'
+end
 
 streamings = db.query("SELECT * FROM series WHERE streaming ='" + service + "';")
 streamings = streamings.to_a
-size = (streamings.size/5)
-if (size == 0)
-    size = 1
-end
+size = streamings.size
+size = 0
 beginArray = 0
 endArray = 5
-#(0...size).each do |i|
+(0...streamings.size).each do |i|
+    if (streamings[size])
     puts '<div class="wrapper">'
     puts '<section class="carousel-section" id="section' + size.to_s() + '">'
-        (0...streamings.size).each do |i|
+        (0...5).each do |i|
+            if (streamings[size])
             puts '<div class="item">'
             puts '<form action="series.cgi" method="POST">'
-                puts '<input type="image" src="' + streamings[i]['imageName'] + '" alt="' + streamings[i]['imageName'] + '">'
-                puts '<input type="hidden" name="clicked_image" value="' + streamings[i]['imageName'] + '">'
+                puts '<input type="image" src="' + streamings[size]['imageName'] + '" alt="' + streamings[size]['imageName'] + '">'
+                puts '<input type="hidden" name="clicked_image" value="' + streamings[size]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+                size = size + 1
             puts '</form>'
             puts '</div>'
+            end
         end
         puts '</section>'
     puts '</div>'
-    puts '<br>' 
-#end
+    puts '<br>'
+end 
+end
 
 
 
 puts '<div class="center mt-5">'
 puts '<div class="pagination">'
+    if pageNumber.to_i == 1 
         puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=1">Disney+</a>'
+    else
+        puts '<a href="discover.cgi?sort=streaming&pageNumber=1">Disney+</a>'
+    end
+    if pageNumber.to_i == 2 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=2">Netflix</a>'
+    else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=2">Netflix</a>'
+    end
+    if pageNumber.to_i == 3 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=3">Max</a>'
+    else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=3">Max</a>'
+    end
+    if pageNumber.to_i == 4 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=4">Hulu</a>'
+    else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=4">Hulu</a>'
+    end
+    if pageNumber.to_i == 5 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=5">Prime Video</a>'
+    else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=5">Prime Video</a>'
+    end
+    if pageNumber.to_i == 6 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=6">Apple TV+</a>'
+    else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=6">Apple TV+</a>'
+    end
+    if pageNumber.to_i == 7 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=7">Peacock</a>'
+    else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=7">Peacock</a>'
+    end
+    if pageNumber.to_i == 8 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=8">Tubi</a>'
+    else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=8">Tubi</a>'
+    end
+    if pageNumber.to_i == 9 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=9">Hulu</a>'
+    else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=9">Hulu</a>'
+    end
+    if pageNumber.to_i == 10 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=10">Paramount+</a>'
+    else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=10">Paramount+</a>'
+    end
       puts '</div>'
     puts '</div>'
   puts '</div>'

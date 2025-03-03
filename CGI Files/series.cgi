@@ -19,7 +19,6 @@ db = Mysql2::Client.new(
 
 series = db.query("SELECT * FROM series WHERE imageName = '" + seriesImage + "';")
 seasons = db.query("SELECT season.* FROM season JOIN series ON season.seriesId = series.showId WHERE series.imageName = '" + seriesImage + "';")
-
 seasonsArray = seasons.to_a
 seasonId = seasonsArray[seasonNumber-1]['seasonId']
 episodes = db.query("SELECT episode.* FROM episode JOIN season ON episode.seasonId = season.seasonId WHERE season.seasonId = '" + seasonId.to_s + "';")
@@ -34,6 +33,7 @@ puts "<head>"
     puts "<title>Televised</title>"
     puts "<link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\">"
     puts "<link rel=\"stylesheet\" href=\"Televised.css\">"
+    puts '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">'
 puts "</head>"
 puts "<body id=\"showsPage\">"
     puts "<nav id=\"changingNav\"></nav>"
@@ -63,7 +63,8 @@ puts "<body id=\"showsPage\">"
 
       puts "<div class=\"editButtons\">"
       puts '<form action="threebuttons.cgi" method="POST">'
-        puts "<button class=\"watchedButton\">EYE</button>"
+        puts '<button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button>'
+        #puts "<button class=\"watchedButton\">EYE</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
@@ -181,9 +182,9 @@ puts "<body id=\"showsPage\">"
   episodes.each do |episode|
   # EP INFO FOR EACH
   puts "<div class=\"epInfo\">"
-    puts "<img src=\"./Episodes/adventureTime1.1.jpg\" alt=\"Adventure Time\" width=\"300\" height=\"225\">"
+    puts "<img src=\"./Episodes/" + seriesImage.split('.')[0] + seasonNumber.to_s + "." + epNum.to_s + ".1.jpg\" alt=\"" + seriesImage + "\" width=\"300\" height=\"225\">"
     puts "<div class=\"words\">"
-      puts "<a href=\"indivEp.cgi?ep_name=" + episode['epName'] + "&show_name=" + series.first['showName'] + "&ep_num=" + epNum.to_s + "\"><h3 style=\"font-family: 'Times New Roman', Times, serif; text-align: left;\">" + epNum.to_s + ". " + episode['epName'] + "</h3></a>"
+      puts "<a href=\"indivEp.cgi?ep_name=" + episode['epName'] + "&show_name=" + series.first['showName'] + "&ep_num=" + epNum.to_s + "&seasonNumber=" + seasonNumber.to_s + "\"><h3 style=\"font-family: 'Times New Roman', Times, serif; text-align: left;\">" + epNum.to_s + ". " + episode['epName'] + "</h3></a>"
       puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + episode['runtime'].to_s + " minutes</h4>"
       puts "<h5 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + episode['description'] + "</h5>"
       puts "<div class=\"editButtons\">"
