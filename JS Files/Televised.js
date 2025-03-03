@@ -370,6 +370,23 @@ document.addEventListener("DOMContentLoaded", () => {
     updateWelcomeMessage();
 });
 
+// change eye icon color
+document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll(".watchedButton").forEach(button => {
+        let icon = button.querySelector(".eye-icon");
+        icon.style.fontSize = "1.5rem";
+        icon.style.color = "white";
+
+        button.addEventListener("click", function () {
+            if(icon.style.color == "white"){
+                icon.style.color = "#6bdf10";
+            } else{
+                icon.style.color = "white"
+            }
+        });
+    });
+});
+
 /* Row/Slideshow Functionality
 let rowIndex = 1;
 showNextSlide(rowIndex);
