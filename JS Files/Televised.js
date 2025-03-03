@@ -374,7 +374,7 @@ document.addEventListener("DOMContentLoaded", () => {
 document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll(".watchedButton").forEach(button => {
         let icon = button.querySelector(".eye-icon");
-        icon.style.fontSize = "1.5rem";
+        icon.style.fontSize = "35px";
         icon.style.color = "white";
 
         button.addEventListener("click", function () {
