@@ -25,6 +25,10 @@ episodes = db.query("SELECT episode.* FROM episode JOIN season ON episode.season
 seriesId = series.first['showId']
 numOfSeasons = series.first['numOfSeasons']
 
+seriesId = series.first['showId']
+streaming = db.query("SELECT * FROM streaming WHERE seriesId = '" + seriesId.to_s + "';")
+streaming = streaming.to_a
+
 puts "<!DOCTYPE html>"
 puts "<html lang=\"en\">"
 puts "<head>"
@@ -108,7 +112,16 @@ puts "<body id=\"showsPage\">"
     puts "<span>" + seasonsArray[0]['mainCast'] + "</span>"
   puts "</h4>"
   puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">Streaming: "
-    puts "<span>" + series.first['streaming'] + "</span>"
+    (0...streaming.size).each do |i|
+      print "<span>" + streaming[i]['service'].strip
+      if streaming.size == 1
+        puts "</span>"
+      elsif i == (streaming.size - 1)
+        puts "</span>"
+      else
+        puts ",</span>"
+      end
+    end
   puts "</h4>"
   puts "<br>"
 
