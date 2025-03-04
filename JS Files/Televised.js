@@ -243,11 +243,11 @@ function validateAccountCreation() {
     }
 
   // Password validation: At least 12 characters, 1 uppercase, 1 number, 1 special character
-  //const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{12,}$/;
-  //if (!passwordRegex.test(password)) {
-  //    alert("Password must be at least 12 characters long and contain at least one capital letter, one number, and one special character.");
-  //    return;
-  //}
+  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{12,}$/;
+  if (!passwordRegex.test(password)) {
+      alert("Password must be at least 12 characters long and contain at least one capital letter, one number, and one special character.");
+      return false;
+  }
 
   localStorage.setItem("FalseFlag", "false");
   return true;
