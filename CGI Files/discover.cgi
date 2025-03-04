@@ -178,6 +178,42 @@ if (sortBy == 'az')
         firstCharacterSort = firstCharacterSort.to_a
         size = 0
         
+
+        puts '<div class="center mt-5">'
+    puts '<div class="pagination">'
+    if (pageNumber.to_i == 1)
+        puts '<a class="active" href="discover.cgi?sort=az&pageNumber=1">A-D</a>'
+    else
+        puts '<a href="discover.cgi?sort=az&pageNumber=1">A-D</a>'
+    end
+    if (pageNumber.to_i == 2)
+        puts '<a class="active" href="discover.cgi?sort=az&pageNumber=2">E-H</a>'
+    else
+        puts '<a href="discover.cgi?sort=az&pageNumber=2">E-H</a>'
+    end
+    if (pageNumber.to_i == 3)
+        puts '<a class="active" href="discover.cgi?sort=az&pageNumber=3">I-L</a>'
+    else
+        puts '<a href="discover.cgi?sort=az&pageNumber=3">I-L</a>'
+    end
+    if (pageNumber.to_i == 4)
+        puts '<a class="active" href="discover.cgi?sort=az&pageNumber=4">M-P</a>'
+    else
+        puts '<a href="discover.cgi?sort=az&pageNumber=4">M-P</a>'
+    end
+    if (pageNumber.to_i == 5)
+        puts '<a class="active" href="discover.cgi?sort=az&pageNumber=5">Q-T</a>'
+    else
+        puts '<a href="discover.cgi?sort=az&pageNumber=5">Q-T</a>'
+    end
+    if (pageNumber.to_i == 6)
+        puts '<a class="active" href="discover.cgi?sort=az&pageNumber=6">U-Z</a>'
+    else
+        puts '<a href="discover.cgi?sort=az&pageNumber=6">U-Z</a>'
+    end
+          puts '</div>'
+        puts '</div>'
+        
         (0...firstCharacterSort.size).each do |h|
             if (firstCharacterSort[size])
             puts '<div class="wrapper">'
@@ -270,6 +306,62 @@ if pageNumber.to_i == 10
     service = 'Paramount+'
 end
 
+
+    puts '<div class="center mt-5">'
+puts '<div class="pagination">'
+    if pageNumber.to_i == 1 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=1">Disney+</a>'
+    else
+        puts '<a href="discover.cgi?sort=streaming&pageNumber=1">Disney+</a>'
+    end
+    if pageNumber.to_i == 2 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=2">Netflix</a>'
+    else
+        puts '<a href="discover.cgi?sort=streaming&pageNumber=2">Netflix</a>'
+    end
+    if pageNumber.to_i == 3 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=3">Max</a>'
+    else
+        puts '<a href="discover.cgi?sort=streaming&pageNumber=3">Max</a>'
+    end
+    if pageNumber.to_i == 4 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=4">Hulu</a>'
+    else
+        puts '<a href="discover.cgi?sort=streaming&pageNumber=4">Hulu</a>'
+    end
+    if pageNumber.to_i == 5 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=5">Prime Video</a>'
+    else
+        puts '<a href="discover.cgi?sort=streaming&pageNumber=5">Prime Video</a>'
+    end
+    if pageNumber.to_i == 6 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=6">Apple TV+</a>'
+    else
+        puts '<a href="discover.cgi?sort=streaming&pageNumber=6">Apple TV+</a>'
+    end
+    if pageNumber.to_i == 7 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=7">Peacock</a>'
+    else
+        puts '<a href="discover.cgi?sort=streaming&pageNumber=7">Peacock</a>'
+    end
+    if pageNumber.to_i == 8 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=8">Tubi</a>'
+    else
+        puts '<a href="discover.cgi?sort=streaming&pageNumber=8">Tubi</a>'
+    end
+    if pageNumber.to_i == 9 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=9">Hulu</a>'
+    else
+        puts '<a href="discover.cgi?sort=streaming&pageNumber=9">Hulu</a>'
+    end
+    if pageNumber.to_i == 10 
+        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=10">Paramount+</a>'
+    else
+        puts '<a href="discover.cgi?sort=streaming&pageNumber=10">Paramount+</a>'
+    end
+      puts '</div>'
+    puts '</div>'
+
 series = db.query("SELECT series.imageName FROM streaming JOIN series ON streaming.seriesid = series.showid WHERE streaming.service = '" + service.to_s + "';")
 streamings = series.to_a
 size = streamings.size
@@ -290,6 +382,8 @@ endArray = 5
                 size = size + 1
             puts '</form>'
             puts '</div>'
+            else
+                puts '<br>'
             end
         end
         puts '</section>'
