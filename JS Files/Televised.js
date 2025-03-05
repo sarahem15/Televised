@@ -1,83 +1,5 @@
 console.log("Televised.js is loaded!");
 
-// Image array for the series
-const seriesImgs = [
-    "ADiscoveryOfWitches.jpg",
-    "AdventureTime.jpg",
-    "AgathaAllAlong.jpg",
-    "AmericanHorrorStory.jpg",
-    "Arcane.jpg",
-    "BelowDeck.jpg",
-    "BlackMirror.jpg",
-    "BojackHorseman.jpg",
-    "BreakingBad.jpg",
-    "Bridgerton.jpg",
-    "Chernobyl.jpg",
-    "ClarksonsFarm.jpg",
-    "Community.jpg",
-    "ConversationsWithFriends.jpg",
-    "CriminalMinds.jpg",
-    "DaughtersOfTheCult.jpg",
-    "Dexter.jpg",
-    "DoctorWho.jpg",
-    "EveryWitchWay.jpg",
-    "EvilLivesHere.jpg",
-    "Friends.jpg",
-    "Futurama.jpg",
-    "GameOfThrones.jpg",
-    "GossipGirl.jpg",
-    "H2O.jpg",
-    "JupitersLegacy.jpg",
-    "LessonsInChemistry.jpg",
-    "MissingYou.jpg",
-    "ModernFamily.jpg",
-    "NewGirl.jpg",
-    "NormalPeople.jpg",
-    "OnlyMurdersInTheBuilding.jpg",
-    "Outlander.jpg",
-    "PercyJackson.jpg",
-    "PlanetEarth.jpg",
-    "PrettyLittleLiars.jpg",
-    "Reacher.jpg",
-    "Ripley.jpg",
-    "RuPaulsDragRace.jpg",
-    "SharpObjects.jpg",
-    "SmilingFriends.jpg",
-    "Sprint.jpg",
-    "SquidGame.jpg",
-    "StarTrek.jpg",
-    "StrangerThings.jpg",
-    "Supacell.jpg",
-    "SupermanAndLois.jpg",
-    "Supernatural.jpg",
-    "That70sShow.jpg",
-    "The100.jpg",
-    "TheBabySittersClub.jpg",
-    "TheBachelor.jpg",
-    "TheEndOfTheFWorld.jpg",
-    "TheFallOfTheHouseOfUsher.jpg",
-    "TheFlash.jpg",
-    "TheGreat.jpg",
-    "TheHauntingOfHillHouse.jpg",
-    "TheHauntingOfBlyManor.jpg",
-    "TheLastOfUs.jpg",
-    "TheMandalorian.jpg",
-    "TheManInTheHighCastle.jpg",
-    "TheSandman.jpg",
-    "TheSecretLivesOfMormonWives.jpg",
-    "TheSummerITurnedPretty.jpg",
-    "TheTudors.jpg",
-    "TheUmbrellaAcademy.jpg",
-    "TheWitcher.jpg",
-    "Travelers.jpg",
-    "WandaVision.jpg",
-    "Wednesday.jpg",
-    "WildWildCountry.jpg",
-    "WizardsOfWaverlyPlace.jpg",
-    "XOKitty.jpg",
-    "You.jpg"
-];
-
 
 // Initialize the array to store user account info
 let userAccountsArray = JSON.parse(localStorage.getItem("userAccountsArray") || "[]");
@@ -91,13 +13,6 @@ function shuffleArray(array) {
 function populateCarousel(carouselId, imageArray) {
     const carousel = document.getElementById(carouselId);
     if (carousel) {
-        //const items = carousel.querySelectorAll(".item img");
-        //const shuffledImages = shuffleArray([...imageArray]); // Shuffle a copy of the array
-        /*items.forEach((img, index) => {
-            img.src = shuffledImages[index % shuffledImages.length];
-            img.alt = `Image ${index + 1}`;
-        });*/
-
         const itemx = carousel.querySelectorAll(".item input");
         const shuffledImages = shuffleArray([...imageArray]); // Shuffle a copy of the array
         itemx.forEach((input, index) => {
@@ -107,13 +22,6 @@ function populateCarousel(carouselId, imageArray) {
         });
     }
 }
-
-// Function to initialize the homepage carousels
-/*function initializeHomeCarousels() {
-    // Populate carousels
-    populateCarousel("homePopular", seriesImgs);
-    populateCarousel("homeNew", seriesImgs);
-}*/
 
 // Initialize the homepage carousels on DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
@@ -175,7 +83,7 @@ function attachLoggedInEvents() {
     const username = localStorage.getItem("username");
     const displayName = document.getElementById("displayName");
     const logoutButton = document.querySelector(".dropdown-item[href='#']");
-    const displayNameS = document.getElementById("displayNameS");
+    //const displayNameS = document.getElementById("displayNameS");
 
     console.log("****> " + displayName); 
     console.log("****> " + username);
@@ -183,7 +91,6 @@ function attachLoggedInEvents() {
     if (username && displayName) {
         displayName.textContent = username;
     }
-    //displayNameS.value = username;
 
     if (logoutButton) {
         logoutButton.addEventListener("click", () => {
@@ -386,32 +293,3 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
-
-/* Row/Slideshow Functionality
-let rowIndex = 1;
-showNextSlide(rowIndex);
-
-// Next/previous controls
-function plusSlides(n) {
-    showNextSlide(rowIndex += n);
-}
-
-function currentRow(n) {
-    showNextSlide(rowIndex = n);
-}
-
-function showNextSlide(n) {
-    let i;
-    let slides = document.getElementsByI("carousel-section");
-    if (n > slides.length) {
-        rowIndex = 1;
-    }
-    if (n < 1) {
-        rowIndex = slides.length;
-    }
-    for (i = 0; i < slides.length; i++) {
-        slides[i].style.display = "none";
-    }
-    slides[rowIndex - 1].style.display = "in-line block";
-}
-*/
