@@ -23,7 +23,11 @@ db = Mysql2::Client.new(
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
-
+seriesTab = cgi['seriesTab']
+if seriesTab == ""
+  seriesTab = "SERIES"
+end
+size = 0
 puts "Content-type: text/html\n\n"
 
 puts '<!DOCTYPE html>'
@@ -61,56 +65,56 @@ puts '<body id="profile">'
     puts '</div>'
   puts '<hr>'
   puts '<div class="profileListHeader">'
+      if seriesTab == "SERIES"
       puts '<a href="#"class="active">Series</a>'
-      puts '<a href="#">Seasons</a>'
-      puts '<a href="#">Episodes</a>'
+      puts '<a href="Want_to_Watch.cgi?seriesTab=SEASON">Seasons</a>'
+      puts '<a href="Want_to_Watch.cgi?seriesTab=EP">Episodes</a>'
+
+      images = db.query("SELECT series.imageName FROM wantToWatchSeries JOIN series ON wantToWatchSeries.seriesId = series.showId WHERE wantToWatchSeries.username = '" + username.to_s + "';")
+      images = images.to_a
+  elsif seriesTab == "SEASON"
+      puts '<a href="Want_to_Watch.cgi?seriesTab=SERIES">Series</a>'
+      puts '<a href="#" class="active">Seasons</a>'
+      puts '<a href="Want_to_Watch.cgi?seriesTab=EP">Episodes</a>'
+      images = db.query("SELECT series.imageName FROM wantToWatchSeason JOIN season ON wantToWatchSeason.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE wantToWatchSeason.username = '" + username.to_s + "';")
+      images = images.to_a
+  elsif seriesTab == "EP"
+      puts '<a href="Want_to_Watch.cgi?seriesTab=SERIES">Series</a>'
+      puts '<a href="Want_to_Watch.cgi?seriesTab=SEASON">Seasons</a>'
+      puts '<a href="#" class="active">Episodes</a>'
+      images = db.query("SELECT series.imageName FROM wantToWatchEpisode JOIN episode ON wantToWatchEpisode.epId = episode.epId JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE wantToWatchEpisode.username = '" + username.to_s + "';")
+      images = images.to_a
+  end
     puts '</div>'
   puts '<br>'
 
+
+
+
   puts '<section class="topFiveFavs">'
     puts '<hr style="margin-left: 80px; margin-right: 80px">'
+     (0...images.size).each do |h|
+    if (images[size])
     puts '<div class="wrapper">'
       puts '<section class="carousel-section" id="topFiveSeries">'
 
       # INPUT IMAGES  
       (0...5).each do |i|
+        if (images[size])
         puts '<div class="item">'
           puts '<form action="series.cgi" method="POST">'
-            puts '<input type="image" src="" alt="">'
-            puts '<input type="hidden" name="clicked_image" value="">'
+            puts '<input type="image" src="' + images[size]['imageName'] + '" alt="' + images[size]['imageName'] + '">'
+            puts '<input type="hidden" name="clicked_image" value="' + images[size]['imageName'] + '">'
+            puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+            size = size + 1
           puts '</form>'
         puts '</div>'
       end
-        puts '</section>'
-    puts '</div>'
-
-    puts '<hr style="margin-left: 80px; margin-right: 80px">'
-    puts '<div class="wrapper">'
-    puts '<section class="carousel-section" id="topFiveSeries">'
-      (0...5).each do |i|
-        puts '<div class="item">'
-          puts '<form action="series.cgi" method="POST">'
-            puts '<input type="image" src="" alt="">'
-            puts '<input type="hidden" name="clicked_image" value="">'
-          puts '</form>'
-        puts '</div>'
       end
         puts '</section>'
     puts '</div>'
-
-puts '<hr style="margin-left: 80px; margin-right: 80px">'
-    puts '<div class="wrapper">'
-    puts '<section class="carousel-section" id="topFiveSeries">'
-      (0...5).each do |i|
-        puts '<div class="item">'
-          puts '<form action="series.cgi" method="POST">'
-            puts '<input type="image" src="" alt="">'
-            puts '<input type="hidden" name="clicked_image" value="">'
-          puts '</form>'
-        puts '</div>'
-      end
-        puts '</section>'
-    puts '</div>'
+  end
+end
 
 
     puts '<!-- Scripts -->'

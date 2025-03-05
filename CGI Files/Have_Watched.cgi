@@ -30,14 +30,11 @@ db = Mysql2::Client.new(
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
-
-images = db.query("SELECT series.imageName FROM haveWatchedSeries JOIN series ON haveWatchedSeries.seriesId = series.showId WHERE haveWatchedSeries.username = '" + username.to_s + "';")
-images = images.to_a
 size = 0
-series = db.query("SELECT imageName FROM series;")
-series = series.to_a
-seriesSize = series.size
-
+seriesTab = cgi['seriesTab']
+if seriesTab == ""
+  seriesTab = "SERIES"
+end
 
 puts "Content-type: text/html\n\n"
 puts '<!DOCTYPE html>'
@@ -76,12 +73,31 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
   puts '<hr>'
   puts '<br>'
   puts '<div class="profileListHeader">'
+  if seriesTab == "SERIES"
       puts '<a href="#"class="active">Series</a>'
-      puts '<a href="#">Seasons</a>'
-      puts '<a href="#">Episodes</a>'
+      puts '<a href="Have_Watched.cgi?seriesTab=SEASON">Seasons</a>'
+      puts '<a href="Have_Watched.cgi?seriesTab=EP">Episodes</a>'
+
+      images = db.query("SELECT series.imageName FROM haveWatchedSeries JOIN series ON haveWatchedSeries.seriesId = series.showId WHERE haveWatchedSeries.username = '" + username.to_s + "';")
+      images = images.to_a
+  elsif seriesTab == "SEASON"
+      puts '<a href="Have_Watched.cgi?seriesTab=SERIES">Series</a>'
+      puts '<a href="#" class="active">Seasons</a>'
+      puts '<a href="Have_Watched.cgi?seriesTab=EP">Episodes</a>'
+      images = db.query("SELECT series.imageName FROM haveWatchedSeason JOIN season ON haveWatchedSeason.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE haveWatchedSeason.username = '" + username.to_s + "';")
+      images = images.to_a
+  elsif seriesTab == "EP"
+      puts '<a href="Have_Watched.cgi?seriesTab=SERIES">Series</a>'
+      puts '<a href="Have_Watched.cgi?seriesTab=SEASON">Seasons</a>'
+      puts '<a href="#" class="active">Episodes</a>'
+      images = db.query("SELECT series.imageName FROM haveWatchedEpisode JOIN episode ON haveWatchedEpisode.epId = episode.epId JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE haveWatchedEpisode.username = '" + username.to_s + "';")
+      images = images.to_a
+  end
+
     puts '</div>'
   puts '<section class="topFiveFavs">'
     puts '<hr style="margin-left: 80px; margin-right: 80px">'
+
 
     (0...images.size).each do |h|
     if (images[size])

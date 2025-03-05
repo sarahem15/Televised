@@ -11,6 +11,11 @@ $stderr.reopen $stdout
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
+search = cgi['top5search']
+type = "Series"
+type = cgi['typeSearch']
+
+
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -23,7 +28,7 @@ displayName = db.query("SELECT displayName FROM account WHERE username = '" + us
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns =db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
 replies = db.query("SELECT replies FROM account WHERE username = '" + username.to_s + "';")
-
+#topFiveSeries = db.query("SELECT imageName FROM TopFiveSeries WHERE username = '" + username.to_s + "';")
 puts "Content-type: text/html\n\n"
 
 
@@ -123,7 +128,61 @@ puts '<body id="profileSettings">'
                     puts '<button id="saveProfile" class="btn" style="background-color: #9daef6;" type="submit">Save Changes</button>'
                 puts '</form>'
                 puts '</div>'
+
+        puts '<div class="TopFiveProfile">'
+            puts '<form method="post" action="Profile_Settings.cgi">'
+            puts '<select id="type" name="typeSearch" class="form-control">'
+                puts '<option value="Series" selected>Series</option>'
+                puts '<option value="Seasons">Season</option>'
+                puts '<option value="Episodes">Episodes</option>'
+            puts '</select>'
+                puts '<input type="text" name="top5search" class="top5search">'
+                puts '<input type="submit" value="Search">'
+            puts '</form>'
+
+            puts '<br>'
+            if (type == "Series" && search != "")
+                images = db.query("SELECT showName, imageName, showId FROM series WHERE showName like '" + search + "%';")
+                images = images.to_a
+                if (images.first.to_s != "")
+                    puts 'Is this the title you\'re looking for?'
+                    puts '<br>'
+                    arraySize = images.size
+                    (0...arraySize).each do |i|
+                        puts images[i]['showName']
+                        puts '<img src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '" style=" height: 50px; width: 35px; object-fit: cover;">'
+                        puts '<br>'
+                        #db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + images.first['showId'] + "', '" + ranking + "');")
+                        images[i]['imageName'] = ""
+                    end
+                else
+                    puts 'We can\'t seem to find this title!'
+                end
+            end
+
+
+            size = 0
+            (0...3).each do |h|
+            puts '<div class="TopFiveSeries">'
+                puts '<div class="wrapper">'
+                    puts '<section class="carousel-section" id="section' + size.to_s() + '">'
+                    (0...5).each do |i|
+                        puts '<div class="item">'
+                            puts '<form action="series.cgi" method="POST">'
+                                puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
+                                puts '<input type="hidden" name="clicked_image" value="">'
+                                puts '<input type="hidden" name="seasonNumber" value="">'
+                            puts '</form>'
+                        puts '</div>'
+                    end
+                    puts '</section>'
+            puts '</div>'
+            end
+            puts '</div>'
         puts '</div>'
+        puts '</div>'
+
+
     puts '</div>'
     # <!-- Scripts -->
     puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'

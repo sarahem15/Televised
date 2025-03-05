@@ -157,6 +157,7 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
         puts "<button class=\"reviewButton\">REVIEW</button>"
         puts "<button class=\"rateButton\">STARS</button>"
@@ -168,21 +169,25 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="wantToWatch" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Existing List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
         puts '<form action="createNewList.cgi" method="POST">'
         puts "<button>Add to New List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>View on Other's Lists</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
         puts "</div>"
         puts "</div>"
