@@ -706,3 +706,37 @@ button:hover {
     font-size: 20px;
     font-family: Times New Roman, Times, serif;
 }
+
+#profileSettings .container {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    margin:  auto;
+}
+
+#profileSettings .wrapper .item {
+    position: relative;
+    width:80px;
+} 
+
+#profileSettings .wrapper section {
+    width: 100%;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+}
+
+#profileSettings .wrapper {
+    overflow: hidden;
+    scroll-behavior: smooth;
+    width: 100%;
+    margin: auto;
+}
+
+#profileSettings form {
+    width: 550px;
+}
+
+#profileSettings .TopFiveProfile form {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+}
