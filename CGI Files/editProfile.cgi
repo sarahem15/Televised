@@ -2,15 +2,30 @@
 require 'mysql2'
 require 'cgi'
 require 'cgi/session'
+require 'stringio'
 
 # Enable debugging
 $stdout.sync = true
 $stderr.reopen $stdout
 
+print "Content-type: text/html\r\n\r\n"
+
 # Initialize CGI
-cgi = CGI.new
+
+uploadLocation = "/NFSHome/Televised/public_html/ProfileImages/"
+cgi = CGI.new("html5")
 session = CGI::Session.new(cgi)
 username = session['username']
+
+fromfile = cgi.params['fileName'].first
+originalName = cgi.params['fileName'].first.instance_variable_get("@original_filename")
+fileType = originalName.split(".")
+lastDot = fileType.size - 1
+if (originalName != "" && (fileType[lastDot] == "jpg" || fileType[lastDot] == "png"))
+  tofile = uploadLocation + username + ".jpg" 
+  File.open(tofile.untaint, 'w') { |file| file << fromfile.read}
+end
+
 
 # Retrieve form parameters
 displayName = cgi['displayName']
@@ -22,8 +37,8 @@ else
   replies = 0
 end
 
+
 # Print HTTP header
-print "Content-type: text/html\r\n\r\n"
 
 # Start HTML output
 puts "<!DOCTYPE html>"
@@ -35,8 +50,8 @@ puts "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstra
 print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/Home.cgi'>\n"
 puts "</head>"
 puts "<body>"
-puts "<div class='container mt-5'>"
-
+#puts "<div class='container mt-5'>"
+#puts "Uploaded: " + originalName
 # Debugging: Print received parameters
 =begin
 puts "<h3>Received Parameters:</h3>"

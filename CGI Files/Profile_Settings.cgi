@@ -1,7 +1,10 @@
 #!/usr/bin/ruby
+# SOURCES:
+## FILE TYPE - https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file
 require 'mysql2'
 require 'cgi'
 require 'cgi/session'
+
 
 # Enable debugging
 $stdout.sync = true
@@ -14,9 +17,9 @@ username = session['username']
 search = cgi['top5search']
 type = "Series"
 type = cgi['typeSearch']
-
-
-
+topSeries = cgi['topSeries']
+ranking = cgi['rank']
+selectedSeries = cgi['SELECT']
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -51,7 +54,7 @@ puts '<body id="profileSettings">'
         puts '<br>'
         puts '<div class="container">'
                 puts '<div class="col-5" id="profileRow">'
-                    puts '<form id="profileSettinsForm" method="post" action="editProfile.cgi">'
+                    puts '<form id="profileSettinsForm" enctype="multipart/form-data" method="post" action="editProfile.cgi">'
                     puts '<span>Username</span>'
                     puts '<input type="text" id="userName" name="userNameX" class="form-control" readonly>'
                     puts '<br>'
@@ -121,7 +124,7 @@ puts '<body id="profileSettings">'
                     puts '</select>'
                     puts '<br>'
                     puts '<span>Avatar</span>'
-                    puts '<input type="image" src="" alt="Avatar">'
+                    puts '<input type="File" name="fileName" accept="image/png, image/jpeg">'
                     puts '<br>'
                     puts '<br>'
                     puts '<br>'
@@ -149,11 +152,26 @@ puts '<body id="profileSettings">'
                     puts '<br>'
                     arraySize = images.size
                     (0...arraySize).each do |i|
+                        puts '<form method="get" action="Profile_Settings.cgi">'
                         puts images[i]['showName']
                         puts '<img src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '" style=" height: 50px; width: 35px; object-fit: cover;">'
+                        #puts '<input type="hidden" name="topSeries" value="' + images.first['showId'] + '">'
+                        puts '<select id="type" name="rank" class="form-control">'
+                            puts '<option value="1" selected> 1</option>'
+                            puts '<option value="2">2</option>'
+                            puts '<option value="3">3</option>'
+                            puts '<option value="4">4</option>'
+                            puts '<option value="5">5</option>'
+                        puts '</select>'
+                        puts '<input type="submit" value="SELECT">'
+                        puts '</form>'
                         puts '<br>'
                         #db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + images.first['showId'] + "', '" + ranking + "');")
                         images[i]['imageName'] = ""
+                    end
+
+                    if (selectedSeries != "")
+                        #db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
                     end
                 else
                     puts 'We can\'t seem to find this title!'
@@ -162,6 +180,7 @@ puts '<body id="profileSettings">'
 
 
             size = 0
+            #topSeriesImages = db.query("SELECT ")
             (0...3).each do |h|
             puts '<div class="TopFiveSeries">'
                 puts '<div class="wrapper">'
