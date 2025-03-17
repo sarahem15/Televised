@@ -153,7 +153,8 @@ puts "<body id=\"showsPage\">"
   puts "</div>"
   puts "<div class=\"editButtons\">"
       puts '<form action="threebuttons.cgi" method="POST">'
-        puts "<button class=\"watchedButton\">EYE</button>"
+        #puts "<button class=\"watchedButton\">EYE</button>"
+        puts '<button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button>'
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
@@ -207,7 +208,8 @@ puts "<body id=\"showsPage\">"
       puts "<h5 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + episode['description'] + "</h5>"
       puts "<div class=\"editButtons\">"
       puts '<form action="threebuttons.cgi" method="POST">'
-        puts "<button class=\"watchedButton\">EYE</button>"
+        puts '<button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button>'
+        #puts "<button class=\"watchedButton\">EYE</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
         puts '<input type="hidden" name="watchedButton" value="TRUE">'

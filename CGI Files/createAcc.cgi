@@ -70,7 +70,7 @@ if fromCreate == "true"
     puts 'localStorage.setItem("username", "' + unameCreateInput + '");'
     puts '</script>'
     
-    db.query("INSERT INTO account (username, password) VALUES ('" + cgi['unameCreateInput'] + "','" + cgi['passCreateInput'] + "');")
+    db.query("INSERT INTO account (username, password, displayName) VALUES ('" + cgi['unameCreateInput'] + "','" + cgi['passCreateInput'] + "','" + cgi['unameCreateInput'] + "');")
     session['username'] = unameCreateInput
     session.close
     print cgi.header(
@@ -148,7 +148,7 @@ puts '  <script src="Televised.js"></script>'
 
 puts "<h3>Received Parameters:</h3>"
 puts "<p>Username:" + cgi['unameCreateInput'] + "</p>"
-puts "<p>Password:" + cgi['passCreateInput'] + "</p>"
+puts "<p>Password:"f + cgi['passCreateInput'] + "</p>"
 
 # Connect to MySQL and insert data
 #begin
