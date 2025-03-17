@@ -74,7 +74,36 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts "<button class=\"reviewButton\" data-bs-toggle=\"toggle\" data-bs-target=\"#CreateReview\">REVIEW</button>"
-        puts "<button class=\"rateButton\">STARS</button>"
+        #puts "<button class=\"rateButton\">STARS</button>"
+
+=begin
+        puts "<button class=\"submit\" id=\"stars\">"
+        puts "<span id=\"star1\"><class=\"fa fa-star\"></span>"
+        puts "</button>"
+=end
+        puts '<form action="threebuttons.cgi" method="POST">'
+        puts '<button class="star">'
+        puts '<span id="star2" class="fa fa-star"></span>'
+        puts '<input type="hidden" name="seriesRating" value="2">'
+        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+
+        puts '<span id="star3" class="fa fa-star"></span>'
+        puts '<input type="hidden" name="seriesRating" value="3">'
+        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        puts '</button>'
+        puts '</form>'
+
+=begin
+        puts "<button class=\"submit\" id=\"stars\">"
+        puts '<span id="star2" class="fa fa-star"></span>'
+        puts '<span id="star3" class="fa fa-star"></span>'
+        puts '<span id="star4" class="fa fa-star"></span>'
+        puts '<span id="star5" class="fa fa-star"></span>'
+        puts "</button>"
+=end
+
         puts "<div class=\"seasonDropdown\">"
         puts "<button class=\"menuButton\">MENU</button>"
         puts "<div class=\"dropseason-content\">"
@@ -93,7 +122,7 @@ puts "<body id=\"showsPage\">"
         puts "<button>Add to New List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '</form>'
-        puts '<form action="threebuttons.cgi" method="POST">'
+        puts '<form action="otherLists.cgi" method="POST">'
         puts "<button>View on Other's Lists</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'

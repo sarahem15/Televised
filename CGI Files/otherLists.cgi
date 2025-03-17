@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 # Switch images to queries from the database
 # Enable debugging
+#Display in ascending order when date field is added
 $stdout.sync = true
 $stderr.reopen $stdout
 
@@ -13,6 +14,7 @@ require 'cgi/session'
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
+seriesId = cgi['seriesID']
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -21,13 +23,14 @@ db = Mysql2::Client.new(
     database: 'televised_w25'
   )
 
-#listImages = db.query("SELECT imageName FROM list;")
 seriesImages = db.query("SELECT imageName FROM series;")
 seriesImages = seriesImages.to_a()
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
-
+lists = db.query("SELECT name, description, username FROM curatedListSeries WHERE seriesId ='" + seriesId + "';")
+lists = lists.to_a
+showName = db.query("SELECT showName FROM series WHERE showId = '" + seriesId + "';")
 
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -44,72 +47,46 @@ puts '<body id="profile">'
   puts '<nav id="changingNav"></nav> <!-- This is where the navbar will be dynamically loaded -->'
   puts '<div class="container-fluid">'
   puts '<br>'
-  puts '<section class="ProfileInfo">'
-  puts '<section class="UserDisplay">'
-    puts '<img src="ProfileImages/' + username.to_s + '.jpg" alt="' + username.to_s + '.jpg">'
-    puts '<h3 id="DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
-  puts '</section>'
-  puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
-  puts '<h4>' + bio.first['bio'].to_s + '</h4>'
-  puts '</section>'
-  puts '<hr>'
-     puts '<div class="profileHeader">'
-      puts '<a href="Profile.cgi">Profile</a>'
-      puts '<a href="Have_Watched.cgi">Have Watched</a>'
-      puts '<a href="Want_to_Watch.cgi">Want to Watch</a>'
-      puts '<a href="Profile_Lists.cgi">Lists</a>'
-      puts '<a href="#">Reviews</a>'
-      puts '<a href="#" class="active">Likes</a>'
-      puts '<a href="#">Ratings</a>'
-    puts '</div>'
-  puts '<hr>'
+  puts '<h1>Lists containing ' + showName.first['showName'] + '!</h1>'
   puts '<br>'
-  
-  puts '<div class="profileListHeader">'
-      puts '<a href="#">Reviews</a>'
-      puts '<a href="#" class="active">Lists</a>'
-    puts '</div>'
 
-(0...5).each do |i|
+if (lists.size == 0)
+    puts '<hr style="margin-left: 80px; margin-right: 80px">'
+    puts '<h5 style="text-align: center;">Looks like there are no lists containing this title!</h5>'
+else
+(0...lists.size).each do |i|
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<div class="listImages">'
     puts '<div class="listWrapper">'
         puts '<section class="carousel-section" id="listsPlease">'
+        listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+        listImages = listImages.to_a
         (0...5).each do |j|
         puts '<div class="itemS">'
-            puts '<img src="' + seriesImages[j]['imageName'] + '" alt="' + seriesImages[j]['imageName'] + '">'
+            puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '">'
         puts '</div>'
         end
       puts '</section>'
       puts '</div>'
       puts '<div>'
       puts '<section class="titleDate">'
-      puts '<a href="listContents.cgi?title=LIST TITLE">LIST TITLE</a>'
+      puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '">' + lists[i]['name'] + '</a>'
       puts '<h4>DATE</h4>'
       puts '</section>'
-
-      puts '<section class="listInfo">'
-        puts '<section class="UserDisplay">'
-          puts '<img src="./Episodes/adventureTime1.1.jpg" alt="testing123">'
-          puts '<h3 id=" DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
+      puts '<section class="UserDisplay">'
+          puts '<img src="./ProfileImages/' + lists[i]['username'].to_s + '.jpg" alt="userProfilePic">'
+          puts '<h3 id=" DisplayName">' + lists[i]['username'].to_s + '</h3>'
         puts '</section>'
-      puts '<h3> shows </h3>'
-      puts '<section class="Likes">'
-        puts '<button id="Heart">&#9829</button>'
-        puts '<h4>12</h4>'
-      puts '</section>'
-      puts '</section>'
-
-      puts '<h3>DESCRIPTION of the list goes here!!</h3>'
+      puts '<h3>' + lists[i]['description'] +'</h3>'
       puts '</div>'
     puts '</div>'
     puts '<br>'
 end
- puts '<br>'
-  puts '<br>'
+end
     puts '<!-- Scripts -->'
   puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
   puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
   puts '<script src="Televised.js"></script>'
 puts '</body>'
 puts '</html>'
+session.close
