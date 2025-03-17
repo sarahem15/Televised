@@ -10,6 +10,7 @@ cgi = CGI.new
 episodeName = cgi['ep_name']
 showName = cgi['show_name']
 epNum = cgi['ep_num']
+seasonNumber = cgi['seasonNumber']
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -17,10 +18,11 @@ db = Mysql2::Client.new(
     database: 'televised_w25'
   )
 
+#seriesImage = db.query("SELECT imageName FROM series WHERE showName = '" + showName + "';")
 episode = db.query("SELECT episode.* FROM episode JOIN season ON episode.seasonId = season.seasonId
   JOIN series ON season.seriesId = series.showId WHERE episode.epName = '" + episodeName.gsub("'", "\\\\'") + "' AND series.showName = '" + showName.gsub("'", "\\\\'") + "';")
 
-
+#puts "<img src=\"./Episodes/" + seriesImage.split('.')[0] + seasonNumber.to_s + "." + epNum.to_s + ".1.jpg\" alt=\"" + seriesImage[0] + "\" width=\"300\" height=\"225\">"
 
 
 
@@ -32,6 +34,7 @@ puts "<head>"
     puts "<title>Televised</title>"
     puts "<link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\">"
     puts "<link rel=\"stylesheet\" href=\"Televised.css\">"
+    puts '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">'
 puts "</head>"
 puts "<body id=\"episodePage\">"
     puts "<nav id=\"changingNav\"></nav>"
@@ -65,7 +68,7 @@ puts "<body id=\"episodePage\">"
   puts "<br>"
   puts "<div class=\"editButtons\">"
       puts '<form action="threebuttons.cgi" method="POST">'
-        puts "<button class=\"watchedButton\">EYE</button>"
+        puts '<button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button>'
         #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
         #puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
