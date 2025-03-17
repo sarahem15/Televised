@@ -18,6 +18,8 @@ wantToWatch = cgi['wantToWatch']
 seasonNumber = cgi['seasonNumber']
 seasonId = cgi['seasonId']
 
+seriesRating = cgi['seriesRating']
+rated = cgi['rated']
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -36,7 +38,7 @@ puts "<head>"
 puts "<meta charset='UTF-8'>"
 puts "<title>Watched</title>"
 puts "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
-print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
+print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
 puts "</head>"
 puts "<body>"
 puts "<div class='container mt-5'>"
@@ -69,6 +71,12 @@ elsif (wantToWatch == "TRUE" && epId != "")
     #puts '<br>'
     #puts 'ADDED TO WANT TO WATCH LIST'
 end
+
+# CHECK FOR PREV RATING AND DELETE BEFORE INSERT
+if rated == "TRUE"
+    db.query("INSERT INTO seriesRating (rating, username, seriesId) VALUES ('" + seriesRating.to_s + "', '" + username.to_s + "', '" + seriesId.to_s + "');")
+end
+
 =begin
 puts '<br>'
 puts 'add to existing list: ' + addToExisting 
@@ -79,6 +87,8 @@ puts 'view on other lists: ' + viewOnOthers
 puts '<br>'
 puts 'userName: ' + username.to_s
 =end
+
+puts seriesRating.to_s
 
 puts '</body>'
 puts '</html>'

@@ -76,33 +76,15 @@ puts "<body id=\"showsPage\">"
         puts "<button class=\"reviewButton\" data-bs-toggle=\"toggle\" data-bs-target=\"#CreateReview\">REVIEW</button>"
         #puts "<button class=\"rateButton\">STARS</button>"
 
-=begin
-        puts "<button class=\"submit\" id=\"stars\">"
-        puts "<span id=\"star1\"><class=\"fa fa-star\"></span>"
-        puts "</button>"
-=end
-        puts '<form action="threebuttons.cgi" method="POST">'
-        puts '<button class="star">'
-        puts '<span id="star2" class="fa fa-star"></span>'
-        puts '<input type="hidden" name="seriesRating" value="2">'
-        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
-        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
-
-        puts '<span id="star3" class="fa fa-star"></span>'
-        puts '<input type="hidden" name="seriesRating" value="3">'
-        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
-        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
-        puts '</button>'
-        puts '</form>'
-
-=begin
-        puts "<button class=\"submit\" id=\"stars\">"
-        puts '<span id="star2" class="fa fa-star"></span>'
-        puts '<span id="star3" class="fa fa-star"></span>'
-        puts '<span id="star4" class="fa fa-star"></span>'
-        puts '<span id="star5" class="fa fa-star"></span>'
-        puts "</button>"
-=end
+        (0...5).each do |i|
+          puts '<form action="threebuttons.cgi" method="POST">'
+          puts '<button class="fa fa-star"></button>'
+          puts '<input type="hidden" name="seriesRating" value="' + (i+1).to_s + '">'
+          puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+          puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+          puts '<input type="hidden" name="rated" value="TRUE">'
+          puts '</form>'
+        end
 
         puts "<div class=\"seasonDropdown\">"
         puts "<button class=\"menuButton\">MENU</button>"
