@@ -41,7 +41,7 @@ puts '<body id="profile">'
   puts '<br>'
   puts '<section class="ProfileInfo">'
   puts '<section class="UserDisplay">'
-    puts '<img src="./Episodes/adventureTime1.1.jpg" alt="testing123">'
+    puts '<img src="ProfileImages/' + username.to_s + '.jpg" alt="' + username.to_s + '.jpg">'
     puts '<h3 id="DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
   puts '</section>' 
   puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
@@ -65,11 +65,22 @@ puts '<body id="profile">'
     puts '<hr style="margin-left: 80px; margin-right: 80px">'
     puts '<div class="wrapper">'
       puts '<section class="carousel-section" id="topFiveSeries">'
+      topSeriesImage = db.query("SELECT imageName, ranking FROM series JOIN topFiveSeries ON series.showId = topFiveSeries.seriesId WHERE username = '" + username.to_s + "' ORDER BY ranking ASC;")
+      topSeriesImage = topSeriesImage.to_a
       (0...5).each do |i|
         puts '<div class="item">'
           puts '<form action="series.cgi" method="POST">'
-            puts '<input type="image" src="" alt="">'
-            puts '<input type="hidden" name="clicked_image" value="">'
+            if (i <= topSeriesImage.size)
+              if (topSeriesImage[i]['ranking'] == i + 1)
+                puts '<input type="image" src="' + topSeriesImage[i]['imageName'] + '" alt="' + topSeriesImage[i]['imageName'] + '">'
+              else
+                puts '<input type="image" src="" alt="">'
+              end
+            else
+              puts '<input type="image" src="" alt="">'
+            end
+            puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
+            puts '<input type="hidden" name="seasonNumber" value="1">'
           puts '</form>'
         puts '</div>'
       end

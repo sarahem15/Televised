@@ -21,10 +21,10 @@ db = Mysql2::Client.new(
     password: 'TV_Group123!', 
     database: 'televised_w25'
   )
-
-#listImages = db.query("SELECT imageName FROM list;")
-seriesImages = db.query("SELECT imageName FROM series;")
-seriesImages = seriesImages.to_a()
+lists = db.query("SELECT DISTINCT name, description FROM curatedListSeries;")
+lists = lists.to_a
+#seriesImages = db.query("SELECT imageName FROM series;")
+#seriesImages = seriesImages.to_a()
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
@@ -46,7 +46,7 @@ puts '<body id="profile">'
   puts '<br>'
   puts '<section class="ProfileInfo">'
   puts '<section class="UserDisplay">'
-    puts '<img src="./Episodes/adventureTime1.1.jpg" alt="testing123">'
+    puts '<img src="ProfileImages/' + username.to_s + '.jpg" alt="' + username.to_s + '.jpg">'
     puts '<h3 id="DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
   puts '</section>'
   puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
@@ -74,25 +74,27 @@ puts '<body id="profile">'
     puts '<button id="newListProfile" class="createListButton"> <a href="createNewList.cgi"> Create a New List </a> </button>'
 puts '</div>'
 
-(0...5).each do |i|
+(0...lists.size).each do |i|
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<div class="listImages">'
     puts '<div class="listWrapper">'
         puts '<section class="carousel-section" id="listsPlease">'
+        listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+        listImages = listImages.to_a
         (0...5).each do |j|
         puts '<div class="itemS">'
-            puts '<img src="' + seriesImages[j]['imageName'] + '" alt="' + seriesImages[j]['imageName'] + '">'
+            puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '">'
         puts '</div>'
         end
       puts '</section>'
       puts '</div>'
       puts '<div>'
       puts '<section class="titleDate">'
-      puts '<a href="listContents.cgi?title=LIST TITLE">LIST TITLE</a>'
+      puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '">' + lists[i]['name'] + '</a>'
       puts '<h4>DATE</h4>'
       puts '</section>'
 
-      puts '<h3>DESCRIPTION of the list goes here!!</h3>'
+      puts '<h3>' + lists[i]['description'] +'</h3>'
       puts '</div>'
     puts '</div>'
     puts '<br>'

@@ -31,7 +31,7 @@ displayName = db.query("SELECT displayName FROM account WHERE username = '" + us
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns =db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
 replies = db.query("SELECT replies FROM account WHERE username = '" + username.to_s + "';")
-#topFiveSeries = db.query("SELECT imageName FROM TopFiveSeries WHERE username = '" + username.to_s + "';")
+topFiveSeries = db.query("SELECT seriesId FROM topFiveSeries WHERE username = '" + username.to_s + "';")
 puts "Content-type: text/html\n\n"
 
 
@@ -155,9 +155,11 @@ puts '<body id="profileSettings">'
                         puts '<form method="get" action="Profile_Settings.cgi">'
                         puts images[i]['showName']
                         puts '<img src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '" style=" height: 50px; width: 35px; object-fit: cover;">'
-                        #puts '<input type="hidden" name="topSeries" value="' + images.first['showId'] + '">'
+                        puts '<input type="hidden" name="topSeries" value="' + images[i]['showId'].to_s + '">'
+                        puts '<input type="hidden" name="typeSearch" value="Series">'
                         puts '<select id="type" name="rank" class="form-control">'
-                            puts '<option value="1" selected> 1</option>'
+                            puts '<option value="SELECT" selected>RANK</option>'
+                            puts '<option value="1">1</option>'
                             puts '<option value="2">2</option>'
                             puts '<option value="3">3</option>'
                             puts '<option value="4">4</option>'
@@ -166,37 +168,96 @@ puts '<body id="profileSettings">'
                         puts '<input type="submit" value="SELECT">'
                         puts '</form>'
                         puts '<br>'
-                        #db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + images.first['showId'] + "', '" + ranking + "');")
                         images[i]['imageName'] = ""
-                    end
-
-                    if (selectedSeries != "")
-                        #db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
-                    end
+                    end 
                 else
                     puts 'We can\'t seem to find this title!'
                 end
             end
-
+            if (type == "Series" && ranking != "" && ranking != "SELECT")
+                db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
+                #puts 'hey!'
+            end
 
             size = 0
-            #topSeriesImages = db.query("SELECT ")
-            (0...3).each do |h|
+            
+            #seasons = db.query("SELECT season.* FROM season JOIN series ON season.seriesId = series.showId WHERE series.imageName = '" + seriesImage + "';")
+            topSeriesImage = db.query("SELECT imageName, ranking FROM series JOIN topFiveSeries ON series.showId = topFiveSeries.seriesId WHERE username = '" + username.to_s + "' ORDER BY ranking ASC;")
+            topSeriesImage = topSeriesImage.to_a
+            
             puts '<div class="TopFiveSeries">'
                 puts '<div class="wrapper">'
                     puts '<section class="carousel-section" id="section' + size.to_s() + '">'
                     (0...5).each do |i|
                         puts '<div class="item">'
                             puts '<form action="series.cgi" method="POST">'
-                                puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
-                                puts '<input type="hidden" name="clicked_image" value="">'
-                                puts '<input type="hidden" name="seasonNumber" value="">'
+                            if (i <= topSeriesImage.size)
+                                if (topSeriesImage[i]['ranking'] == i + 1)
+                                    puts '<input type="image" src="' + topSeriesImage[i]['imageName'] + '" alt="' + topSeriesImage[i]['imageName'] + '" style=" height: 100px; width: 80px">'
+                                else
+                                    puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
+                                end
+                                puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
+                            else
+                                puts '<input type="image" src="" alt="hee" style=" height: 100px; width: 80px">'
+                            end
+                                puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
+                                puts '<input type="hidden" name="seasonNumber" value="1">'
                             puts '</form>'
                         puts '</div>'
                     end
                     puts '</section>'
-            puts '</div>'
-            end
+                puts '</div>'
+
+                #Season
+                puts '<div class="TopFiveSeason">'
+                puts '<div class="wrapper">'
+                    puts '<section class="carousel-section" id="section' + size.to_s() + '">'
+                    (0...5).each do |i|
+                        puts '<div class="item">'
+                            puts '<form action="series.cgi" method="POST">'
+                            if (i <= topSeriesImage.size)
+                                if (topSeriesImage[i]['ranking'] == i + 1)
+                                    puts '<input type="image" src="' + topSeriesImage[i]['imageName'] + '" alt="' + topSeriesImage[i]['imageName'] + '" style=" height: 100px; width: 80px">'
+                                else
+                                    puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
+                                end
+                                puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
+                            else
+                                puts '<input type="image" src="" alt="hee" style=" height: 100px; width: 80px">'
+                            end
+                                puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
+                                puts '<input type="hidden" name="seasonNumber" value="1">'
+                            puts '</form>'
+                        puts '</div>'
+                    end
+                    puts '</section>'
+                puts '</div>'
+
+                #Episode
+                puts '<div class="TopFiveEpisode">'
+                puts '<div class="wrapper">'
+                    puts '<section class="carousel-section" id="section' + size.to_s() + '">'
+                    (0...5).each do |i|
+                        puts '<div class="item">'
+                            puts '<form action="series.cgi" method="POST">'
+                            if (i <= topSeriesImage.size)
+                                if (topSeriesImage[i]['ranking'] == i + 1)
+                                    puts '<input type="image" src="' + topSeriesImage[i]['imageName'] + '" alt="' + topSeriesImage[i]['imageName'] + '" style=" height: 100px; width: 80px">'
+                                else
+                                    puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
+                                end
+                                puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
+                            else
+                                puts '<input type="image" src="" alt="hee" style=" height: 100px; width: 80px">'
+                            end
+                                puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
+                                puts '<input type="hidden" name="seasonNumber" value="1">'
+                            puts '</form>'
+                        puts '</div>'
+                    end
+                    puts '</section>'
+                puts '</div>'
             puts '</div>'
         puts '</div>'
         puts '</div>'

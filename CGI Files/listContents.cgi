@@ -21,6 +21,10 @@ db = Mysql2::Client.new(
     database: 'televised_w25'
   )
 
+haveWatched = db.query("SELECT seriesId FROM haveWatchedSeries WHERE username = '" + username.to_s + "';")
+haveWatched = haveWatched.to_a
+listContent = db.query("SELECT imageName, seriesId FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE name = '" + listTitle + "';")
+listContent = listContent.to_a
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -47,17 +51,30 @@ puts '<body id="listContent">'
   puts '<hr>'
   puts '<section class="contents">'
   puts '<div class="listContents">'
-  (0...7).each do |i|
+  (0...listContent.size).each do |i|
     puts '<div class="listItem">'
         puts '<form action="series.cgi" method="POST">'
-              puts '<input type="image" src="" alt="">'
-              puts '<input type="hidden" name="clicked_image" value="">'
+          puts '<input type="image" src="' + listContent[i]['imageName'] + '" alt="' + listContent[i]['imageName'] + '">'
+          puts '<input type="hidden" name="clicked_image" value="' + listContent[i]['imageName'] + '">'
+          puts '<input type="hidden" name="seasonNumber" value="1">'
        puts ' </form>'
    puts '</div>'
  end
     
   puts '</div>'
-  puts "<h6> You've watched 7 of 7 </h6>"
+
+  tempCount = 0
+  if (haveWatched.size > 0)
+  (0...listContent.size).each do |i|
+    (0...haveWatched.size).each do |h|
+      if (haveWatched[h]['seriesId'] == listContent[i]['seriesId'])
+          tempCount = tempCount + 1
+      end
+    end
+  end
+end
+
+  puts "<h6> You've watched " + tempCount.to_s + " of " + listContent.size.to_s + " </h6>"
 puts '</section>'
 puts '</section>'
 

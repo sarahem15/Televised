@@ -19,13 +19,14 @@ username = session['username']
 
 fromfile = cgi.params['fileName'].first
 originalName = cgi.params['fileName'].first.instance_variable_get("@original_filename")
+if (fromfile != "")
 fileType = originalName.split(".")
 lastDot = fileType.size - 1
 if (originalName != "" && (fileType[lastDot] == "jpg" || fileType[lastDot] == "png"))
   tofile = uploadLocation + username + ".jpg" 
   File.open(tofile.untaint, 'w') { |file| file << fromfile.read}
 end
-
+end
 
 # Retrieve form parameters
 displayName = cgi['displayName']
