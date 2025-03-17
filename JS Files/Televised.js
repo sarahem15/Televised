@@ -127,6 +127,18 @@ function showSignInModal() {
     signInModal.show();
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    const reviewButton = document.getElementById("reviewButton");
+    const reviewModal = new bootstrap.Modal(document.getElementById("CreateReview"));
+
+    if (reviewButton) {
+        reviewButton.addEventListener("click", function () {
+            reviewModal.show();
+        });
+    }
+});
+
+
 function validateAccountCreation() {
   const username = document.getElementById("unameCreateInput").value.trim();
   const password = document.getElementById("passCreateInput").value.trim();
