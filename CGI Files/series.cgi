@@ -73,7 +73,7 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
-        puts "<button class=\"reviewButton\">REVIEW</button>"
+        puts "<button class=\"reviewButton\" data-bs-toggle=\"toggle\" data-bs-target=\"#CreateReview\">REVIEW</button>"
         puts "<button class=\"rateButton\">STARS</button>"
         puts "<div class=\"seasonDropdown\">"
         puts "<button class=\"menuButton\">MENU</button>"
@@ -159,7 +159,7 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
-        puts "<button class=\"reviewButton\">REVIEW</button>"
+        puts "<button class=\"reviewButton\" data-bs-toggle=\"toggle\" data-bs-target=\"#CreateReview\">REVIEW</button>"
         puts "<button class=\"rateButton\">STARS</button>"
         puts "<div class=\"seasonDropdown\">"
         puts "<button class=\"menuButton\">MENU</button>"
@@ -213,7 +213,7 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
-        puts "<button class=\"reviewButton\">REVIEW</button>"
+        puts "<button class=\"reviewButton\" data-bs-toggle=\"toggle\" data-bs-target=\"#CreateReview\">REVIEW</button>"
         puts "<button class=\"rateButton\">STARS</button>"
         puts "<div class=\"seasonDropdown\">"
         puts "<button class=\"menuButton\">MENU</button>"
