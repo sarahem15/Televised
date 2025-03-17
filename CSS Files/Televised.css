@@ -460,6 +460,7 @@ button:hover {
     width:  50px;
     border-radius: 50%;
     display: inline-block;
+    object-fit: cover;
   }
   .ReviewIndiv .ReviewContent .UserDisplay {
     display: grid;
@@ -482,10 +483,11 @@ button:hover {
   }
 
 .UserDisplay img{
-    height: 50px;
-    width:  50px;
+    height: 65px;
+    width:  65px;
     border-radius: 50%;
     display: inline-block;
+    object-fit: cover;
   }
 
 .UserDisplay {
@@ -579,7 +581,7 @@ button:hover {
 
 .listImages {
     display: grid;
-    grid-template-columns: repeat(2, auto);
+    grid-template-columns: auto 65%;
     margin: auto;
 }
 
@@ -739,4 +741,9 @@ button:hover {
 #profileSettings .TopFiveProfile form {
     display: grid;
     grid-template-columns: repeat(3, auto);
+}
+
+#createNewList .container-fluid {
+    display: grid;
+    grid-template-columns: 80% auto;
 }
