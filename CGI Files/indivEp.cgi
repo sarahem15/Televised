@@ -11,6 +11,7 @@ episodeName = cgi['ep_name']
 showName = cgi['show_name']
 epNum = cgi['ep_num']
 seasonNumber = cgi['seasonNumber']
+seriesId = cgi['seriesId']
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -48,8 +49,9 @@ puts "<body id=\"episodePage\">"
 
 
   #HERE
-  
-    puts "<img src=\"H2O.jpg\"alt=\"placeholder\">" 
+    (1...4).each do |i|
+      puts "<img src=\"Episodes/" + showName.gsub(" ", "").gsub("'", "") + seasonNumber.to_s + "." + epNum.to_s + "." + i.to_s + ".jpg\" alt=\"\">" 
+    end
     puts "<br>"
     puts "<br>"
       puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + showName + "</h1>"
@@ -74,7 +76,19 @@ puts "<body id=\"episodePage\">"
         #puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
         puts '</form>'
         puts "<button class=\"reviewButton\">REVIEW</button>"
-        puts "<button class=\"rateButton\">STARS</button>"
+        #puts "<button class=\"rateButton\">STARS</button>"
+
+        (0...5).each do |i|
+          puts '<form action="threebuttons.cgi" method="POST">'
+          puts '<button class="fa fa-star"></button>'
+          puts '<input type="hidden" name="epRating" value="' + (i+1).to_s + '">'
+          puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+          puts '<input type="hidden" name="epID" value="' + episode.first['epId'].to_s + '">'
+          puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+          puts '<input type="hidden" name="rated" value="TRUE">'
+          puts '</form>'
+        end
+
         puts "<div class=\"seasonDropdown\">"
         puts "<button class=\"menuButton\">MENU</button>"
         puts "<div class=\"dropseason-content\">"

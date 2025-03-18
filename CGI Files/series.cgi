@@ -172,7 +172,19 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
         puts "<button class=\"reviewButton\" data-bs-toggle=\"toggle\" data-bs-target=\"#CreateReview\">REVIEW</button>"
-        puts "<button class=\"rateButton\">STARS</button>"
+        # puts "<button class=\"rateButton\">STARS</button>"
+
+        (0...5).each do |i|
+          puts '<form action="threebuttons.cgi" method="POST">'
+          puts '<button class="fa fa-star"></button>'
+          puts '<input type="hidden" name="seasonRating" value="' + (i+1).to_s + '">'
+          puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+          puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
+          puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+          puts '<input type="hidden" name="rated" value="TRUE">'
+          puts '</form>'
+        end
+
         puts "<div class=\"seasonDropdown\">"
         puts "<button class=\"menuButton\">MENU</button>"
         puts "<div class=\"dropseason-content\">"
@@ -214,7 +226,7 @@ puts "<body id=\"showsPage\">"
   puts "<div class=\"epInfo\">"
     puts "<img src=\"./Episodes/" + seriesImage.split('.')[0] + seasonNumber.to_s + "." + epNum.to_s + ".1.jpg\" alt=\"" + seriesImage + "\" width=\"300\" height=\"225\">"
     puts "<div class=\"words\">"
-      puts "<a href=\"indivEp.cgi?ep_name=" + episode['epName'] + "&show_name=" + series.first['showName'] + "&ep_num=" + epNum.to_s + "&seasonNumber=" + seasonNumber.to_s + "\"><h3 style=\"font-family: 'Times New Roman', Times, serif; text-align: left;\">" + epNum.to_s + ". " + episode['epName'] + "</h3></a>"
+      puts "<a href=\"indivEp.cgi?ep_name=" + episode['epName'] + "&show_name=" + series.first['showName'] + "&seriesID=" + series.first['showId'].to_s + "&ep_num=" + epNum.to_s + "&seasonNumber=" + seasonNumber.to_s + "\"><h3 style=\"font-family: 'Times New Roman', Times, serif; text-align: left;\">" + epNum.to_s + ". " + episode['epName'] + "</h3></a>"
       puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + episode['runtime'].to_s + " minutes</h4>"
       puts "<h5 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + episode['description'] + "</h5>"
       puts "<div class=\"editButtons\">"
@@ -227,7 +239,19 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts "<button class=\"reviewButton\" data-bs-toggle=\"toggle\" data-bs-target=\"#CreateReview\">REVIEW</button>"
-        puts "<button class=\"rateButton\">STARS</button>"
+        #puts "<button class=\"rateButton\">STARS</button>"
+
+        (0...5).each do |i|
+          puts '<form action="threebuttons.cgi" method="POST">'
+          puts '<button class="fa fa-star"></button>'
+          puts '<input type="hidden" name="epRating" value="' + (i+1).to_s + '">'
+          puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+          puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
+          puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+          puts '<input type="hidden" name="rated" value="TRUE">'
+          puts '</form>'
+        end
+
         puts "<div class=\"seasonDropdown\">"
         puts "<button class=\"menuButton\">MENU</button>"
         puts "<div class=\"dropseason-content\">"

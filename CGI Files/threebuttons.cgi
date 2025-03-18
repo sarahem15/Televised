@@ -19,6 +19,8 @@ seasonNumber = cgi['seasonNumber']
 seasonId = cgi['seasonId']
 
 seriesRating = cgi['seriesRating']
+seasonRating = cgi['seasonRating']
+epRating = cgi['epRating']
 rated = cgi['rated']
 
 db = Mysql2::Client.new(
@@ -73,8 +75,15 @@ elsif (wantToWatch == "TRUE" && epId != "")
 end
 
 # CHECK FOR PREV RATING AND DELETE BEFORE INSERT
-if rated == "TRUE"
+puts seasonRating.to_s
+puts username
+puts seriesId.to_s
+if rated == "TRUE" && seasonRating == "" && epRating == ""
     db.query("INSERT INTO seriesRating (rating, username, seriesId) VALUES ('" + seriesRating.to_s + "', '" + username.to_s + "', '" + seriesId.to_s + "');")
+elsif rated == "TRUE" && seriesRating == "" && epRating == ""
+    db.query("INSERT INTO seasonRating (rating, username, seasonId) VALUES ('" + seasonRating.to_s + "', '" + username.to_s + "', '" + seasonId.to_s + "');")
+elsif rated == "TRUE" && seriesRating == "" && seasonRating == ""
+    db.query("INSERT INTO episodeRating (rating, username, epId) VALUES ('" + epRating.to_s + "', '" + username.to_s + "', '" + epId.to_s + "');")
 end
 
 =begin
@@ -87,8 +96,6 @@ puts 'view on other lists: ' + viewOnOthers
 puts '<br>'
 puts 'userName: ' + username.to_s
 =end
-
-puts seriesRating.to_s
 
 puts '</body>'
 puts '</html>'
