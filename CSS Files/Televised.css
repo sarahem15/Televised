@@ -747,3 +747,9 @@ button:hover {
     display: grid;
     grid-template-columns: 80% auto;
 }
+
+#episodePage img {
+    object-fit: cover;
+    width: 33%;
+    height: auto;
+}
