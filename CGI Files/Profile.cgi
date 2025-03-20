@@ -119,4 +119,4 @@ puts '<body id="profile">'
   puts '<script src="Televised.js"></script>'
 puts '</body>'
 puts '</html>'
-session.close
+#session.close
