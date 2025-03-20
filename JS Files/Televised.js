@@ -296,6 +296,21 @@ document.addEventListener("DOMContentLoaded", function () {
     updateSeriesList(); // Load stored series on page load
 });
 
+    document.addEventListener("DOMContentLoaded", function() {
+    let storedUsername = localStorage.getItem("username");
+
+    if (!storedUsername) {
+        alert("You are not logged in!");
+        window.location.href = "Home.cgi"; // Redirect to login page if not logged in
+    } else {
+        // Send username to profile.cgi via AJAX
+        fetch("series.cgi?userName=" + encodeURIComponent(storedUsername))
+            .then(response => response.text())
+            .then(html => document.documentElement.innerHTML = html)
+            .catch(error => console.error("Error loading profile:", error));
+    }
+});
+
 // Autofill profile settings
 function autofillProfileSettings() {
     const usernameInput = document.getElementById("userName");
