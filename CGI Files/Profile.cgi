@@ -1,7 +1,7 @@
 #!/usr/bin/ruby
 require 'mysql2'
 require 'cgi'
-require 'cgi/session'
+#require 'cgi/session'
 
 # Enable debugging
 $stdout.sync = true
@@ -9,8 +9,8 @@ $stderr.reopen $stdout
 
 # Initialize CGI
 cgi = CGI.new
-session = CGI::Session.new(cgi)
-username = session['username']
+#session = CGI::Session.new(cgi)
+#username = session['username']
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -18,10 +18,16 @@ db = Mysql2::Client.new(
     password: 'TV_Group123!', 
     database: 'televised_w25'
   )
-displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
+#displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
 
+puts '<script>'
+puts    'userName = localStorage.getItem("username");'
+puts    'console.log(userName, username)'
+puts '</script>'
+
+username = cgi['username']
 
 puts "Content-type: text/html\n\n"
 puts '<!DOCTYPE html>'
@@ -41,7 +47,7 @@ puts '<body id="profile">'
   puts '<br>'
   puts '<section class="ProfileInfo">'
   puts '<section class="UserDisplay">'
-    puts '<img src="ProfileImages/' + username.to_s + '.jpg" alt="' + username.to_s + '.jpg">'
+    puts '<img src="./Episodes/adventureTime1.1.jpg" alt="testing123">'
     puts '<h3 id="DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
   puts '</section>' 
   puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
@@ -65,22 +71,11 @@ puts '<body id="profile">'
     puts '<hr style="margin-left: 80px; margin-right: 80px">'
     puts '<div class="wrapper">'
       puts '<section class="carousel-section" id="topFiveSeries">'
-      topSeriesImage = db.query("SELECT imageName, ranking FROM series JOIN topFiveSeries ON series.showId = topFiveSeries.seriesId WHERE username = '" + username.to_s + "' ORDER BY ranking ASC;")
-      topSeriesImage = topSeriesImage.to_a
       (0...5).each do |i|
         puts '<div class="item">'
           puts '<form action="series.cgi" method="POST">'
-            if (i <= topSeriesImage.size)
-              if (topSeriesImage[i]['ranking'] == i + 1)
-                puts '<input type="image" src="' + topSeriesImage[i]['imageName'] + '" alt="' + topSeriesImage[i]['imageName'] + '">'
-              else
-                puts '<input type="image" src="" alt="">'
-              end
-            else
-              puts '<input type="image" src="" alt="">'
-            end
-            puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
-            puts '<input type="hidden" name="seasonNumber" value="1">'
+            puts '<input type="image" src="" alt="">'
+            puts '<input type="hidden" name="clicked_image" value="">'
           puts '</form>'
         puts '</div>'
       end
