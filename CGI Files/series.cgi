@@ -3,24 +3,21 @@ $stdout.sync = true
 $stderr.reopen $stdout
 
 puts "Content-type: text/html\n\n"
+
 require 'mysql2'
 require 'cgi'
-require 'cgi/session'
-#username = "try@try"
-cgi = CGI.new
-
-
-#session = CGI::Session.new(cgi)
-#username = session['username']
-#puts "Username: " + username
-#puts username.class
 
 cgi = CGI.new
-username = cgi.params['userName'][0] # Read from POST data
-puts "Username: " + username # Default if not found
+username = cgi['username']  # Get username from URL query parameters
 
-#username = cgi['userName']
-#puts "username: " + username
+# Debugging: Print username to console
+puts "<script>console.log('Received username: #{username}');</script>"
+
+if username.nil? || username.empty?
+  username = "Error"  # Default username if not provided
+end
+
+puts "Username: " + username
 
 seriesImage = cgi['clicked_image']
 seasonNumber = cgi['seasonNumber'].to_i
