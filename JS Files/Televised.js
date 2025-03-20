@@ -296,20 +296,25 @@ document.addEventListener("DOMContentLoaded", function () {
     updateSeriesList(); // Load stored series on page load
 });
 
-    document.addEventListener("DOMContentLoaded", function() {
-    let storedUsername = localStorage.getItem("username");
+document.addEventListener("DOMContentLoaded", function () {
+    let userName = localStorage.getItem("userName"); // Get userName from Local Storage
 
-    if (!storedUsername) {
-        alert("You are not logged in!");
-        window.location.href = "Home.cgi"; // Redirect to login page if not logged in
+    if (userName) {
+        fetch("series.cgi", {
+            method: "POST", // You can also use GET if preferred
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `userName=${encodeURIComponent(userName)}`
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.body.innerHTML = data; // Replace the page with the CGI response
+        })
+        .catch(error => console.error("Error:", error));
     } else {
-        // Send username to profile.cgi via AJAX
-        fetch("series.cgi?userName=" + encodeURIComponent(storedUsername))
-            .then(response => response.text())
-            .then(html => document.documentElement.innerHTML = html)
-            .catch(error => console.error("Error loading profile:", error));
+        console.error("Username not found in Local Storage");
     }
 });
+
 
 // Autofill profile settings
 function autofillProfileSettings() {
