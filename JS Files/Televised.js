@@ -250,6 +250,52 @@ function handleSigningIn() {
     }
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    let series = JSON.parse(localStorage.getItem("series")) || []; // Retrieve stored series
+
+    function updateLocalStorage() {
+        localStorage.setItem("series", JSON.stringify(series)); // Save to localStorage
+        updateSeriesList(); // Update displayed list
+    }
+
+    function updateSeriesList() {
+        let listContainer = document.getElementById("seriesList");
+        listContainer.innerHTML = ""; // Clear previous list
+        series.forEach(seriesID => {
+            let listItem = document.createElement("li");
+            listItem.className = "list-group-item";
+            listItem.textContent = "Series ID: " + seriesID; // Display ID (can be changed to name if needed)
+            listContainer.appendChild(listItem);
+        });
+    }
+
+    document.querySelectorAll("#addItem").forEach(button => {
+        button.addEventListener("click", function (event) {
+            event.preventDefault();
+            let seriesID = this.closest("form").querySelector("input[name='seriesID']").value;
+
+            if (!series.includes(seriesID)) {
+                series.push(seriesID);
+                updateLocalStorage();
+            }
+        });
+    });
+
+    document.getElementById("saveList").addEventListener("click", function (event) {
+        event.preventDefault();
+        let form = document.getElementById("newListForm");
+        let hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = "seriesList";
+        hiddenInput.value = JSON.stringify(series);
+        form.appendChild(hiddenInput);
+        form.submit();
+        localStorage.removeItem("series");
+    });
+
+    updateSeriesList(); // Load stored series on page load
+});
+
 // Autofill profile settings
 function autofillProfileSettings() {
     const usernameInput = document.getElementById("userName");
