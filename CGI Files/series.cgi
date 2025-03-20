@@ -15,8 +15,12 @@ cgi = CGI.new
 #puts "Username: " + username
 #puts username.class
 
-username = cgi['userName']
-puts "username: " + username
+cgi = CGI.new
+username = cgi.params['userName'][0] # Read from POST data
+puts "Username: " + username # Default if not found
+
+#username = cgi['userName']
+#puts "username: " + username
 
 seriesImage = cgi['clicked_image']
 seasonNumber = cgi['seasonNumber'].to_i
