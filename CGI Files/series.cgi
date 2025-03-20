@@ -5,10 +5,22 @@ $stderr.reopen $stdout
 puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
-
+require 'cgi/session'
+#username = "try@try"
 cgi = CGI.new
+
+
+#session = CGI::Session.new(cgi)
+#username = session['username']
+#puts "Username: " + username
+#puts username.class
+
+username = cgi['userName']
+puts "username: " + username
+
 seriesImage = cgi['clicked_image']
 seasonNumber = cgi['seasonNumber'].to_i
+trueWatched = cgi['trueWatched']
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -28,6 +40,8 @@ numOfSeasons = series.first['numOfSeasons']
 seriesId = series.first['showId']
 streaming = db.query("SELECT * FROM streaming WHERE seriesId = '" + seriesId.to_s + "';")
 streaming = streaming.to_a
+
+
 
 puts "<!DOCTYPE html>"
 puts "<html lang=\"en\">"
@@ -73,9 +87,10 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
-        puts "<button class=\"reviewButton\" data-bs-toggle=\"toggle\" data-bs-target=\"#CreateReview\">REVIEW</button>"
+        puts "<button class=\"reviewButton\" data-bs-toggle=\"toggle\" data-bs-target=\"#CreateReview\">&#128488</button>"
         #puts "<button class=\"rateButton\">STARS</button>"
 
+        puts '<section class="Rating">'
         (0...5).each do |i|
           puts '<form action="threebuttons.cgi" method="POST">'
           puts '<button class="fa fa-star"></button>'
@@ -85,9 +100,10 @@ puts "<body id=\"showsPage\">"
           puts '<input type="hidden" name="rated" value="TRUE">'
           puts '</form>'
         end
+        puts '</section>'
 
         puts "<div class=\"seasonDropdown\">"
-        puts "<button class=\"menuButton\">MENU</button>"
+        puts "<button class=\"menuButton\">...</button>"
         puts "<div class=\"dropseason-content\">"
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Want to Watch</button>"
@@ -174,6 +190,7 @@ puts "<body id=\"showsPage\">"
         puts "<button class=\"reviewButton\" data-bs-toggle=\"toggle\" data-bs-target=\"#CreateReview\">REVIEW</button>"
         # puts "<button class=\"rateButton\">STARS</button>"
 
+        puts '<section class="Rating">'
         (0...5).each do |i|
           puts '<form action="threebuttons.cgi" method="POST">'
           puts '<button class="fa fa-star"></button>'
@@ -184,9 +201,10 @@ puts "<body id=\"showsPage\">"
           puts '<input type="hidden" name="rated" value="TRUE">'
           puts '</form>'
         end
+        puts '</section>'
 
         puts "<div class=\"seasonDropdown\">"
-        puts "<button class=\"menuButton\">MENU</button>"
+        puts "<button class=\"menuButton\">...</button>"
         puts "<div class=\"dropseason-content\">"
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Want to Watch</button>"
@@ -239,8 +257,9 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts "<button class=\"reviewButton\" data-bs-toggle=\"toggle\" data-bs-target=\"#CreateReview\">REVIEW</button>"
-        #puts "<button class=\"rateButton\">STARS</button>"
 
+
+        puts '<section class="Rating">'
         (0...5).each do |i|
           puts '<form action="threebuttons.cgi" method="POST">'
           puts '<button class="fa fa-star"></button>'
@@ -251,9 +270,10 @@ puts "<body id=\"showsPage\">"
           puts '<input type="hidden" name="rated" value="TRUE">'
           puts '</form>'
         end
+        puts '</section>'
 
         puts "<div class=\"seasonDropdown\">"
-        puts "<button class=\"menuButton\">MENU</button>"
+        puts "<button class=\"menuButton\">...</button>"
         puts "<div class=\"dropseason-content\">"
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Want to Watch</button>"
