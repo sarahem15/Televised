@@ -24,6 +24,10 @@ body {
     color: white;
 }
 
+#userReview{
+    height: 200px;
+}
+
 #slogan{
     text-align: center;
     position: relative;
@@ -460,7 +464,6 @@ button:hover {
     width:  50px;
     border-radius: 50%;
     display: inline-block;
-    object-fit: cover;
   }
   .ReviewIndiv .ReviewContent .UserDisplay {
     display: grid;
@@ -483,11 +486,10 @@ button:hover {
   }
 
 .UserDisplay img{
-    height: 65px;
-    width:  65px;
+    height: 50px;
+    width:  50px;
     border-radius: 50%;
     display: inline-block;
-    object-fit: cover;
   }
 
 .UserDisplay {
@@ -581,7 +583,7 @@ button:hover {
 
 .listImages {
     display: grid;
-    grid-template-columns: auto 65%;
+    grid-template-columns: repeat(2, auto);
     margin: auto;
 }
 
@@ -741,15 +743,4 @@ button:hover {
 #profileSettings .TopFiveProfile form {
     display: grid;
     grid-template-columns: repeat(3, auto);
-}
-
-#createNewList .container-fluid {
-    display: grid;
-    grid-template-columns: 80% auto;
-}
-
-#episodePage img {
-    object-fit: cover;
-    width: 33%;
-    height: auto;
 }
