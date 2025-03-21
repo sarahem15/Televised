@@ -132,9 +132,9 @@ puts '                const imgSrc = imgElement && imgElement.tagName === "IMG" 
 puts '                const seriesID = form.querySelector("input[name=\'seriesID\']").value;' 
 puts ''
 puts '                if (!selectedSeries.some(series => series.seriesID === seriesID)) {' 
-puts '                    selectedSeries.push({ showName, imgSrc, seriesID });' 
+puts '                    selectedSeries.push({ showName: showName, imgSrc: imgSrc, seriesID: seriesID });' 
 puts '                    updateSeriesList();' 
-puts '                    console.log("Updated selectedSeries array:", selectedSeries);' // Logs the entire array
+puts '                    console.log("Updated selectedSeries array:", JSON.stringify(selectedSeries, null, 2));' // Debugging
 puts '                }' 
 puts '            });' 
 puts '        });' 
@@ -146,10 +146,9 @@ puts '        seriesList.innerHTML = "";'
 puts '        selectedSeries.forEach(series => {' 
 puts '            const listItem = document.createElement("li");' 
 puts '            listItem.className = "list-group-item d-flex align-items-center";' 
-puts '            listItem.innerHTML = `' 
-puts '                <img src="${series.imgSrc}" alt="${series.showName}" style="height: 50px; width: 35px; object-fit: cover; margin-right: 10px;">'
-puts '                <span>${series.showName}</span>' 
-puts '            `;' 
+puts '            listItem.innerHTML = ' 
+puts '                "<img src=\'" + series.imgSrc + "\' alt=\'" + series.showName + "\' style=\'height: 50px; width: 35px; object-fit: cover; margin-right: 10px;\'>" +'
+puts '                "<span>" + series.showName + "</span>";' 
 puts '            seriesList.appendChild(listItem);' 
 puts '        });' 
 puts '    }' 
@@ -157,6 +156,7 @@ puts ''
 puts '    attachAddButtons(); // Ensure buttons work after loading'
 puts '});'
 puts '</script>'
+
 
 
 puts '</body>'
