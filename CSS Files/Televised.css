@@ -24,10 +24,6 @@ body {
     color: white;
 }
 
-#userReview{
-    height: 200px;
-}
-
 #slogan{
     text-align: center;
     position: relative;
@@ -59,7 +55,7 @@ html {
 }
 
 /* M'Kiyah's Pages Backgrounds */
-#discoverPage, #discoverTwo, #discoverAlphabet, #showsPage, #listContent, #episodePage, #profile {
+#discoverPage, #showsPage, #listContent, #episodePage, #profile, #reviewIndiv, #profileReviews, #userRatings {
     background-color: #140044;
     min-height: 100vh;
     margin: 0;
@@ -343,7 +339,7 @@ button:hover {
 
 
     .editButtons{
-        width: 400px;
+        width: 500px;
         height: auto;
         display: grid;
         grid-template-columns: repeat(4, auto);
@@ -396,15 +392,10 @@ button:hover {
     width: 95px;
     height: 100%;
     border-radius: 40%;
+    font-size: 40px;
+    padding: 0;
   }
   
-  .rateButton{
-    background-color: #436eb1;
-    color: white;
-    width: 95px;
-    height: 100%;
-    border-radius: 40%;
-  }
   
   .menuButton{
     background-color: #436eb1;
@@ -412,6 +403,7 @@ button:hover {
     width: 95px;
     height: 100%;
     border-radius: 40%;
+    padding: 0;
   }
 
 
@@ -432,7 +424,7 @@ button:hover {
     padding:  5px;
     border-radius: 5%;
     height: 90%;
-    width: 90%;
+    width: 95%;
 
     h3 {
         font-size: 15px;
@@ -464,6 +456,7 @@ button:hover {
     width:  50px;
     border-radius: 50%;
     display: inline-block;
+    object-fit: cover;
   }
   .ReviewIndiv .ReviewContent .UserDisplay {
     display: grid;
@@ -486,10 +479,11 @@ button:hover {
   }
 
 .UserDisplay img{
-    height: 50px;
-    width:  50px;
+    height: 65px;
+    width:  65px;
     border-radius: 50%;
     display: inline-block;
+    object-fit: cover;
   }
 
 .UserDisplay {
@@ -503,6 +497,12 @@ button:hover {
 .UserDisplay h3 {
     padding-left: 10px;
     padding-top: 5px;
+}
+
+#homePage .UserDisplay h3 {
+    padding-left: 10px;
+    padding-top: 5px;
+    font-size: 12px;
 }
 
   .contentList {
@@ -583,7 +583,7 @@ button:hover {
 
 .listImages {
     display: grid;
-    grid-template-columns: repeat(2, auto);
+    grid-template-columns: auto 65%;
     margin: auto;
 }
 
@@ -743,4 +743,157 @@ button:hover {
 #profileSettings .TopFiveProfile form {
     display: grid;
     grid-template-columns: repeat(3, auto);
+}
+
+#createNewList .container-fluid {
+    display: grid;
+    grid-template-columns: 80% auto;
+}
+
+#episodePage img {
+    object-fit: cover;
+    width: 33%;
+    height: auto;
+}
+
+.Rating {
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+    background-color: #436eb1;
+    color: white;
+    height: 100%;
+    width: 130px;
+    border-radius: 40%;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.Rating button {
+    background-color: transparent;
+    width: 15px;
+    padding: 0;
+    font-size: 25px;
+    text-align: center;
+    margin-top: 60%;
+}
+
+.Rating button:hover {color: gray;}
+
+.LIKES {
+    background-color: transparent;
+    color: white;
+    font-size: 30px;
+    padding: 0;
+}
+
+.LIKES:hover {color: pink; background-color: transparent;}
+
+.LIKES active {
+    color: red;
+}
+
+#homePage .ReviewIndiv .ReviewContent a {
+    text-decoration: none;
+    color: white;
+}
+
+#homePage .ReviewIndiv .ReviewContent a h3 {
+    font-size: 110%;
+}
+
+#homePage .ReviewContent .UserDisplay a h3 {
+    font-size: 80%;
+}
+
+#homePage .ReviewIndiv .ReviewContent a:hover {color: lightblue;}
+
+#reviewIndiv .originalReview .content-R .Rating , #profileReviews .originalReview .content-R .Rating , #userRatings .listWrapper .content-R .Rating {
+    display: grid;
+    grid-template-columns: repeat(5, auto);
+    background-color: transparent;
+    height: 100%;
+    width: 150px;
+    border-radius: 40%;
+    padding: 10px;
+}
+
+#reviewIndiv .originalReview .content-R .Rating i, #profileReviews .originalReview .content-R .Rating i , #userRatings .listWrapper .content-R .Rating i{
+    background-color: transparent;
+    width: 15px;
+    padding: 2;
+    font-size: 25px;
+    text-align: center;
+    margin-top: 0%;
+    color: #5C70C4;
+}
+
+.originalReview {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+}
+
+.originalReview img {
+    height: 350px;
+    margin: auto;
+}
+
+.originalReview .content-R {
+    height: 50px;
+}
+
+#reviewIndiv .UserDisplay img {
+    height: 50px;
+    width: 50px;
+}
+
+#reviewIndiv .NameAndYear {
+    display: grid;
+    grid-template-columns: auto auto;
+    width: 50%;
+}
+
+#reviewIndiv .UserDisplay h3 {
+    font-size: 20px;
+    margin: auto;
+}
+
+#reviewIndiv .content-Reply {
+    margin-left:  100px;
+}
+
+#profileReviews .originalReview img {
+    width: 200px;
+    height: 275px;
+    object-fit: cover;
+}
+
+.profileHeader {
+    display: grid;
+    grid-template-columns: repeat(7, auto);
+    width: 80%;
+    margin:  auto;
+}
+.profileHeader a {
+    color: #5c70c4;
+    float: left;
+    padding: 2px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+    font-size: 25px;
+    margin:  auto;
+}
+
+.profileHeader a.active {
+    text-decoration: underline;
+    color: white;
+}
+
+#homePage p {
+    margin-left: 80px;
+    font-size: 25px;
+}
+
+#userRatings .listWrapper {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
 }
