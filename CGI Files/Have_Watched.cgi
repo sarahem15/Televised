@@ -10,16 +10,8 @@ require 'cgi/session'
 
 # Initialize CGI
 cgi = CGI.new
-=begin
-session_id = cgi.cookies['CGISESSID']&.value.first
-if session_id
-  session = CGI::Session.new(cgi, 'session_id' => session_id)
-else
-  session = CGI::Session.new(cgi)
-=end
 session = CGI::Session.new(cgi)
 username = session['username']
-
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -54,7 +46,7 @@ puts '<body id="profile">'
   puts '<br>'
   puts '<section class="ProfileInfo">'
   puts '<section class="UserDisplay">'
-    puts '<img src="./Episodes/adventureTime1.1.jpg" alt="testing123">'
+    puts '<img src="ProfileImages/' + username.to_s + '.jpg" alt="">'
     puts '<h3 id="DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
   puts '</section>'
 puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
@@ -66,9 +58,9 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
       puts '<a href="#" class="active">Have Watched</a>'
       puts '<a href="Want_to_Watch.cgi">Want to Watch</a>'
       puts '<a href="Profile_Lists.cgi">Lists</a>'
-      puts '<a href="#">Reviews</a>'
+      puts '<a href="Profile_Reviews.cgi">Reviews</a>'
       puts '<a href="Likes_Lists.cgi">Likes</a>'
-      puts '<a href="#">Ratings</a>'
+      puts '<a href="Profile_Ratings.cgi">Ratings</a>'
     puts '</div>'
   puts '<hr>'
   puts '<br>'

@@ -7,11 +7,17 @@ require 'cgi/session'
 $stdout.sync = true
 $stderr.reopen $stdout
 # Print HTTP header
-print "Content-type: text/html\r\n\r\n"
+#print "Content-type: text/html\r\n\r\n"
 
 # Initialize CGI
 cgi = CGI.new
 session = CGI::Session.new(cgi)
+
+# set the username to invalid or default or something here so we catch it is needs be 
+username = "invalid"
+print cgi.header(
+		 'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
+		 )
 
 # Retrieve form parameters
 unameCreateInput = cgi['unameCreateInput']
@@ -72,10 +78,9 @@ if fromCreate == "true"
     
     db.query("INSERT INTO account (username, password, displayName) VALUES ('" + cgi['unameCreateInput'] + "','" + cgi['passCreateInput'] + "','" + cgi['unameCreateInput'] + "');")
     session['username'] = unameCreateInput
+    session.update
     session.close
-    print cgi.header(
-    'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
-    )
+
   else
     puts '<script>console.log("User made bad name, let them know and retry")</script>'
     puts "<script>"
@@ -121,10 +126,8 @@ if attempting == "true"
     #puts 'window.attachLoggedInEvents();'
     puts '</script>'
     session['username'] = unameSignInInput
+    session.update
     session.close
-    print cgi.header(
-    'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
-    )
   else
     puts "<script>"
     puts 'console.log("Login failed!")' 

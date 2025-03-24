@@ -124,7 +124,7 @@ puts '<body id="profileSettings">'
                     puts '</select>'
                     puts '<br>'
                     puts '<span>Avatar</span>'
-                    puts '<input type="File" name="fileName" accept="image/png, image/jpeg">'
+                    puts '<input type="File" name="fileName" accept="image/png, image/jpeg, image/jpg">'
                     puts '<br>'
                     puts '<br>'
                     puts '<br>'
@@ -191,17 +191,19 @@ puts '<body id="profileSettings">'
                     (0...5).each do |i|
                         puts '<div class="item">'
                             puts '<form action="series.cgi" method="POST">'
-                            if (i <= topSeriesImage.size)
-                                if (topSeriesImage[i]['ranking'] == i + 1)
+                            #puts topSeriesImage.size
+                            if (i < topSeriesImage.size)
+                                if (topSeriesImage[i]['ranking'].to_i == (i + 1))
                                     puts '<input type="image" src="' + topSeriesImage[i]['imageName'] + '" alt="' + topSeriesImage[i]['imageName'] + '" style=" height: 100px; width: 80px">'
+                                    puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
                                 else
                                     puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
+                                    puts '<input type="hidden" name="clicked_image" value="">'
                                 end
-                                puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
                             else
-                                puts '<input type="image" src="" alt="hee" style=" height: 100px; width: 80px">'
+                                puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
+                                puts '<input type="hidden" name="clicked_image" value="">'
                             end
-                                puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
                                 puts '<input type="hidden" name="seasonNumber" value="1">'
                             puts '</form>'
                         puts '</div>'
@@ -216,17 +218,18 @@ puts '<body id="profileSettings">'
                     (0...5).each do |i|
                         puts '<div class="item">'
                             puts '<form action="series.cgi" method="POST">'
-                            if (i <= topSeriesImage.size)
-                                if (topSeriesImage[i]['ranking'] == i + 1)
+                            if (i < topSeriesImage.size)
+                                if (topSeriesImage[i]['ranking'].to_i == (i + 1))
                                     puts '<input type="image" src="' + topSeriesImage[i]['imageName'] + '" alt="' + topSeriesImage[i]['imageName'] + '" style=" height: 100px; width: 80px">'
+                                    puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
                                 else
                                     puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
+                                    puts '<input type="hidden" name="clicked_image" value="">'
                                 end
-                                puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
                             else
-                                puts '<input type="image" src="" alt="hee" style=" height: 100px; width: 80px">'
+                                puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
+                                puts '<input type="hidden" name="clicked_image" value="">'
                             end
-                                puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
                                 puts '<input type="hidden" name="seasonNumber" value="1">'
                             puts '</form>'
                         puts '</div>'
@@ -241,17 +244,18 @@ puts '<body id="profileSettings">'
                     (0...5).each do |i|
                         puts '<div class="item">'
                             puts '<form action="series.cgi" method="POST">'
-                            if (i <= topSeriesImage.size)
-                                if (topSeriesImage[i]['ranking'] == i + 1)
+                            if (i < topSeriesImage.size)
+                                if (topSeriesImage[i]['ranking'].to_i == (i + 1))
                                     puts '<input type="image" src="' + topSeriesImage[i]['imageName'] + '" alt="' + topSeriesImage[i]['imageName'] + '" style=" height: 100px; width: 80px">'
+                                    puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
                                 else
                                     puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
+                                    puts '<input type="hidden" name="clicked_image" value="">'
                                 end
-                                puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
                             else
-                                puts '<input type="image" src="" alt="hee" style=" height: 100px; width: 80px">'
+                                puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
+                                puts '<input type="hidden" name="clicked_image" value="">'
                             end
-                                puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
                                 puts '<input type="hidden" name="seasonNumber" value="1">'
                             puts '</form>'
                         puts '</div>'

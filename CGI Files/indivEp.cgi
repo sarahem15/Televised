@@ -6,7 +6,12 @@ puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
 
+require 'cgi/session'
+
 cgi = CGI.new
+session = CGI::Session.new(cgi)
+username = session['username']
+
 episodeName = cgi['ep_name']
 showName = cgi['show_name']
 epNum = cgi['ep_num']
@@ -90,7 +95,9 @@ puts "<body id=\"episodePage\">"
         end
 
         puts "<div class=\"seasonDropdown\">"
-        puts "<button class=\"menuButton\">MENU</button>"
+        puts '<button class="menuButton"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
+  <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
+</svg></button>'
         puts "<div class=\"dropseason-content\">"
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Want to Watch</button>"

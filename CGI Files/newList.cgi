@@ -1,13 +1,17 @@
 #!/usr/bin/ruby
 require 'mysql2'
 require 'cgi'
+require 'cgi/session'
 
 # Enable debugging
 $stdout.sync = true
 $stderr.reopen $stdout
 
 # Initialize CGI
+
 cgi = CGI.new
+session = CGI::Session.new(cgi)
+username = session['username']
 
 # Retrieve form parameters
 listName = cgi['listName']

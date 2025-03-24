@@ -7,13 +7,10 @@ $stderr.reopen $stdout
 puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
-require 'cgi/session'
 
 # Initialize CGI
 cgi = CGI.new
-session = CGI::Session.new(cgi)
-username = session['username']
-#username = "try@try"
+username = cgi['username']
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -21,11 +18,12 @@ db = Mysql2::Client.new(
     password: 'TV_Group123!', 
     database: 'televised_w25'
   )
-lists = db.query("SELECT DISTINCT name, description FROM curatedListSeries WHERE username = '" + username.to_s + "';")
-lists = lists.to_a
+ratings = db.query("SELECT DISTINCT seriesId, rating FROM seriesRating WHERE username = '" + username.to_s + "';")
+ratings = ratings.to_a
 #seriesImages = db.query("SELECT imageName FROM series;")
 #seriesImages = seriesImages.to_a()
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
+
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
 
@@ -38,9 +36,11 @@ puts '<meta charset="UTF-8">'
   puts '<title>Televised</title>'
   puts '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">'
   puts '<link rel="stylesheet" href="Televised.css">'
+  puts '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">'
+  puts '<script src="fetch-data-loader.js"></script>'
 puts '</head>'
 
-puts '<body id="profile">'
+puts '<body id="userRatings">'
   puts '<nav id="changingNav"></nav> <!-- This is where the navbar will be dynamically loaded -->'
   puts '<div class="container-fluid">'
   puts '<br>'
@@ -54,13 +54,10 @@ puts '<body id="profile">'
   puts '</section>'
   puts '<hr>'
      puts '<div class="profileHeader">'
-      puts '<a href="Profile.cgi">Profile</a>'
-      puts '<a href="Have_Watched.cgi">Have Watched</a>'
-      puts '<a href="Want_to_Watch.cgi">Want to Watch</a>'
-      puts '<a href="#!" class="active">Lists</a>'
-      puts '<a href="Profile_Reviews.cgi">Reviews</a>'
-      puts '<a href="Likes_Lists.cgi">Likes</a>'
-      puts '<a href="Profile_Ratings.cgi">Ratings</a>'
+      puts '<a href="othersProfiles.cgi?username=' + username + '">Profile</a>'
+      puts '<a href="userRatings.cgi?username=' + username + '" >Lists</a>'
+      puts '<a href="userReviews.cgi?username=' + username + '">Reviews</a>'
+      puts '<a href="#!" class="active">Ratings</a>'
     puts '</div>'
   puts '<hr>'
   puts '<br>'
@@ -71,37 +68,32 @@ puts '<body id="profile">'
       puts '<a href="#">Seasons</a>'
       puts '<a href="#">Episodes</a>'
     puts '</div>'
-    puts '<button id="newListProfile" class="createListButton"> <a href="createNewList.cgi"> Create a New List </a> </button>'
 puts '</div>'
 
-(0...lists.size).each do |i|
+(0...ratings.size).each do |i|
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
-  puts '<div class="listImages">'
     puts '<div class="listWrapper">'
-        puts '<section class="carousel-section" id="listsPlease">'
-        listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
-        listImages = listImages.to_a
-        (0...5).each do |j|
-
-        puts '<div class="itemS">'
-        if (j < listImages.size)
-            puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '">'
-        else
-          puts '<img src="" alt="">'
-        end
-        puts '</div>'
-        end
+        rateImages = db.query("SELECT imageName, showName, year FROM series JOIN seriesRating ON series.showId = seriesRating.seriesId WHERE username = '" + username.to_s + "';")
+        rateImages = rateImages.to_a
+        puts "<img src=\"" + rateImages[i]['imageName'] + "\"alt=\"" + rateImages[i]['imageName'] + "\" style='width: 100px; height: 150px;'>" 
+  puts '<div class="content-R">'
+      puts '<br>'
+      puts '<section class="NameAndYear">'
+      puts '<h3>' + rateImages[i]['showName'] + '</h3>'
+      puts '<h3 style="color: #436eb1;">' + rateImages[i]['year'].to_s + '</h3>'
       puts '</section>'
-      puts '</div>'
-      puts '<div>'
-      puts '<section class="titleDate">'
-      puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '">' + lists[i]['name'] + '</a>'
-      puts '<h4>DATE</h4>'
-      puts '</section>'
+  puts '<section class="Rating">'
+          (0...5).each do |j|
+            if (j < ratings[i]['rating'].to_i)
+                puts '<i class="fa fa-star" style="color: white;"></i>'
+            else
+              puts '<i class="fa fa-star"></i>'
+            end
+          end
+        puts '</section>'
+  puts '</div>'
+  puts '</div>'
 
-      puts '<h3>' + lists[i]['description'] +'</h3>'
-      puts '</div>'
-    puts '</div>'
     puts '<br>'
 end
     puts '<!-- Scripts -->'
@@ -110,4 +102,3 @@ end
   puts '<script src="Televised.js"></script>'
 puts '</body>'
 puts '</html>'
-session.close

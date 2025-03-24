@@ -14,6 +14,7 @@ require 'cgi/session'
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
+#username = "try@try"
 seriesId = cgi['seriesID']
 
 db = Mysql2::Client.new(
@@ -59,11 +60,15 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<div class="listImages">'
     puts '<div class="listWrapper">'
         puts '<section class="carousel-section" id="listsPlease">'
-        listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+        listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE name = '" + lists[i]['name'] + "';")
         listImages = listImages.to_a
         (0...5).each do |j|
         puts '<div class="itemS">'
+        if (j < listImages.size)
             puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '">'
+        else
+            puts '<img src="" alt="">'
+        end
         puts '</div>'
         end
       puts '</section>'

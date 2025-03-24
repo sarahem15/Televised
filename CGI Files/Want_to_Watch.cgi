@@ -12,7 +12,6 @@ require 'cgi/session'
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
-
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -47,7 +46,7 @@ puts '<body id="profile">'
   puts '<br>'
   puts '<section class="ProfileInfo">'
   puts '<section class="UserDisplay">'
-    puts '<img src="./Episodes/adventureTime1.1.jpg" alt="testing123">'
+    puts '<img src="ProfileImages/' + username.to_s + '.jpg" alt="">'
     puts '<h3 id=" DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
   puts '</section>'
   puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
@@ -59,11 +58,12 @@ puts '<body id="profile">'
       puts '<a href="Have_Watched.cgi">Have Watched</a>'
       puts '<a href="#!" class="active">Want to Watch</a>'
       puts '<a href="Profile_Lists.cgi">Lists</a>'
-      puts '<a href="#">Reviews</a>'
+      puts '<a href="Profile_Reviews.cgi">Reviews</a>'
       puts '<a href="Likes_Lists.cgi">Likes</a>'
-      puts '<a href="#">Ratings</a>'
+      puts '<a href="Profile_Ratings.cgi">Ratings</a>'
     puts '</div>'
   puts '<hr>'
+  puts '<br>'
   puts '<div class="profileListHeader">'
       if seriesTab == "SERIES"
       puts '<a href="#"class="active">Series</a>'
@@ -86,7 +86,6 @@ puts '<body id="profile">'
       images = images.to_a
   end
     puts '</div>'
-  puts '<br>'
 
 
 

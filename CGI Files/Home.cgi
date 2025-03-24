@@ -5,8 +5,12 @@ $stderr.reopen $stdout
 puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
+require 'cgi/session'
 
 cgi = CGI.new
+session = CGI::Session.new(cgi)
+
+username = session['username']
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -20,6 +24,9 @@ series = series.to_a
 
 sortedSeries = db.query("SELECT * FROM series ORDER BY year DESC;")
 sortedSeries = sortedSeries.to_a
+
+reviews = db.query("SELECT * FROM seriesReview")
+reviews = reviews.to_a
 
 puts'<!DOCTYPE html>'
 puts'<html lang="en">'
@@ -140,26 +147,30 @@ puts '<br>'
 puts '<!-- reviews -->'
 puts '<p> Popular Reviews </p>'
 puts '<section class="homeReviews">'
+    
 
-(0...4).each do
+(0...4).each do |i|
+    seriesImage = db.query("SELECT imageName, showName FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id = '" + reviews[i]['id'].to_s + "';")
+    
 puts '<div class="ReviewIndiv">'
   puts '<section class="SeriesImg">'
-    puts '<img src="TheUmbrellaAcademy.jpg" alt="The Umbrella Academy">'
+    puts '<img src="' + seriesImage.first['imageName'] + '" alt="">'
   puts '</section>'
   puts '<div class="ReviewContent">'
       puts '<section class="UserDisplay">'
-         puts '<img src="./Episodes/adventureTime1.1.jpg" alt="here">'
-          puts '<h3> Username </h3>'
+         puts '<img src="./ProfileImages/' + reviews[i]['username'] + '.jpg" alt="">'
+          puts '<a href="othersProfiles.cgi?username=' + reviews[i]['username'] + '"><h3>' + reviews[i]['username'] + '</h3></a>'
       puts '</section>'
       puts '<br>'
+      puts '<a href="reviewIndiv.cgi?reviewId=' + reviews[i]['id'].to_s + '">'
+        puts '<h3>' + seriesImage.first['showName'] + '</h3>'
+      puts '</a>'
       puts '<br>'
-      puts '<h4> This show is great! </h4>'
-      puts '<section class="Likes">'
-        puts '<h5>&#9829</h5>'
-        puts '<h4>12</h4>'
-      puts '</section>'
+      puts '<h6>' + reviews[i]['review'] + '</h6>'
+      puts '<button class="LIKES" style="color: pink;">&#10084</button>'
   puts '</div>'
 puts '</div>'
+
 end
 
 puts '</section>'

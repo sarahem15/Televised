@@ -7,13 +7,13 @@ $stderr.reopen $stdout
 puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
-require 'cgi/session'
+#require 'cgi/session'
 
 # Initialize CGI
 cgi = CGI.new
-session = CGI::Session.new(cgi)
-username = session['username']
-#username = "try@try"
+#session = CGI::Session.new(cgi)
+#username = session['username']
+username = cgi['username']
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -26,6 +26,7 @@ lists = lists.to_a
 #seriesImages = db.query("SELECT imageName FROM series;")
 #seriesImages = seriesImages.to_a()
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
+
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
 
@@ -54,13 +55,10 @@ puts '<body id="profile">'
   puts '</section>'
   puts '<hr>'
      puts '<div class="profileHeader">'
-      puts '<a href="Profile.cgi">Profile</a>'
-      puts '<a href="Have_Watched.cgi">Have Watched</a>'
-      puts '<a href="Want_to_Watch.cgi">Want to Watch</a>'
+      puts '<a href="othersProfiles.cgi?username=' + username + '">Profile</a>'
       puts '<a href="#!" class="active">Lists</a>'
-      puts '<a href="Profile_Reviews.cgi">Reviews</a>'
-      puts '<a href="Likes_Lists.cgi">Likes</a>'
-      puts '<a href="Profile_Ratings.cgi">Ratings</a>'
+      puts '<a href="userReviews.cgi?username=' + username + '">Reviews</a>'
+      puts '<a href="userRatings.cgi?username=' + username + '">Ratings</a>'
     puts '</div>'
   puts '<hr>'
   puts '<br>'
@@ -71,7 +69,6 @@ puts '<body id="profile">'
       puts '<a href="#">Seasons</a>'
       puts '<a href="#">Episodes</a>'
     puts '</div>'
-    puts '<button id="newListProfile" class="createListButton"> <a href="createNewList.cgi"> Create a New List </a> </button>'
 puts '</div>'
 
 (0...lists.size).each do |i|
@@ -82,14 +79,13 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
         listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
         listImages = listImages.to_a
         (0...5).each do |j|
-
-        puts '<div class="itemS">'
-        if (j < listImages.size)
-            puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '">'
-        else
-          puts '<img src="" alt="">'
-        end
-        puts '</div>'
+          puts '<div class="itemS">'
+          if (j < listImages.size)
+              puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '">'
+          else
+            puts '<img src="" alt="">'
+          end
+          puts '</div>'
         end
       puts '</section>'
       puts '</div>'
@@ -110,4 +106,4 @@ end
   puts '<script src="Televised.js"></script>'
 puts '</body>'
 puts '</html>'
-session.close
+#session.close
