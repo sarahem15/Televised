@@ -29,7 +29,7 @@ seriesImages = seriesImages.to_a()
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
-lists = db.query("SELECT name, description, username FROM curatedListSeries WHERE seriesId ='" + seriesId + "';")
+lists = db.query("SELECT name, description, username FROM curatedListSeries WHERE seriesId ='" + seriesId + "' AND privacy = 1;")
 lists = lists.to_a
 showName = db.query("SELECT showName FROM series WHERE showId = '" + seriesId + "';")
 

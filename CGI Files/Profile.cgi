@@ -22,6 +22,12 @@ db = Mysql2::Client.new(
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
+topFiveSeries = db.query("SELECT imageName FROM series JOIN topFiveSeries ON topFiveSeries.seriesId = series.showId WHERE username = '" + username.to_s + "';")
+topFiveSeries = topFiveSeries.to_a
+topFiveSeason = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN topFiveSeason ON topFiveSeason.seasonId = season.seasonId WHERE username = '" + username.to_s + "';")
+topFiveSeason = topFiveSeason.to_a
+topFiveEpisode = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN topFiveEpisode ON topFiveEpisode.epId = episode.epId WHERE username = '" + username.to_s + "';")
+
 
 puts "Content-type: text/html\n\n"
 puts '<!DOCTYPE html>'
@@ -68,7 +74,11 @@ puts '<body id="profile">'
       (0...5).each do |i|
         puts '<div class="item">'
           puts '<form action="series.cgi" method="POST">'
+          if i < topFiveSeries.size
+            puts '<input type="image" src="' + topFiveSeries[i]['imageName'] + '" alt="">'
+          else 
             puts '<input type="image" src="" alt="">'
+          end
             puts '<input type="hidden" name="clicked_image" value="">'
           puts '</form>'
         puts '</div>'
@@ -83,7 +93,11 @@ puts '<body id="profile">'
         (0...5).each do |i|
         puts '<div class="item">'
           puts '<form action="series.cgi" method="POST">'
+          if i < topFiveSeason.size
+            puts '<input type="image" src="' + topFiveSeason[i]['imageName'] + '" alt="">'
+          else
             puts '<input type="image" src="" alt="">'
+          end
             puts '<input type="hidden" name="clicked_image" value="">'
           puts '</form>'
         puts '</div>'
@@ -99,7 +113,11 @@ puts '<body id="profile">'
         (0...5).each do |i|
         puts '<div class="item">'
           puts '<form action="series.cgi" method="POST">'
+          if i < topFiveEpisode.size
+            puts '<input type="image" src="' + topFiveEpisode[i]['imageName'] + '" alt="">'
+          else
             puts '<input type="image" src="" alt="">'
+          end
             puts '<input type="hidden" name="clicked_image" value="">'
           puts '</form>'
         puts '</div>'

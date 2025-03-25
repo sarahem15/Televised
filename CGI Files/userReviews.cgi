@@ -20,8 +20,11 @@ username = cgi['username']
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
-seriesReviews = db.query("SELECT * FROM seriesReview WHERE username = '" + username.to_s + "';")
-seriesReviews = seriesReviews.to_a
+
+seriesTab = cgi['seriesTab']
+if seriesTab == ""
+  seriesTab = "SERIES"
+end
 
 puts'<head>'
   puts'<meta charset="UTF-8">'
@@ -48,23 +51,48 @@ puts'<body id="profileReviews">'
       puts '<a href="othersProfiles.cgi?username=' + username + '">Profile</a>'
       puts '<a href="userLists.cgi?username=' + username + '">Lists</a>'
       puts '<a href="#!" class="active">Reviews</a>'
-      puts '<a href="#">Ratings</a>'
+      puts '<a href="userRatings.cgi?username=' + username + '">Ratings</a>'
     puts '</div>'
   puts '<hr>'
   puts '<br>'
 
   puts '<div class="listProfileButtons">'
   puts '<div class="profileListHeader">'
-      puts '<a href="#!"class="active">Series</a>'
-      puts '<a href="#">Seasons</a>'
-      puts '<a href="#">Episodes</a>'
+      if seriesTab == "SERIES"
+      puts '<a href="#"class="active">Series</a>'
+      puts '<a href="userReviews.cgi?username=' + username + '&seriesTab=SEASON">Seasons</a>'
+      puts '<a href="userReviews.cgi?username=' + username + '&seriesTab=EP">Episodes</a>'
+      seriesReviews = db.query("SELECT * FROM seriesReview WHERE username = '" + username.to_s + "';")
+  elsif seriesTab == "SEASON"
+      puts '<a href="userReviews.cgi?username=' + username + '&seriesTab=SERIES">Series</a>'
+      puts '<a href="#" class="active">Seasons</a>'
+      puts '<a href="userReviews.cgi?username=' + username + '&seriesTab=EP">Episodes</a>'
+      seriesReviews = db.query("SELECT * FROM seasonReview WHERE username = '" + username.to_s + "';")
+  elsif seriesTab == "EP"
+      puts '<a href="userReviews.cgi?username=' + username + '&seriesTab=SERIES">Series</a>'
+      puts '<a href="userReviews.cgi?username=' + username + '&seriesTab=SEASON">Seasons</a>'
+      puts '<a href="#" class="active">Episodes</a>'
+      seriesReviews = db.query("SELECT * FROM episodeReview WHERE username = '" + username.to_s + "';")
+  end
+
+  seriesReviews = seriesReviews.to_a
     puts '</div>'
 puts '</div>'
 puts '<hr>'
 puts '<br>'
 (0...seriesReviews.size).each do |i|
-  seriesImage = db.query("SELECT imageName, showName, year FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id= '" + seriesReviews[i]['id'].to_s + "';")
-  reviewRating = db.query("SELECT rating FROM seriesRating JOIN seriesReview ON seriesRating.id = seriesReview.ratingId WHERE seriesReview.id = '" + seriesReviews[i]['id'].to_s + "';")
+  if seriesTab == "SERIES"
+    seriesImage = db.query("SELECT imageName, showName, year FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id= '" + seriesReviews[i]['id'].to_s + "';")
+    reviewRating = db.query("SELECT rating FROM seriesRating JOIN seriesReview ON seriesRating.id = seriesReview.ratingId WHERE seriesReview.id = '" + seriesReviews[i]['id'].to_s + "';")
+  elsif seriesTab == "SEASON"
+    seriesImage = db.query("SELECT imageName, showName, year FROM series JOIN season ON season.seriesId = series.showId JOIN seasonReview ON seasonReview.seasonId = season.seasonId WHERE seasonReview.id = '" + seriesReviews[i]['id'].to_s + "';")
+    reviewRating = db.query("SELECT rating FROM seasonRating JOIN seasonReview ON seasonRating.id = seasonReview.ratingId WHERE seasonReview.id = '" + seriesReviews[i]['id'].to_s + "';")
+  else
+     seriesImage = db.query("SELECT imageName, showName, year FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN episodeReview ON episodeReview.epId = episode.epId WHERE episodeReview.id = '" + seriesReviews[i]['id'].to_s + "';")
+     reviewRating = db.query("SELECT rating FROM episodeRating JOIN episodeReview ON episodeRating.id = episodeReview.ratingId WHERE episodeReview.id = '" + seriesReviews[i]['id'].to_s + "';") 
+  end
+
+
 puts '<div class="originalReview">'
 	puts "<img src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\">" 
 	puts '<div class="content-R">'

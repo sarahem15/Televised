@@ -6,7 +6,7 @@ puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
 require 'cgi/session'
-#username = "try@try"
+require 'open-uri'
 cgi = CGI.new
 time = Time.new
 session = CGI::Session.new(cgi)
@@ -267,11 +267,30 @@ puts "<body id=\"showsPage\">"
 
   puts "<hr>"
   
+  ############################
   epNum = 1
   episodes.each do |episode|
   # EP INFO FOR EACH
   puts "<div class=\"epInfo\">"
-    puts "<img src=\"./Episodes/" + seriesImage.split('.')[0] + seasonNumber.to_s + "." + epNum.to_s + ".1.jpg\" alt=\"" + seriesImage + "\" width=\"300\" height=\"225\">"
+
+    def url_exists?(url)
+      begin
+        URI.open(url)
+        true
+      rescue OpenURI::HTTPError, SocketError
+        false
+      end
+    end
+
+
+    imageSource = "https://cs.transy.edu/Televised/Episodes/" + seriesImage.split('.')[0] + seasonNumber.to_s + "." + epNum.to_s + ".1.jpg"
+    valid = url_exists?(imageSource)
+    if valid
+      puts "<img src=\"./Episodes/" + seriesImage.split('.')[0] + seasonNumber.to_s + "." + epNum.to_s + ".1.jpg\" alt=\"" + seriesImage + "\" width=\"300\" height=\"225\">"
+    else
+      puts "<img src=\"./Episodes/Televised.jpg\" alt=\"" + seriesImage + "\" width=\"300\" height=\"225\">"
+    end
+
     puts "<div class=\"words\">"
       puts "<a href=\"indivEp.cgi?ep_name=" + episode['epName'] + "&show_name=" + series.first['showName'] + "&seriesID=" + series.first['showId'].to_s + "&ep_num=" + epNum.to_s + "&seasonNumber=" + seasonNumber.to_s + "\"><h3 style=\"font-family: 'Times New Roman', Times, serif; text-align: left;\">" + epNum.to_s + ". " + episode['epName'] + "</h3></a>"
       puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + episode['runtime'].to_s + " minutes</h4>"
@@ -389,7 +408,7 @@ puts "            </div>"
 puts "            <div class='row'>"
 puts "              <div class='col'>"
 puts "            <section class='Rating'>"
-dumbCount = 1
+
 (0...5).each do |i|
  # puts "              <form action='threebuttons.cgi' method='POST'>"
   if (i < seriesRating)
@@ -459,7 +478,7 @@ puts "            </div>"
 puts "            <div class='row'>"
 puts "              <div class='col'>"
 puts "            <section class='Rating'>"
-dumbCount = 1
+
 (0...5).each do |i|
  # puts "              <form action='threebuttons.cgi' method='POST'>"
   if (i < seriesRating)
@@ -529,7 +548,7 @@ puts "            </div>"
 puts "            <div class='row'>"
 puts "              <div class='col'>"
 puts "            <section class='Rating'>"
-dumbCount = 1
+
 (0...5).each do |i|
  # puts "              <form action='threebuttons.cgi' method='POST'>"
   if (i < seriesRating)

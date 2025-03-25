@@ -29,6 +29,11 @@ displayName = db.query("SELECT displayName FROM account WHERE username = '" + us
 
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
+seriesTab = cgi['seriesTab']
+if seriesTab == ""
+  seriesTab = "SERIES"
+end
+
 
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -65,9 +70,25 @@ puts '<body id="profile">'
 
   puts '<div class="listProfileButtons">'
   puts '<div class="profileListHeader">'
+      if seriesTab == "SERIES"
       puts '<a href="#"class="active">Series</a>'
-      puts '<a href="#">Seasons</a>'
-      puts '<a href="#">Episodes</a>'
+      puts '<a href="userLists.cgi?username=' + username + '&seriesTab=SEASON">Seasons</a>'
+      puts '<a href="userLists.cgi?username=' + username + '&seriesTab=EP">Episodes</a>'
+      ratings = db.query("SELECT DISTINCT seriesId, rating FROM seriesRating WHERE username = '" + username.to_s + "';")
+      ratings = ratings.to_a
+  elsif seriesTab == "SEASON"
+      puts '<a href="userLists.cgi?username=' + username + '&seriesTab=SERIES">Series</a>'
+      puts '<a href="#" class="active">Seasons</a>'
+      puts '<a href="userLists.cgi?username=' + username + '&seriesTab=EP">Episodes</a>'
+      ratings = db.query("SELECT DISTINCT seasonId, rating FROM seasonRating WHERE username = '" + username.to_s + "';")
+      ratings = ratings.to_a
+  elsif seriesTab == "EP"
+      puts '<a href="userLists.cgi?username=' + username + '&seriesTab=SERIES">Series</a>'
+      puts '<a href="userLists.cgi?username=' + username + '&seriesTab=SEASON">Seasons</a>'
+      puts '<a href="#" class="active">Episodes</a>'
+      ratings = db.query("SELECT DISTINCT epId, rating FROM episodeRating WHERE username = '" + username.to_s + "';")
+      ratings = ratings.to_a
+  end
     puts '</div>'
 puts '</div>'
 

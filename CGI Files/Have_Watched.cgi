@@ -70,19 +70,19 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
       puts '<a href="Have_Watched.cgi?seriesTab=SEASON">Seasons</a>'
       puts '<a href="Have_Watched.cgi?seriesTab=EP">Episodes</a>'
 
-      images = db.query("SELECT series.imageName FROM haveWatchedSeries JOIN series ON haveWatchedSeries.seriesId = series.showId WHERE haveWatchedSeries.username = '" + username.to_s + "';")
+      images = db.query("SELECT series.imageName, series.showName FROM haveWatchedSeries JOIN series ON haveWatchedSeries.seriesId = series.showId WHERE haveWatchedSeries.username = '" + username.to_s + "';")
       images = images.to_a
   elsif seriesTab == "SEASON"
       puts '<a href="Have_Watched.cgi?seriesTab=SERIES">Series</a>'
       puts '<a href="#" class="active">Seasons</a>'
       puts '<a href="Have_Watched.cgi?seriesTab=EP">Episodes</a>'
-      images = db.query("SELECT series.imageName FROM haveWatchedSeason JOIN season ON haveWatchedSeason.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE haveWatchedSeason.username = '" + username.to_s + "';")
+      images = db.query("SELECT series.imageName, series.showName FROM haveWatchedSeason JOIN season ON haveWatchedSeason.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE haveWatchedSeason.username = '" + username.to_s + "';")
       images = images.to_a
   elsif seriesTab == "EP"
       puts '<a href="Have_Watched.cgi?seriesTab=SERIES">Series</a>'
       puts '<a href="Have_Watched.cgi?seriesTab=SEASON">Seasons</a>'
       puts '<a href="#" class="active">Episodes</a>'
-      images = db.query("SELECT series.imageName FROM haveWatchedEpisode JOIN episode ON haveWatchedEpisode.epId = episode.epId JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE haveWatchedEpisode.username = '" + username.to_s + "';")
+      images = db.query("SELECT series.imageName, series.showName FROM haveWatchedEpisode JOIN episode ON haveWatchedEpisode.epId = episode.epId JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE haveWatchedEpisode.username = '" + username.to_s + "';")
       images = images.to_a
   end
 
@@ -104,7 +104,9 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
             puts '<input type="image" src="' + images[size]['imageName'] + '" alt="' + images[size]['imageName'] + '">'
             puts '<input type="hidden" name="clicked_image" value="' + images[size]['imageName'] + '">'
             puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+            puts images[size]['showName']
             size = size + 1
+
           puts '</form>'
         puts '</div>'
       end

@@ -26,6 +26,11 @@ displayName = db.query("SELECT displayName FROM account WHERE username = '" + us
 
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
+seriesTab = cgi['seriesTab']
+if seriesTab == ""
+  seriesTab = "SERIES"
+end
+
 
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -55,7 +60,7 @@ puts '<body id="userRatings">'
   puts '<hr>'
      puts '<div class="profileHeader">'
       puts '<a href="othersProfiles.cgi?username=' + username + '">Profile</a>'
-      puts '<a href="userRatings.cgi?username=' + username + '" >Lists</a>'
+      puts '<a href="userLists.cgi?username=' + username + '" >Lists</a>'
       puts '<a href="userReviews.cgi?username=' + username + '">Reviews</a>'
       puts '<a href="#!" class="active">Ratings</a>'
     puts '</div>'
@@ -64,17 +69,35 @@ puts '<body id="userRatings">'
 
   puts '<div class="listProfileButtons">'
   puts '<div class="profileListHeader">'
+      if seriesTab == "SERIES"
       puts '<a href="#"class="active">Series</a>'
-      puts '<a href="#">Seasons</a>'
-      puts '<a href="#">Episodes</a>'
+      puts '<a href="userRatings.cgi?username=' + username + '&seriesTab=SEASON">Seasons</a>'
+      puts '<a href="userRatings.cgi?username=' + username + '&seriesTab=EP">Episodes</a>'
+      ratings = db.query("SELECT DISTINCT seriesId, rating FROM seriesRating WHERE username = '" + username.to_s + "';")
+      rateImages = db.query("SELECT imageName, showName, year FROM series JOIN seriesRating ON series.showId = seriesRating.seriesId WHERE username = '" + username.to_s + "';")
+  elsif seriesTab == "SEASON"
+      puts '<a href="userRatings.cgi?username=' + username + '&seriesTab=SERIES">Series</a>'
+      puts '<a href="#" class="active">Seasons</a>'
+      puts '<a href="userRatings.cgi?username=' + username + '&seriesTab=EP">Episodes</a>'
+      ratings = db.query("SELECT DISTINCT seasonId, rating FROM seasonRating WHERE username = '" + username.to_s + "';")
+      rateImages = db.query("SELECT series.imageName, series.showName, series.year FROM series JOIN season ON series.showId = season.seriesId JOIN seasonRating ON seasonRating.seasonId = season.seasonId WHERE username = '" + username.to_s + "';")
+  elsif seriesTab == "EP"
+      puts '<a href="userRatings.cgi?username=' + username + '&seriesTab=SERIES">Series</a>'
+      puts '<a href="userRatings.cgi?username=' + username + '&seriesTab=SEASON">Seasons</a>'
+      puts '<a href="#" class="active">Episodes</a>'
+      ratings = db.query("SELECT DISTINCT epId, rating FROM episodeRating WHERE username = '" + username.to_s + "';")
+      rateImages = db.query("SELECT series.imageName, series.showName, series.year FROM series JOIN season ON series.showId = season.seriesId JOIN episode ON episode.seasonId = season.seasonId JOIN episodeRating ON episodeRating.epId = episode.epId WHERE username = '" + username.to_s + "';")
+  end
+
+      ratings = ratings.to_a
+      rateImages = rateImages.to_a
     puts '</div>'
 puts '</div>'
 
 (0...ratings.size).each do |i|
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
     puts '<div class="listWrapper">'
-        rateImages = db.query("SELECT imageName, showName, year FROM series JOIN seriesRating ON series.showId = seriesRating.seriesId WHERE username = '" + username.to_s + "';")
-        rateImages = rateImages.to_a
+        
         puts "<img src=\"" + rateImages[i]['imageName'] + "\"alt=\"" + rateImages[i]['imageName'] + "\" style='width: 100px; height: 150px;'>" 
   puts '<div class="content-R">'
       puts '<br>'

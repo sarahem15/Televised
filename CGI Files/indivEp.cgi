@@ -26,8 +26,8 @@ db = Mysql2::Client.new(
 
 #seriesImage = db.query("SELECT imageName FROM series WHERE showName = '" + showName + "';")
 episode = db.query("SELECT episode.* FROM episode JOIN season ON episode.seasonId = season.seasonId
-  JOIN series ON season.seriesId = series.showId WHERE episode.epName = '" + episodeName.gsub("'", "\\\\'") + "' AND series.showName = '" + showName.gsub("'", "\\\\'") + "';")
-
+JOIN series ON season.seriesId = series.showId WHERE episode.epName = '" + episodeName.gsub("'", "\\\\'") + "' AND series.showName = '" + showName.gsub("'", "\\\\'") + "';")
+episodeRating = 0
 #puts "<img src=\"./Episodes/" + seriesImage.split('.')[0] + seasonNumber.to_s + "." + epNum.to_s + ".1.jpg\" alt=\"" + seriesImage[0] + "\" width=\"300\" height=\"225\">"
 
 
@@ -75,17 +75,32 @@ puts "<body id=\"episodePage\">"
   puts "<br>"
   puts "<div class=\"editButtons\">"
       puts '<form action="threebuttons.cgi" method="POST">'
-        puts '<button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button>'
-        #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        alreadyWatchedEpisode = db.query("SELECT * FROM haveWatchedEpisode WHERE username = '" + username.to_s + "'AND epId = '" + episode.first['epId'].to_s + "';")
+        if (alreadyWatchedEpisode.to_a.to_s != "[]")
+          puts '<button class="watchedButton"><i class="eye-icon fa fa-eye" style="color: #6bdf10;"></i></button>'
+        else
+          puts '<button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button>'
+        end
+        #puts "<button class=\"watchedButton\">EYE</button>"
+        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="epID" value="' + episode.first['epId'].to_s + '">'
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
-        #puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
-        puts "<button class=\"reviewButton\">REVIEW</button>"
-        #puts "<button class=\"rateButton\">STARS</button>"
+        puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateEpisodeReview\">&#128488</button>"
 
+        alreadyRatedEpisode = db.query("SELECT * FROM episodeRating WHERE username = '" + username + "' AND epId = '" + episode.first['epId'].to_s + "';")
+          if (alreadyRatedEpisode.to_a.to_s != "[]")
+            episodeRating = alreadyRatedEpisode.first['rating'].to_i
+          end
+        puts '<section class="Rating">'
         (0...5).each do |i|
           puts '<form action="threebuttons.cgi" method="POST">'
-          puts '<button class="fa fa-star"></button>'
+          if (i < episodeRating)
+            puts '<button class="fa fa-star" style="color: yellow;"></button>'
+          else
+            puts '<button class="fa fa-star"></button>'
+          end
           puts '<input type="hidden" name="epRating" value="' + (i+1).to_s + '">'
           puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
           puts '<input type="hidden" name="epID" value="' + episode.first['epId'].to_s + '">'
@@ -93,7 +108,7 @@ puts "<body id=\"episodePage\">"
           puts '<input type="hidden" name="rated" value="TRUE">'
           puts '</form>'
         end
-
+        puts '</section>'
         puts "<div class=\"seasonDropdown\">"
         puts '<button class="menuButton"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
   <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
