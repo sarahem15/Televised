@@ -85,6 +85,10 @@ puts                    '<br>'
 puts                    '<input type="text" name="mediaEntered" class="top5search">'
 puts                    '<input type="submit" value="search">'
 puts                '</form>'
+
+#current issues: 1. make search not refresh the page when clicked 2. need to get the actual series name from the bd for the array 3. make the list not look ugly
+
+
 if (type == "Series" && search != "")
     images = db.query("SELECT showName, imageName, showId FROM series WHERE showName like '" + search + "%';")
     images = images.to_a
@@ -98,12 +102,12 @@ if (type == "Series" && search != "")
             #puts '<br>'
             #db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + images.first['showId'] + "', '" + ranking + "');")
             images[i]['imageName'] = ""
-            #puts '<form action="createNewList.cgi" method="POST">'
-            puts "<button id='addToList'>ADD</button>"
+            puts '<form action="createNewList.cgi" method="get">'
+            puts "<button id='addToList' type='submit'>ADD</button>"
             #puts '<input type="hidden" name="seriesID" value="' + images[i]['seriesId'].to_s + '">'
             #puts '<input type="hidden" name="wantToWatch" value="TRUE">'
             #puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
-            #puts '</form>'
+            puts '</form>'
         end
     else
         puts 'We can\'t seem to find this title!'
@@ -120,12 +124,18 @@ puts    '<script src="Televised.js"></script>'
 puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
 puts '    let seriesArray = [];'
+puts 'console.log("here1");'
 
 puts '    document.addEventListener("click", function (event) {'
+puts 'console.log("here2");'
 puts '        if (event.target.id === "addToList") {'
+puts 'console.log("here3");'
 puts '            event.preventDefault(); // Prevent default button behavior'
-puts '            let seriesName = event.target.previousSibling.textContent.trim(); // Get series name'
+puts '            let seriesName = "TestName"; '
+puts 'console.log("here4");'
+puts 'console.log(seriesName);'
 puts '            if (seriesName && !seriesArray.includes(seriesName)) {'
+puts 'console.log("here5");'
 puts '                seriesArray.push(seriesName);'
 puts '                updateSeriesList();'
 puts '            }'
@@ -133,10 +143,12 @@ puts '        }'
 puts '    });'
 
 puts '    function updateSeriesList() {'
+puts 'console.log("here6");'
 puts '        let listColumn = document.getElementById("seriesList");'
-puts '        listColumn.innerHTML = ""; // Clear the list before updating'
+#puts '        listColumn.innerHTML = ""; // Clear the list before updating'
 
 puts '        seriesArray.forEach(series => {'
+puts 'console.log("here7");'
 puts '            let listItem = document.createElement("li");'
 puts '            listItem.className = "list-group-item";'
 puts '            listItem.textContent = series;'
@@ -144,6 +156,7 @@ puts '            listColumn.appendChild(listItem);'
 puts '        });'
 puts '    }'
 puts '});'
+puts 'console.log(seriesArray);'
 puts '</script>'
 
 puts '</body>'
