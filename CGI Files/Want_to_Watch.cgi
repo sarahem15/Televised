@@ -76,13 +76,13 @@ puts '<body id="profile">'
       puts '<a href="Want_to_Watch.cgi?seriesTab=SERIES">Series</a>'
       puts '<a href="#" class="active">Seasons</a>'
       puts '<a href="Want_to_Watch.cgi?seriesTab=EP">Episodes</a>'
-      images = db.query("SELECT series.imageName FROM wantToWatchSeason JOIN season ON wantToWatchSeason.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE wantToWatchSeason.username = '" + username.to_s + "';")
+      images = db.query("SELECT series.imageName, season.seasonNum FROM wantToWatchSeason JOIN season ON wantToWatchSeason.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE wantToWatchSeason.username = '" + username.to_s + "';")
       images = images.to_a
   elsif seriesTab == "EP"
       puts '<a href="Want_to_Watch.cgi?seriesTab=SERIES">Series</a>'
       puts '<a href="Want_to_Watch.cgi?seriesTab=SEASON">Seasons</a>'
       puts '<a href="#" class="active">Episodes</a>'
-      images = db.query("SELECT series.imageName FROM wantToWatchEpisode JOIN episode ON wantToWatchEpisode.epId = episode.epId JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE wantToWatchEpisode.username = '" + username.to_s + "';")
+      images = db.query("SELECT series.imageName, seasonNum, episode.epName FROM wantToWatchEpisode JOIN episode ON wantToWatchEpisode.epId = episode.epId JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE wantToWatchEpisode.username = '" + username.to_s + "';")
       images = images.to_a
   end
     puts '</div>'
@@ -105,6 +105,19 @@ puts '<body id="profile">'
             puts '<input type="image" src="' + images[size]['imageName'] + '" alt="' + images[size]['imageName'] + '">'
             puts '<input type="hidden" name="clicked_image" value="' + images[size]['imageName'] + '">'
             puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+            if seriesTab == "SERIES"
+              puts images[size]['showName']
+            elsif seriesTab == "SEASON"
+              puts images[size]['showName']
+              puts '<br>'
+              puts 'Season ' + images[size]['seasonNum'].to_s
+            elsif seriesTab == "EP"
+              puts images[size]['showName']
+              puts '<br>'
+              puts 'Season ' + images[size]['seasonNum'].to_s
+              puts '<br>'
+              puts images[size]['epName']
+            end
             size = size + 1
           puts '</form>'
         puts '</div>'

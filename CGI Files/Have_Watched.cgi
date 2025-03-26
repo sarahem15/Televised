@@ -27,7 +27,11 @@ seriesTab = cgi['seriesTab']
 if seriesTab == ""
   seriesTab = "SERIES"
 end
-
+pageCount = cgi['pageNumber'] 
+if pageCount == ""
+  pageNumber = 1 
+end
+printPage = true
 puts "Content-type: text/html\n\n"
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -76,13 +80,13 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
       puts '<a href="Have_Watched.cgi?seriesTab=SERIES">Series</a>'
       puts '<a href="#" class="active">Seasons</a>'
       puts '<a href="Have_Watched.cgi?seriesTab=EP">Episodes</a>'
-      images = db.query("SELECT series.imageName, series.showName FROM haveWatchedSeason JOIN season ON haveWatchedSeason.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE haveWatchedSeason.username = '" + username.to_s + "';")
+      images = db.query("SELECT series.imageName, series.showName, season.seasonNum FROM haveWatchedSeason JOIN season ON haveWatchedSeason.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE haveWatchedSeason.username = '" + username.to_s + "';")
       images = images.to_a
   elsif seriesTab == "EP"
       puts '<a href="Have_Watched.cgi?seriesTab=SERIES">Series</a>'
       puts '<a href="Have_Watched.cgi?seriesTab=SEASON">Seasons</a>'
       puts '<a href="#" class="active">Episodes</a>'
-      images = db.query("SELECT series.imageName, series.showName FROM haveWatchedEpisode JOIN episode ON haveWatchedEpisode.epId = episode.epId JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE haveWatchedEpisode.username = '" + username.to_s + "';")
+      images = db.query("SELECT series.imageName, series.showName, season.seasonNum, episode.epName FROM haveWatchedEpisode JOIN episode ON haveWatchedEpisode.epId = episode.epId JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE haveWatchedEpisode.username = '" + username.to_s + "';")
       images = images.to_a
   end
 
@@ -92,28 +96,34 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
 
 
     (0...images.size).each do |h|
-    if (images[size])
-    puts '<div class="wrapper">'
-      puts '<section class="carousel-section" id="topFiveSeries">'
+      if (images[size] && printPage == true)
+        puts '<div class="wrapper">'
+        puts '<section class="carousel-section" id="topFiveSeries">'
 
-      # INPUT IMAGES  
-      (0...5).each do |i|
-        if (images[size])
-        puts '<div class="item">'
-          puts '<form action="series.cgi" method="POST">'
+        # INPUT IMAGES  
+        (0...5).each do |i|
+          if (images[size])
+            puts '<div class="item">'
+            puts '<form action="series.cgi" method="POST">'
             puts '<input type="image" src="' + images[size]['imageName'] + '" alt="' + images[size]['imageName'] + '">'
             puts '<input type="hidden" name="clicked_image" value="' + images[size]['imageName'] + '">'
             puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
-            puts images[size]['showName']
+              puts '<h6 style="text-align: center;">' + images[size]['showName'] + '</h6>'
+            if seriesTab == "SEASON"
+              puts '<h6 style="text-align: center;">Season ' + images[size]['seasonNum'].to_s + '</h6>'
+            elsif seriesTab == "EP"
+              puts '<h6 style="text-align: center;">Season ' + images[size]['seasonNum'].to_s + '</h6>'
+              puts '<h6 style="text-align: center;">' + images[size]['epName'] + '</h6>'
+             end
             size = size + 1
 
-          puts '</form>'
+            puts '</form>'
+            puts '</div>'
+          end
+        end
+        puts '</section>'
         puts '</div>'
       end
-      end
-        puts '</section>'
-    puts '</div>'
-  end
 end
 =begin
     puts '<hr style="margin-left: 80px; margin-right: 80px">'

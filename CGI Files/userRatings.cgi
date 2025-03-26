@@ -45,7 +45,7 @@ puts '<meta charset="UTF-8">'
   puts '<script src="fetch-data-loader.js"></script>'
 puts '</head>'
 
-puts '<body id="userRatings">'
+puts '<body id="userProfile">'
   puts '<nav id="changingNav"></nav> <!-- This is where the navbar will be dynamically loaded -->'
   puts '<div class="container-fluid">'
   puts '<br>'

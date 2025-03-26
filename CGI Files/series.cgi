@@ -78,7 +78,7 @@ puts "<body id=\"showsPage\">"
       puts '<form action="threebuttons.cgi" method="POST">'
       alreadyWatchedSeries = db.query("SELECT * FROM haveWatchedSeries WHERE username = '" + username + "'AND seriesId = '" + seriesId.to_s + "';")
         if (alreadyWatchedSeries.to_a.to_s != "[]")
-          puts '<button class="watchedButton"><i class="eye-icon fa fa-eye" style="color: #6bdf10;"></i></button>'
+          puts '<button class="watchedButton"><i class="eye-icon fa fa-eye" style="color: #6bdf10;" ></i></button>'
         else
           puts '<button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button>'
         end
@@ -137,7 +137,6 @@ puts "<body id=\"showsPage\">"
         puts '<form action="otherLists.cgi" method="POST">'
         puts "<button>View on Other's Lists</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
-        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts "</div>"
         puts "</div>"
@@ -254,11 +253,10 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
-        puts '<form action="threebuttons.cgi" method="POST">'
+        puts '<form action="otherLists.cgi" method="POST">'
         puts "<button>View on Other's Lists</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
-        puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
         puts "</div>"
         puts "</div>"
@@ -356,12 +354,11 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
         puts '</form>'
-        puts '<form action="threebuttons.cgi" method="POST">'
+        puts '<form action="otherLists.cgi" method="POST">'
         puts "<button>View on Other's Lists</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
-        puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
-        puts '<input type="hidden" name="viewOnOthers" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        puts '<input type="hidden" name="epId" value="' + episode['epId'].to_s + '">'
         puts '</form>'
         puts "</div>"
         puts "</div>"

@@ -19,7 +19,7 @@ db = Mysql2::Client.new(
     database: 'televised_w25'
   )
 
-series = db.query("SELECT imageName FROM series;")
+series = db.query("SELECT imageName, showName FROM series;")
 series = series.to_a
 
 sortedSeries = db.query("SELECT * FROM series ORDER BY year DESC;")
@@ -57,9 +57,12 @@ puts'<body id="homePage">'
             puts '<div class="item">'
             puts '<form action="series.cgi" method="POST">'
                 puts '<input type="image" src="' + series[i]['imageName'] + '" alt="' + series[i]['imageName'] + '">'
+                puts '<h5 style="text-align: center;">' + series[i]['showName'] + '</h5>'
                 puts '<input type="hidden" name="clicked_image" value="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+
             puts '</form>'
+            
             puts '</div>'
         end
         puts'<a href="#homePopularSection2">›</a>'
@@ -70,6 +73,7 @@ puts'<body id="homePage">'
             puts '<div class="item">'
             puts '<form action="series.cgi" method="POST">'
                 puts '<input type="image" src="' + series[i]['imageName'] + '" alt="' + series[i]['imageName'] + '">'
+                puts '<h5 style="text-align: center;">' + series[i]['showName'] + '</h5>'
                 puts '<input type="hidden" name="clicked_image" value="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
             puts '</form>'
@@ -83,6 +87,7 @@ puts'<body id="homePage">'
             puts '<div class="item">'
             puts '<form action="series.cgi" method="POST">'
                 puts '<input type="image" src="' + series[i]['imageName'] + '" alt="' + series[i]['imageName'] + '">'
+                puts '<h5 style="text-align: center;">' + series[i]['showName'] + '</h5>'
                 puts '<input type="hidden" name="clicked_image" value="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
             puts '</form>'
@@ -105,6 +110,7 @@ puts'<body id="homePage">'
                 puts '<input type="image" src="' + sortedSeries[i]['imageName'] + '" alt="' + sortedSeries[i]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + sortedSeries[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+                puts '<h5 style="text-align: center;">' + sortedSeries[i]['showName'] + '</h5>'
             puts '</form>'
             puts '</div>'
         end
@@ -118,6 +124,7 @@ puts'<body id="homePage">'
                 puts '<input type="image" src="' + sortedSeries[i]['imageName'] + '" alt="' + sortedSeries[i]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + sortedSeries[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+                puts '<h5 style="text-align: center;">' + sortedSeries[i]['showName'] + '</h5>'
             puts '</form>'
             puts '</div>'
         end
@@ -131,6 +138,7 @@ puts'<body id="homePage">'
                 puts '<input type="image" src="' + sortedSeries[i]['imageName'] + '" alt="' + sortedSeries[i]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + sortedSeries[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+                puts '<h5 style="text-align: center;">' + sortedSeries[i]['showName'] + '</h5>'
             puts '</form>'
             puts '</div>'
         end
@@ -151,7 +159,7 @@ puts '<section class="homeReviews">'
 
 (0...4).each do |i|
     seriesImage = db.query("SELECT imageName, showName FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id = '" + reviews[i]['id'].to_s + "';")
-    
+    displayName = db.query("SELECT displayName FROM account where username ='" + reviews[i]['username'] + "';")
 puts '<div class="ReviewIndiv">'
   puts '<section class="SeriesImg">'
     puts '<img src="' + seriesImage.first['imageName'] + '" alt="">'
@@ -159,7 +167,7 @@ puts '<div class="ReviewIndiv">'
   puts '<div class="ReviewContent">'
       puts '<section class="UserDisplay">'
          puts '<img src="./ProfileImages/' + reviews[i]['username'] + '.jpg" alt="">'
-          puts '<a href="othersProfiles.cgi?username=' + reviews[i]['username'] + '"><h3>' + reviews[i]['username'] + '</h3></a>'
+          puts '<a href="othersProfiles.cgi?username=' + reviews[i]['username'] + '"><h3>' + displayName.first['displayName'] + '</h3></a>'
       puts '</section>'
       puts '<br>'
       puts '<a href="reviewIndiv.cgi?reviewId=' + reviews[i]['id'].to_s + '">'

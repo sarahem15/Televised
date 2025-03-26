@@ -67,11 +67,43 @@ genres = genres.to_a
 sectionCount = 1;
 
 puts '<section id="discoverGenreOne">'
+if (pageNumber.to_i == 1)
+    puts '<div class="center mt-5">'
+    puts '<div class="pagination">'
+            puts '<a class="active" href="discover.cgi?sort=genre&pageNumber=1">1</a>'
+            puts '<a href="discover.cgi?sort=genre&pageNumber=2">2</a>'
+            puts '<a href="discover.cgi?sort=genre&pageNumber=3">3</a>'
+          puts '</div>'
+        puts '</div>'
+      puts '</div>'
+    end
+if (pageNumber.to_i == 2)
+    puts '<div class="center mt-5">'
+    puts '<div class="pagination">'
+            puts '<a href="discover.cgi?sort=genre&pageNumber=1">1</a>'
+            puts '<a class="active" href="discover.cgi?sort=genre&pageNumber=2">2</a>'
+            puts '<a href="discover.cgi?sort=genre&pageNumber=3">3</a>'
+          puts '</div>'
+        puts '</div>'
+      puts '</div>'
+    end
+if (pageNumber.to_i == 3)
+    puts '<div class="center mt-5">'
+    puts '<div class="pagination">'
+            puts '<a href="discover.cgi?sort=genre&pageNumber=1">1</a>'
+            puts '<a href="discover.cgi?sort=genre&pageNumber=2">2</a>'
+            puts '<a class="active" href="discover.cgi?sort=genre&pageNumber=3">3</a>'
+          puts '</div>'
+        puts '</div>'
+      puts '</div>'
+    end
 (beginArray...endArray).each do |j|
-    series = db.query("SELECT imageName FROM series WHERE genre = '" + genres[j]['genre'] + "';")
+    series = db.query("SELECT imageName, showName FROM series WHERE genre = '" + genres[j]['genre'] + "';")
     series = series.to_a
 
-    puts '<h3 class="text-white ms-4">' + genres[j]['genre'] + '</h3>'
+    
+
+    puts '<h3 style="margin-left: 12%;">' + genres[j]['genre'] + '</h3>'
     puts '<div class="wrapper">'
 
         puts '<section class="carousel-section" id="section' + (sectionCount+(2*j)).to_s() + '">'
@@ -83,6 +115,7 @@ puts '<section id="discoverGenreOne">'
                 puts '<input type="image" src="' + series[i]['imageName'] + '" alt="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+                puts '<h5 style="text-align: center;">' + series[i]['showName'] + '</h5>'
             puts '</form>'
             puts '</div>'
         end
@@ -99,6 +132,7 @@ puts '<section id="discoverGenreOne">'
                 puts '<input type="image" src="' + series[i]['imageName'] + '" alt="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+                puts '<h5 style="text-align: center;">' + series[i]['showName'] + '</h5>'
             puts '</form>'
             puts '</div>'
         end
@@ -115,6 +149,7 @@ puts '<section id="discoverGenreOne">'
                 puts '<input type="image" src="' + series[i]['imageName'] + '" alt="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+                puts '<h5 style="text-align: center;">' + series[i]['showName'] + '</h5>'
             puts '</form>'
             puts '</div>'
         end
@@ -162,17 +197,17 @@ end
 #AZ
 if (sortBy == 'az') 
     if (pageNumber.to_i == 1)
-        firstCharacterSort = db.query("SELECT imageName from series where showName like 'a%' or showName like 'b%' or showName like 'c%' or showName like 'd%' ORDER BY showName ASC;")
+        firstCharacterSort = db.query("SELECT imageName, showName from series where showName like 'a%' or showName like 'b%' or showName like 'c%' or showName like 'd%' ORDER BY showName ASC;")
     elsif (pageNumber.to_i == 2)
-        firstCharacterSort = db.query("SELECT imageName from series where showName like 'e%' or showName like 'f%' or showName like 'g%' or showName like 'h%' ORDER BY showName ASC;")
+        firstCharacterSort = db.query("SELECT imageName, showName from series where showName like 'e%' or showName like 'f%' or showName like 'g%' or showName like 'h%' ORDER BY showName ASC;")
     elsif (pageNumber.to_i == 3)
-        firstCharacterSort = db.query("SELECT imageName from series where showName like 'i%' or showName like 'j%' or showName like 'k%' or showName like 'l%' ORDER BY showName ASC;")
+        firstCharacterSort = db.query("SELECT imageName, showName from series where showName like 'i%' or showName like 'j%' or showName like 'k%' or showName like 'l%' ORDER BY showName ASC;")
     elsif (pageNumber.to_i == 4)
-        firstCharacterSort = db.query("SELECT imageName from series where showName like 'm%' or showName like 'n%' or showName like 'o%' or showName like 'p%' ORDER BY showName ASC;")
+        firstCharacterSort = db.query("SELECT imageName, showName from series where showName like 'm%' or showName like 'n%' or showName like 'o%' or showName like 'p%' ORDER BY showName ASC;")
     elsif (pageNumber.to_i == 5)
-        firstCharacterSort = db.query("SELECT imageName from series where showName like 'q%' or showName like 'r%' or showName like 's%' or showName like 't%' ORDER BY showName ASC;")
+        firstCharacterSort = db.query("SELECT imageName, showName from series where showName like 'q%' or showName like 'r%' or showName like 's%' or showName like 't%' ORDER BY showName ASC;")
     else 
-        firstCharacterSort = db.query("SELECT imageName from series where showName like 'u%' or showName like 'v%' or showName like 'w%' or showName like 'x%' or showName like 'y%'or showName like 'z%' ORDER BY showName ASC;")
+        firstCharacterSort = db.query("SELECT imageName, showName from series where showName like 'u%' or showName like 'v%' or showName like 'w%' or showName like 'x%' or showName like 'y%'or showName like 'z%' ORDER BY showName ASC;")
     end
 
         firstCharacterSort = firstCharacterSort.to_a
@@ -225,6 +260,7 @@ if (sortBy == 'az')
                         puts '<input type="image" src="' + firstCharacterSort[size]['imageName'] + '" alt="' + firstCharacterSort[size]['imageName'] + '">'
                         puts '<input type="hidden" name="clicked_image" value="' + firstCharacterSort[size]['imageName'] + '">'
                         puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+                        puts '<h5 style="text-align: center;">' + firstCharacterSort[size]['showName'] + '</h5>'
                         size = size + 1
                     puts '</form>'
                     puts '</div>'
@@ -362,7 +398,7 @@ puts '<div class="pagination">'
       puts '</div>'
     puts '</div>'
 
-series = db.query("SELECT series.imageName FROM streaming JOIN series ON streaming.seriesid = series.showid WHERE streaming.service = '" + service.to_s + "';")
+series = db.query("SELECT series.imageName, series.showName FROM streaming JOIN series ON streaming.seriesid = series.showid WHERE streaming.service = '" + service.to_s + "';")
 streamings = series.to_a
 size = streamings.size
 size = 0
@@ -378,7 +414,8 @@ endArray = 5
             puts '<form action="series.cgi" method="POST">'
                 puts '<input type="image" src="' + streamings[size]['imageName'] + '" alt="' + streamings[size]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + streamings[size]['imageName'] + '">'
-                puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+                puts '<input type="hidden" name="seasonNumber" value="1">'
+                puts '<h5 style="text-align: center;">' + streamings[size]['showName'] + '</h5>'
                 size = size + 1
             puts '</form>'
             puts '</div>'

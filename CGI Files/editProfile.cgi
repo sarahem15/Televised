@@ -3,6 +3,7 @@ require 'mysql2'
 require 'cgi'
 require 'cgi/session'
 require 'stringio'
+require 'open-uri'
 
 # Enable debugging
 $stdout.sync = true
@@ -12,6 +13,15 @@ print "Content-type: text/html\r\n\r\n"
 
 # Initialize CGI
 
+def url_exists?(url)
+      begin
+        URI.open(url)
+        true
+      rescue OpenURI::HTTPError, SocketError
+        false
+      end
+    end
+
 uploadLocation = "/NFSHome/Televised/public_html/ProfileImages/"
 cgi = CGI.new("html5")
 session = CGI::Session.new(cgi)
@@ -19,17 +29,32 @@ username = session['username']
 fromfile = cgi.params['fileName'].first
 originalName = cgi.params['fileName'].first.instance_variable_get("@original_filename")
 if (fromfile != "")
-fileType = originalName.split(".")
-lastDot = fileType.size - 1
-if (originalName != "" && (fileType[lastDot] == "jpg" || fileType[lastDot] == "png" || fileType[lastDot] == "jpeg"))
-  tofile = uploadLocation + username + ".jpg" 
+  fileType = originalName.split(".")
+  lastDot = fileType.size - 1
+    if (originalName != "" && (fileType[lastDot] == "jpg" || fileType[lastDot] == "png" || fileType[lastDot] == "jpeg"))
+      tofile = uploadLocation + username + ".jpg" 
   
-  begin 
-    File.open(tofile.untaint, 'w') { |file| file << fromfile.read}
-  rescue => e
+    begin 
+      File.open(tofile.untaint, 'w') { |file| file << fromfile.read}
+    rescue => e
+    end
   end
 end
+=begin
+else
+  uploadedProfile = "https://cs.transy.edu/Televised/ProfileImages/" + username + ".jpg"
+  valid = url_exists?(uploadedProfile)
+  if !valid
+    fromfile = "/NFSHome/Televised/public_html/ProfileImages/default.jpg"
+    tofile = uploadLocation + username + ".jpg"
+    begin 
+      File.open(tofile.untaint, 'w') { |file| file << fromfile.read}
+    rescue => e
+      puts e.message
+    end
+  end
 end
+=end
 
 # Retrieve form parameters
 displayName = cgi['displayName']
@@ -51,7 +76,7 @@ puts "<head>"
 puts "<meta charset='UTF-8'>"
 puts "<title>Edit Settings</title>"
 puts "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
-print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/Home.cgi'>\n"
+print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/Profile.cgi'>\n"
 puts "</head>"
 puts "<body>"
 #puts "<div class='container mt-5'>"

@@ -21,7 +21,7 @@ db = Mysql2::Client.new(
     password: 'TV_Group123!', 
     database: 'televised_w25'
   )
-lists = db.query("SELECT DISTINCT name, description FROM curatedListSeries WHERE username = '" + username.to_s + "';")
+lists = db.query("SELECT DISTINCT name, description, date FROM curatedListSeries WHERE username = '" + username.to_s + "';")
 lists = lists.to_a
 #seriesImages = db.query("SELECT imageName FROM series;")
 #seriesImages = seriesImages.to_a()
@@ -96,7 +96,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       puts '<div>'
       puts '<section class="titleDate">'
       puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '">' + lists[i]['name'] + '</a>'
-      puts '<h4>DATE</h4>'
+      puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
       puts '</section>'
 
       puts '<h3>' + lists[i]['description'] +'</h3>'

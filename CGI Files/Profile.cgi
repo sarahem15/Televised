@@ -76,6 +76,7 @@ puts '<body id="profile">'
           puts '<form action="series.cgi" method="POST">'
           if i < topFiveSeries.size
             puts '<input type="image" src="' + topFiveSeries[i]['imageName'] + '" alt="">'
+            puts '<input type="hidden" name="seasonNumber" value="1">'
           else 
             puts '<input type="image" src="" alt="">'
           end
@@ -95,6 +96,7 @@ puts '<body id="profile">'
           puts '<form action="series.cgi" method="POST">'
           if i < topFiveSeason.size
             puts '<input type="image" src="' + topFiveSeason[i]['imageName'] + '" alt="">'
+            puts '<input type="hidden" name="seasonNumber" value="1">'
           else
             puts '<input type="image" src="" alt="">'
           end
@@ -115,6 +117,7 @@ puts '<body id="profile">'
           puts '<form action="series.cgi" method="POST">'
           if i < topFiveEpisode.size
             puts '<input type="image" src="' + topFiveEpisode[i]['imageName'] + '" alt="">'
+            puts '<input type="hidden" name="seasonNumber" value="1">'
           else
             puts '<input type="image" src="" alt="">'
           end

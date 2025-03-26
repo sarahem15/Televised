@@ -29,8 +29,8 @@ month = cgi['month']
 day = cgi['day']
 #rateId = cgi['ratingId']
 review = cgi['review']
-
-
+fromIndivEp = cgi['fromIndivEp']
+epNum = cgi['epNum']
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -40,7 +40,9 @@ db = Mysql2::Client.new(
   )
 
 
-imageName = db.query("SELECT imageName FROM series WHERE showId = '" + seriesId + "';")
+imageName = db.query("SELECT imageName, showName FROM series WHERE showId = '" + seriesId + "';")
+epName = db.query("SELECT epName from episode WHERE epId = '" + epId + "';")
+
 
 # Start HTML output
 puts "<!DOCTYPE html>"
@@ -49,7 +51,11 @@ puts "<head>"
 puts "<meta charset='UTF-8'>"
 puts "<title>Watched</title>"
 puts "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
-print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
+if fromIndivEp == 'TRUE'
+    print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/indivEp.cgi?ep_name=" + epName.first['epName'].to_s + "&show_name=" + imageName.first['showName'] + "&seriesID=" + seriesId + "&epNum=" + epNum + "&seasonNumber=" + seasonNumber + "'>\n"
+else
+    print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
+end
 puts "</head>"
 puts "<body>"
 puts "<div class='container mt-5'>"
@@ -73,6 +79,7 @@ if (watchedButton == "TRUE" && epId == "" && seasonId == "")
     seasons = seasons.to_a
     if (alreadyWatched.to_a.to_s != "[]")
         db.query("DELETE FROM haveWatchedSeries WHERE username = '" + username.to_s + "' AND seriesId = '" + seriesId.to_s + "';")
+        db.query('DELETE FROM seriesRating WHERE username = "' + username.to_s + '" AND seriesId = "' + seriesId.to_s + '";')
         (0...episodes.size).each do |i|
             begin
                 db.query('DELETE FROM haveWatchedEpisode WHERE username = "' + username.to_s + '" AND epId = "' + episodes[i]['epId'].to_s + '";')
@@ -104,10 +111,25 @@ if (watchedButton == "TRUE" && epId == "" && seasonId == "")
     end
 elsif (watchedButton == "TRUE" && seasonId != "")
     alreadyWatched = db.query("SELECT * FROM haveWatchedSeason WHERE seasonId = '" + seasonId.to_s + "' AND username = '" + username.to_s + "';")
+    episodes = db.query("SELECT episode.epId FROM episode JOIN season ON episode.seasonId = season.seasonId WHERE season.seasonId = '" + seasonId.to_s + "';")
+    episodes = episodes.to_a
     if (alreadyWatched.to_a.to_s != "[]")
         db.query("DELETE FROM haveWatchedSeason WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonId.to_s + "';")
+        (0...episodes.size).each do |i|
+            begin
+                db.query('DELETE FROM haveWatchedEpisode WHERE username = "' + username.to_s + '" AND epId = "' + episodes[i]['epId'].to_s + '";')
+            rescue => e
+                puts e.message
+            end
+        end
     else    
         db.query('INSERT INTO haveWatchedSeason VALUES ("' + username.to_s + '", "' + seasonId.to_s + '");')
+        (0...episodes.size).each do |i|
+            alreadyWatchedEp = db.query("SELECT * FROM haveWatchedEpisode WHERE epId = '" + episodes[i]['epId'].to_s + "' AND username = '" + username.to_s + "';")
+            if (alreadyWatchedEp.to_a.to_s == "[]")
+                db.query('INSERT INTO haveWatchedEpisode VALUES ("' + username.to_s + '", "' + episodes[i]['epId'].to_s + '");')
+            end
+        end
     end
 elsif (watchedButton == "TRUE" && epId != "")
     alreadyWatched = db.query("SELECT * FROM haveWatchedEpisode WHERE epId = '" + epId.to_s + "' AND username = '" + username.to_s + "';")
@@ -175,18 +197,6 @@ end
     puts 'rating is' + seriesRating
     puts reviewText
 end
-
-
-=begin
-puts '<br>'
-puts 'add to existing list: ' + addToExisting 
-puts '<br>'
-puts 'add to new list: ' + addToNew 
-puts '<br>'
-puts 'view on other lists: ' + viewOnOthers 
-puts '<br>'
-puts 'userName: ' + username.to_s
-=end
 
 puts '</body>'
 puts '</html>'

@@ -32,7 +32,7 @@ puts '<head>'
   puts '<link rel="stylesheet" href="Televised.css">'
 puts '</head>'
 
-puts '<body id="profile">'
+puts '<body id="userProfile">'
   puts '<nav id="changingNav"></nav> <!-- This is where the navbar will be dynamically loaded -->'
   puts '<div class="container-fluid">'
   puts '<br>'

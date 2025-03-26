@@ -16,7 +16,19 @@ session = CGI::Session.new(cgi)
 username = session['username']
 #username = "try@try"
 seriesId = cgi['seriesID']
+seasonNum = cgi['seasonNum']
+epId = cgi['epId']
+if epId != ""
+    epSearch = true
+else
+    epSearch = false
+end
 
+if epId == "" && seasonNum != ""
+    seasonSearch = true
+else
+    seasonSearch = false
+end
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -26,10 +38,7 @@ db = Mysql2::Client.new(
 
 seriesImages = db.query("SELECT imageName FROM series;")
 seriesImages = seriesImages.to_a()
-displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
-bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
-pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
-lists = db.query("SELECT name, description, username FROM curatedListSeries WHERE seriesId ='" + seriesId + "' AND privacy = 1;")
+lists = db.query("SELECT name, description, username, date FROM curatedListSeries WHERE seriesId ='" + seriesId + "' AND privacy = 1;")
 lists = lists.to_a
 showName = db.query("SELECT showName FROM series WHERE showId = '" + seriesId + "';")
 
@@ -62,6 +71,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
         puts '<section class="carousel-section" id="listsPlease">'
         listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE name = '" + lists[i]['name'] + "';")
         listImages = listImages.to_a
+        displayName = db.query("SELECT displayName FROM account WHERE username = '" + lists[i]['username'] + "';")
         (0...5).each do |j|
         puts '<div class="itemS">'
         if (j < listImages.size)
@@ -76,12 +86,14 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       puts '<div>'
       puts '<section class="titleDate">'
       puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '">' + lists[i]['name'] + '</a>'
-      puts '<h4>DATE</h4>'
+      puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
       puts '</section>'
+      puts '<br>'
       puts '<section class="UserDisplay">'
           puts '<img src="./ProfileImages/' + lists[i]['username'].to_s + '.jpg" alt="userProfilePic">'
-          puts '<h3 id=" DisplayName">' + lists[i]['username'].to_s + '</h3>'
+          puts '<h3 id=" DisplayName">' + displayName.first['displayName'] + '</h3>'
         puts '</section>'
+        puts '<br>'
       puts '<h3>' + lists[i]['description'] +'</h3>'
       puts '</div>'
     puts '</div>'

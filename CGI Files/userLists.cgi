@@ -21,7 +21,7 @@ db = Mysql2::Client.new(
     password: 'TV_Group123!', 
     database: 'televised_w25'
   )
-lists = db.query("SELECT DISTINCT name, description FROM curatedListSeries WHERE username = '" + username.to_s + "';")
+lists = db.query("SELECT DISTINCT name, description, date FROM curatedListSeries WHERE username = '" + username.to_s + "';")
 lists = lists.to_a
 #seriesImages = db.query("SELECT imageName FROM series;")
 #seriesImages = seriesImages.to_a()
@@ -46,7 +46,7 @@ puts '<meta charset="UTF-8">'
   puts '<link rel="stylesheet" href="Televised.css">'
 puts '</head>'
 
-puts '<body id="profile">'
+puts '<body id="userProfile">'
   puts '<nav id="changingNav"></nav> <!-- This is where the navbar will be dynamically loaded -->'
   puts '<div class="container-fluid">'
   puts '<br>'
@@ -113,7 +113,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       puts '<div>'
       puts '<section class="titleDate">'
       puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '">' + lists[i]['name'] + '</a>'
-      puts '<h4>DATE</h4>'
+      puts '<h4>' + lists[i]['date'].to_s + '</h4>'
       puts '</section>'
 
       puts '<h3>' + lists[i]['description'] +'</h3>'
