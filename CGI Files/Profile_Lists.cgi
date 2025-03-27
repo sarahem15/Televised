@@ -21,13 +21,14 @@ db = Mysql2::Client.new(
     password: 'TV_Group123!', 
     database: 'televised_w25'
   )
-lists = db.query("SELECT DISTINCT name, description, date FROM curatedListSeries WHERE username = '" + username.to_s + "';")
+lists = db.query("SELECT DISTINCT name, description, date, username FROM curatedListSeries WHERE username = '" + username.to_s + "';")
 lists = lists.to_a
 #seriesImages = db.query("SELECT imageName FROM series;")
 #seriesImages = seriesImages.to_a()
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
+likeCount = 0
 
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -85,7 +86,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
 
         puts '<div class="itemS">'
         if (j < listImages.size)
-            puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '">'
+            puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '" style="height:270px; object-fit: cover;">'
         else
           puts '<img src="" alt="">'
         end
@@ -93,16 +94,36 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
         end
       puts '</section>'
       puts '</div>'
-      puts '<div>'
+      puts '<div class="createdLists">'
       puts '<section class="titleDate">'
       puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '">' + lists[i]['name'] + '</a>'
       puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
       puts '</section>'
 
       puts '<h3>' + lists[i]['description'] +'</h3>'
+      listId = db.query("SELECT id FROM listOwnership WHERE username = '" + lists[i]['username'] + "' AND listName = '" + lists[i]['name'] + "';")
+      puts '<form action="threebuttons.cgi" method="post">'
+      alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.first['id'].to_s + "';")
+      (0...alreadyLiked.size).each do |i|
+        likeCount = likeCount + 1
+      end
+      if (alreadyLiked.to_a != [])
+        puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+      else
+        puts '<button class="LIKES">&#10084</button>'
+        end
+        puts '<a href="whoHasLiked.cgi?listName=' + lists[i]['name'] + '&listCreator=' + lists[i]['username'] + '&listId=' + listId.first['id'].to_s + '">' + likeCount.to_s + '</a>'
+        puts '<input type="hidden" name="likedList" value="TRUE">'
+        puts '<input type="hidden" name="listId" value="' + listId.first['id'].to_s + '">'
+        puts '<input type="hidden" name="likeUser" value="' + username.to_s + '">'
+        puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
+        
+    puts '</form>'
       puts '</div>'
+      
     puts '</div>'
     puts '<br>'
+    likeCount = 0
 end
     puts '<!-- Scripts -->'
   puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'

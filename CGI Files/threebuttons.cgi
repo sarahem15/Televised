@@ -31,6 +31,13 @@ day = cgi['day']
 review = cgi['review']
 fromIndivEp = cgi['fromIndivEp']
 epNum = cgi['epNum']
+likedList = cgi['likedList']
+userWhoLiked = cgi['likeUser']
+listId = cgi['listId']
+listCreator = cgi['listCreator']
+profileLikedList = cgi['profileLikedList']
+epname = cgi['epname']
+
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -53,8 +60,12 @@ puts "<title>Watched</title>"
 puts "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
 if fromIndivEp == 'TRUE'
     print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/indivEp.cgi?ep_name=" + epName.first['epName'].to_s + "&show_name=" + imageName.first['showName'] + "&seriesID=" + seriesId + "&epNum=" + epNum + "&seasonNumber=" + seasonNumber + "'>\n"
+elsif likedList == "TRUE" && profileLikedList == ""
+    print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/Lists.cgi'>\n"
+elsif profileLikedList != ""
+    print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/Likes_Lists.cgi'>\n"
 else
-    print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
+    print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
 end
 puts "</head>"
 puts "<body>"
@@ -196,6 +207,16 @@ end
     puts seriesId.to_s
     puts 'rating is' + seriesRating
     puts reviewText
+    puts epname
+end
+
+if likedList == "TRUE"
+    alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + listCreator + "';")
+    if alreadyLiked.to_a == []
+        db.query("INSERT INTO likedList VALUES ('" + userWhoLiked + "', '" + listCreator + "', '" + listId + "');")
+    else
+        db.query("DELETE FROM likedList WHERE userWhoLiked = '" + userWhoLiked + "' AND userWhoCreated = '" + listCreator + "' AND listId = '" + listId + "';")
+    end
 end
 
 puts '</body>'

@@ -123,6 +123,7 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
         end
         puts '</section>'
         puts '</div>'
+        puts '<hr style="margin-left: 10%; margin-right: 10%;">'
       end
 end
 =begin

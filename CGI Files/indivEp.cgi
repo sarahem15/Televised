@@ -5,8 +5,9 @@ $stderr.reopen $stdout
 puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
-
+require 'open-uri'
 require 'cgi/session'
+time = Time.new
 
 cgi = CGI.new
 session = CGI::Session.new(cgi)
@@ -16,7 +17,7 @@ episodeName = cgi['ep_name']
 showName = cgi['show_name']
 epNum = cgi['ep_num']
 seasonNumber = cgi['seasonNumber']
-seriesId = cgi['seriesId']
+seriesId = cgi['seriesID']
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -28,9 +29,18 @@ db = Mysql2::Client.new(
 episode = db.query("SELECT episode.* FROM episode JOIN season ON episode.seasonId = season.seasonId
 JOIN series ON season.seriesId = series.showId WHERE episode.epName = '" + episodeName.gsub("'", "\\\\'") + "' AND series.showName = '" + showName.gsub("'", "\\\\'") + "';")
 episodeRating = 0
+sumRating = 0
+avgRating = 0
+ratings = db.query("SELECT rating FROM episodeRating where epId = '" + episode.first['epId'].to_s + "';")
+ratings = ratings.to_a
+(0...ratings.size).each do |i|
+  sumRating = sumRating + ratings[i]['rating'].to_i
+end
+if ratings.size != 0
+  avgRating = sumRating/ratings.size
+end
+
 #puts "<img src=\"./Episodes/" + seriesImage.split('.')[0] + seasonNumber.to_s + "." + epNum.to_s + ".1.jpg\" alt=\"" + seriesImage[0] + "\" width=\"300\" height=\"225\">"
-
-
 
 puts "<!DOCTYPE html>"
 puts "<html lang=\"en\">"
@@ -52,21 +62,54 @@ puts "<body id=\"episodePage\">"
   puts "<br>"
   puts "<div class=\"episodesPage\">"
 
-
   #HERE
-    (1...4).each do |i|
+    def url_exists?(url)
+      begin
+        URI.open(url)
+        true
+      rescue OpenURI::HTTPError, SocketError
+        false
+      end
+    end
+
+    imageSource = "https://cs.transy.edu/Televised/Episodes/" + showName.gsub(" ", "").gsub("'", "") + seasonNumber.to_s + "." + epNum.to_s + "." + 1.to_s + ".jpg"
+    valid = url_exists?(imageSource)
+    if valid
+      (1...4).each do |i|
       puts "<img src=\"Episodes/" + showName.gsub(" ", "").gsub("'", "") + seasonNumber.to_s + "." + epNum.to_s + "." + i.to_s + ".jpg\" alt=\"\">" 
     end
+
+      #puts "<img src=\"./Episodes/" + seriesImage.split('.')[0] + seasonNumber.to_s + "." + epNum.to_s + ".1.jpg\" alt=\"" + seriesImage + "\" width=\"300\" height=\"225\">"
+    else
+      puts "<img src=\"./Episodes/Televised.jpg\" width=\"300\" height=\"225\" id=\"defaultImage\">"
+    end
+
+
+    #(1...4).each do |i|
+    #  puts "<img src=\"Episodes/" + showName.gsub(" ", "").gsub("'", "") + seasonNumber.to_s + "." + epNum.to_s + "." + i.to_s + ".jpg\" alt=\"\">" 
+    #end
     puts "<br>"
     puts "<br>"
-      puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + showName + "</h1>"
+      puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: center;\">" + showName + "</h1>"
       puts "<div class=\"epWords\">"
-      puts "<h3> Season 1 </h2>"
-      puts "<h3> Episode " + epNum.to_s + "</h4>"
-      puts "<h3> RATING </h4>"
-      puts "<h3>" + episode.first['epName'] + "</h2>"
-      puts "<h3>" + episode.first['releaseDate'] + "</h4>"
-      puts "<h3>" + episode.first['runtime'].to_s + "m</h4>"
+      puts "<h3> Season 1 </h3>"
+      puts "<h3> Episode " + epNum.to_s + "</h3>"
+      puts '<section class="avgRating">'
+        if avgRating != 0
+          (0...5).each do |j|
+            if (j < avgRating)
+                puts '<i class="fa fa-star" style="color: white;"></i>'
+            else
+              puts '<i class="fa fa-star"></i>'
+            end
+          end
+        else
+            puts '<h3>NO AVG RATING</h3>'
+        end
+        puts '</section>'
+      puts "<h3>" + episode.first['epName'] + "</h3>"
+      puts "<h3>" + episode.first['releaseDate'] + "</h3>"
+      puts "<h3>" + episode.first['runtime'].to_s + "m</h3>"
     puts "</div>"
    puts "<br>"
   puts "<h4 class=\"epDes\">"
@@ -82,10 +125,13 @@ puts "<body id=\"episodePage\">"
           puts '<button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button>'
         end
         #puts "<button class=\"watchedButton\">EYE</button>"
-        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+
+        puts '<input type="hidden" name="seriesID" value="' + seriesId + '">'
         puts '<input type="hidden" name="epID" value="' + episode.first['epId'].to_s + '">'
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        puts '<input type="hidden" name="fromIndivEp" value="TRUE">'
+        puts '<input type="hidden" name="epNum" value="' + epNum + '">'
         puts '</form>'
         puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateEpisodeReview\">&#128488</button>"
 
@@ -106,6 +152,7 @@ puts "<body id=\"episodePage\">"
           puts '<input type="hidden" name="epID" value="' + episode.first['epId'].to_s + '">'
           puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
           puts '<input type="hidden" name="rated" value="TRUE">'
+          puts '<input type="hidden" name="fromIndivEp" value="TRUE">'
           puts '</form>'
         end
         puts '</section>'
@@ -117,18 +164,32 @@ puts "<body id=\"episodePage\">"
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Want to Watch</button>"
         #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="epID" value="' + episode.first['epId'].to_s + '">'
+        puts '<input type="hidden" name="wantToWatch" value="TRUE">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Existing List</button>"
         #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="epID" value="' + episode.first['epId'].to_s + '">'
+        puts '<input type="hidden" name="addToExisting" value="TRUE">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to New List</button>"
         #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="epID" value="' + episode.first['epId'].to_s + '">'
         puts '</form>'
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>View on Other's Lists</button>"
         #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        puts '<input type="hidden" name="epID" value="' + episode.first['epId'].to_s + '">'
+        puts '<input type="hidden" name="viewOnOthers" value="TRUE">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
         puts "</div>"
         puts "</div>"
@@ -167,5 +228,89 @@ puts "<body id=\"episodePage\">"
 end
 puts '</section>'
 puts "</div>"
+
+
+puts "<div id='reviewEpisodeModal'>"
+puts "  <div class='modal fade' id='CreateEpisodeReview' tabindex='-1' aria-labelledby='createReviewLabel' aria-hidden='true'>"
+puts "    <div class='modal-dialog'>"
+puts "      <div class='modal-content'>"
+puts "        <div class='modal-header'>"
+puts "          <h5 class='modal-title' id='createReviewLabel'>Leave a Review</h5>"
+puts "          <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>"
+puts "        </div>"
+puts "        <div class='modal-body'>"
+puts "          <form id='createEpisodeReviewForm' name='createEpisodeReviewForm' method='POST' action='threebuttons.cgi'>"
+puts "            <div class='row'>"
+puts "              <div class='col'>"
+#puts "                <img src='" + seriesImage + "' alt='' id='mediaReviewImage'>"
+puts "              </div>"
+  puts "<br>"
+puts "              <div class='col' id='showInfo'>"
+puts "                <p id='reviewHeader'>I WATCHED…</p>"
+puts "                <p id='reviewShowTitle'>" + showName + "</p>"
+puts "                <p id='reviewSENum'>Season " + seasonNumber.to_s + "</p>"
+puts "                <p id='reviewEpName'</p>"
+puts "              </div>"
+  puts "<br>"
+puts "            </div>"
+puts "            <div class='mb-3'>"
+puts "              <textarea name='reviewText' class='form-control' id='userReview' placeholder='Add a review…' required></textarea>"
+puts "            </div>"
+puts "            <div class='row'>"
+puts "              <div class='col'>"
+
+puts "            <section class='Rating'>"
+
+=begin
+(0...5).each do |i|
+ # puts "              <form action='threebuttons.cgi' method='POST'>"
+  if (i < seriesRating)
+            puts '<button class="fa fa-star" style="color: yellow;"></button>'
+          else
+            puts '<button class="fa fa-star"></button>'
+          end
+  puts "                <input type='hidden' name='seriesRating' value='#{i}'>"
+  puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
+  puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
+  puts "                <input type='hidden' name='rated' value='TRUE'>"
+  puts "                <input type='hidden' name='review' value='true'>"
+
+  #puts "              </form>"
+end
+=end
+puts "            </section>"
+puts "              </div>"
+
+
+puts "                <input type='hidden' name='year' value='#{time.year}'>"
+puts "                <input type='hidden' name='month' value='#{time.month}'>"
+puts "                <input type='hidden' name='day' value='#{time.day}'>"
+puts '<br>'
+#puts "            <div class='modal-footer'>"
+puts "              <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>"
+#puts "              <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>"
+puts "              <button type='submit' class='btn btn-primary'>Submit Review</button>"
+#puts "            </div>"
+puts "          </form>"
+puts "        </div>"
+puts "      </div>"
+puts "    </div>"
+puts "  </div>"
+puts "</div>"
+
+puts "  <script>"
+puts "  document.addEventListener('DOMContentLoaded', function () {"
+puts "    document.querySelectorAll('.reviewButton').forEach(button => {"
+puts "      button.addEventListener('click', function () {"
+puts "        const targetModal = document.querySelector(this.getAttribute('data-bs-target'));"
+puts "        if (targetModal) {"
+puts "          const modalInstance = new bootstrap.Modal(targetModal);"
+puts "          modalInstance.show();"
+puts "        }"
+puts "      });"
+puts "    });"
+puts "  });"
+puts "  </script>"
+
 puts "</body>"
 puts "</html>"

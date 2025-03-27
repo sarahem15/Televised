@@ -169,7 +169,7 @@ puts "<body id=\"showsPage\">"
   puts "<div class=\"seasonDropdown\">"
     if numOfSeasons > 1
       puts "<button class=\"dropbtn\">Season " + seasonNumber.to_s + " &#9660"
-    elsif numOfSeasons = 1
+    elsif numOfSeasons == 1
     puts "<button class=\"dropbtn\">Season " + seasonNumber.to_s 
     end
       puts "<a href=\"series.cgi\"></a>"
@@ -290,8 +290,10 @@ puts "<body id=\"showsPage\">"
     end
 
     puts "<div class=\"words\">"
+    puts '<section class="titleTime">'
       puts "<a href=\"indivEp.cgi?ep_name=" + episode['epName'] + "&show_name=" + series.first['showName'] + "&seriesID=" + series.first['showId'].to_s + "&ep_num=" + epNum.to_s + "&seasonNumber=" + seasonNumber.to_s + "\"><h3 style=\"font-family: 'Times New Roman', Times, serif; text-align: left;\">" + epNum.to_s + ". " + episode['epName'] + "</h3></a>"
-      puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + episode['runtime'].to_s + " minutes</h4>"
+      puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + episode['runtime'].to_s + "m</h4>"
+      puts '</section>'
       puts "<h5 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + episode['description'] + "</h5>"
       puts "<div class=\"editButtons\">"
       puts '<form action="threebuttons.cgi" method="POST">'
@@ -307,7 +309,11 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
-        puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateEpisodeReview\">&#128488</button>"
+
+
+        puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" 
+        data-epName=\"" + episode['epName'] + "\"
+        data-bs-target=\"#CreateEpisodeReview\">&#128488</button>"
 
         alreadyRatedEpisode = db.query("SELECT * FROM episodeRating WHERE username = '" + username + "' AND epId = '" + episode['epId'].to_s + "';")
           if (alreadyRatedEpisode.to_a.to_s != "[]")
@@ -366,11 +372,12 @@ puts "<body id=\"showsPage\">"
       puts "</div>"
     puts "</div>"
   puts "</div>"
+
+  puts "<hr>"
   episodeRating = 0
   epNum = epNum + 1
   end
 
-  puts "<hr>"
   puts "<br>"
 puts "</div>"
 
@@ -535,7 +542,7 @@ puts "              <div class='col' id='showInfo'>"
 puts "                <p id='reviewHeader'>I WATCHED…</p>"
 puts "                <p id='reviewShowTitle'>" + series.first['showName'] + "</p>"
 puts "                <p id='reviewSENum'>Season " + seasonNumber.to_s + "</p>"
-puts "                <p id='reviewEpName'>" + episode['epName'] + "</p>"
+puts "                <p id='reviewEpName'</p>"
 puts "              </div>"
   puts "<br>"
 puts "            </div>"
@@ -544,6 +551,7 @@ puts "              <textarea name='reviewText' class='form-control' id='userRev
 puts "            </div>"
 puts "            <div class='row'>"
 puts "              <div class='col'>"
+
 puts "            <section class='Rating'>"
 
 (0...5).each do |i|
@@ -568,14 +576,16 @@ puts "              </div>"
 puts "                <input type='hidden' name='year' value='#{time.year}'>"
 puts "                <input type='hidden' name='month' value='#{time.month}'>"
 puts "                <input type='hidden' name='day' value='#{time.day}'>"
-
+=begin
 puts "              <div class='col'>"
 puts "            <button class='LIKES' style='color: pink;'' id='likeBtn'>&#10084</button>"
 puts "              </div>"
 puts "            </div>"
+=end
 puts '<br>'
 puts "            <div class='modal-footer'>"
 puts "              <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>"
+#puts "              <button type='button' class='btn-close' data-bs-dismiss='modal' aria-label='Close'></button>"
 puts "              <button type='submit' class='btn btn-primary'>Submit Review</button>"
 puts "            </div>"
 puts "          </form>"

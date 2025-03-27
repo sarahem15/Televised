@@ -23,7 +23,7 @@ db = Mysql2::Client.new(
 
 haveWatched = db.query("SELECT seriesId FROM haveWatchedSeries WHERE username = '" + username.to_s + "';")
 haveWatched = haveWatched.to_a
-listContent = db.query("SELECT imageName, seriesId FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE name = '" + listTitle + "';")
+listContent = db.query("SELECT imageName, seriesId, showName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE name = '" + listTitle + "';")
 listContent = listContent.to_a
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 puts '<!DOCTYPE html>'
@@ -36,17 +36,15 @@ puts '<head>'
   puts '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">'
   puts '<link rel="stylesheet" href="Televised.css">'
 puts '</head>'
-
 puts '<body id="listContent">'
   puts '<nav id="changingNav"></nav> <!-- This is where the navbar will be dynamically loaded -->'
-  puts '<br>'
-  puts '<br>'
   
   puts '<section class="contentList">'
-  puts '<section class="UserDisplay">'
-    puts '<img src="./Episodes/adventureTime1.1.jpg" alt="here">'
-    puts '<h3>' + displayName.first['displayName'].to_s + '</h3>'
+  puts '<section class="UserDisplay" style="max-width: 390px">'
+    puts '<img src="./ProfileImages/' + username.to_s + '.jpg" alt="">'
+    puts '<h3>List by ' + displayName.first['displayName'].to_s + '</h3>'
   puts '</section>'
+  puts '<br>'
   puts '<h1>' + listTitle.to_s + '</h1>'
   puts '<hr>'
   puts '<section class="contents">'
@@ -57,10 +55,11 @@ puts '<body id="listContent">'
           puts '<input type="image" src="' + listContent[i]['imageName'] + '" alt="' + listContent[i]['imageName'] + '">'
           puts '<input type="hidden" name="clicked_image" value="' + listContent[i]['imageName'] + '">'
           puts '<input type="hidden" name="seasonNumber" value="1">'
+          puts '<h6 style="text-align: center">' + listContent[i]['showName'] + '</h6>'
        puts ' </form>'
    puts '</div>'
  end
-    
+       puts '<br>'
   puts '</div>'
 
   tempCount = 0

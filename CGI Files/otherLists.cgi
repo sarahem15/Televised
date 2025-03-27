@@ -41,6 +41,8 @@ seriesImages = seriesImages.to_a()
 lists = db.query("SELECT name, description, username, date FROM curatedListSeries WHERE seriesId ='" + seriesId + "' AND privacy = 1;")
 lists = lists.to_a
 showName = db.query("SELECT showName FROM series WHERE showId = '" + seriesId + "';")
+likeCount = 0
+
 
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -53,7 +55,7 @@ puts '<meta charset="UTF-8">'
   puts '<link rel="stylesheet" href="Televised.css">'
 puts '</head>'
 
-puts '<body id="profile">'
+puts '<body id="viewOnOtherLists">'
   puts '<nav id="changingNav"></nav> <!-- This is where the navbar will be dynamically loaded -->'
   puts '<div class="container-fluid">'
   puts '<br>'
@@ -75,7 +77,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
         (0...5).each do |j|
         puts '<div class="itemS">'
         if (j < listImages.size)
-            puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '">'
+            puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '" style="height:270px; object-fit: cover;">'
         else
             puts '<img src="" alt="">'
         end
@@ -95,6 +97,23 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
         puts '</section>'
         puts '<br>'
       puts '<h3>' + lists[i]['description'] +'</h3>'
+
+      listId = db.query("SELECT id FROM listOwnership WHERE username = '" + lists[i]['username'] + "' AND listName = '" + lists[i]['name'] + "';")
+      puts '<form action="threebuttons.cgi" method="post">'
+      alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.first['id'].to_s + "';")
+      (0...alreadyLiked.size).each do |i|
+        likeCount = likeCount + 1
+      end
+      if (alreadyLiked.to_a != [])
+        puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+        puts '<a href="whoHasLiked.cgi?listName=' + lists[i]['name'] + '&listCreator=' + lists[i]['username'] + '&listId=' + listId.first['id'].to_s + '">' + likeCount.to_s + '</a>'
+        puts '<input type="hidden" name="likedList" value="TRUE">'
+        puts '<input type="hidden" name="listId" value="' + listId.first['id'].to_s + '">'
+        puts '<input type="hidden" name="likeUser" value="' + username.to_s + '">'
+        puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
+        end
+    puts '</form>'
+
       puts '</div>'
     puts '</div>'
     puts '<br>'

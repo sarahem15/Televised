@@ -22,11 +22,14 @@ db = Mysql2::Client.new(
   )
 
 #listImages = db.query("SELECT imageName FROM list;")
-seriesImages = db.query("SELECT imageName FROM series;")
-seriesImages = seriesImages.to_a()
+
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
+likedLists = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "';")
+likedLists = likedLists.to_a
+likeCount = 0
+
 
 
 puts '<!DOCTYPE html>'
@@ -70,37 +73,55 @@ puts '<body id="profile">'
       puts '<a href="#" class="active">Lists</a>'
     puts '</div>'
 
-(0...5).each do |i|
+(0...likedLists.size).each do |i|
+  seriesImages = db.query("SELECT series.imageName FROM series JOIN curatedListSeries ON curatedListSeries.seriesId = series.showId WHERE curatedListSeries.listId ='" + likedLists[i]['listId'].to_s + "';")
+  seriesImages = seriesImages.to_a()
+  info = db.query("SELECT * FROM curatedListSeries WHERE listId = '" + likedLists[i]['listId'].to_s + "';")
+  info = info.to_a
+  listDisplayName = db.query("SELECT displayName FROM account WHERE username = '" + info[i]['username'] + "';")
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<div class="listImages">'
     puts '<div class="listWrapper">'
         puts '<section class="carousel-section" id="listsPlease">'
         (0...5).each do |j|
-        puts '<div class="itemS">'
-            puts '<img src="' + seriesImages[j]['imageName'] + '" alt="' + seriesImages[j]['imageName'] + '">'
-        puts '</div>'
+          if i < seriesImages.size
+            puts '<div class="itemS">'
+                puts '<img src="' + seriesImages[j]['imageName'] + '" alt="' + seriesImages[j]['imageName'] + '" style="height:270px; object-fit: cover;">'
+            puts '</div>'
+          end
         end
       puts '</section>'
       puts '</div>'
       puts '<div>'
       puts '<section class="titleDate">'
-      puts '<a href="listContents.cgi?title=LIST TITLE">LIST TITLE</a>'
-      puts '<h4>DATE</h4>'
+      puts '<a href="listContents.cgi?title=' + info[i]['name'] + '">' + info[i]['name'] + '</a>'
+      puts '<i><h4>' + info[i]['date'].to_s + '</h4></i>'
       puts '</section>'
-
+      puts '<br>'
       puts '<section class="listInfo">'
         puts '<section class="UserDisplay">'
-          puts '<img src="./Episodes/adventureTime1.1.jpg" alt="testing123">'
-          puts '<h3 id=" DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
+          puts '<img src="./ProfileImages/' + info[i]['username'] + '.jpg" alt="">'
+          puts '<h3 id="DisplayName">' + listDisplayName.first['displayName'].to_s + '</h3>'
         puts '</section>'
-      puts '<h3> shows </h3>'
-      puts '<section class="Likes">'
-        puts '<button id="Heart">&#9829</button>'
-        puts '<h4>12</h4>'
+      puts '<h3> series </h3>'
+      listId = db.query("SELECT id FROM listOwnership WHERE username = '" + info[i]['username'] + "' AND listName = '" + info[i]['name'] + "';")
+      puts '<form action="threebuttons.cgi" method="post">'
+      alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + info[i]['username'] + "' AND listId = '" + listId.first['id'].to_s + "';")
+      (0...alreadyLiked.size).each do |i|
+        likeCount = likeCount + 1
+      end
+        puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+        puts '<a href="whoHasLiked.cgi?listName=' + info[i]['name'] + '&listCreator=' + info[i]['username'] + '&listId=' + listId.first['id'].to_s + '">' + likeCount.to_s + '</a>'
+        puts '<input type="hidden" name="likedList" value="TRUE">'
+        puts '<input type="hidden" name="profileLikedList" value="TRUE">'
+        puts '<input type="hidden" name="listId" value="' + listId.first['id'].to_s + '">'
+        puts '<input type="hidden" name="likeUser" value="' + username.to_s + '">'
+        puts '<input type="hidden" name="listCreator" value="' + info[i]['username'] + '">'
+        
+    puts '</form>'
       puts '</section>'
-      puts '</section>'
-
-      puts '<h3>DESCRIPTION of the list goes here!!</h3>'
+      puts '<br>'
+      puts '<h3>' + info[i]['description'] + '</h3>'
       puts '</div>'
     puts '</div>'
     puts '<br>'
