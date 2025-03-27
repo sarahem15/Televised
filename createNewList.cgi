@@ -10,14 +10,33 @@ require 'cgi/session'
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
+search = cgi['mediaEntered']
+type = cgi['typeSearch']
+seriesId = cgi['seriesId']
 
-# Connect to the database
+listName = cgi['listName']
+description = cgi['description']
+privacy = cgi['views']
+
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
     password: 'TV_Group123!', 
     database: 'televised_w25'
 )
+
+# If listName is provided, insert it into the database
+if listName && !listName.empty?
+    db.query("INSERT INTO curatedListSeries (username, name, description, privacy, date) 
+              VALUES ('#{username}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW())")
+    list_id = db.last_id
+    
+    selected_series = JSON.parse(cgi['seriesArray'] || '[]')
+    selected_series.each do |series_id|
+        db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
+                  VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
+    end
+end
 
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -32,91 +51,86 @@ puts '</head>'
 puts '<body id="createNewList">'
 puts    '<nav id="changingNav"></nav>'
 puts    '<h2 class="text-center mt-3">Create a New List</h2>'
-puts    '<br>'
-puts    '<br>'
 puts    '<div class="container-fluid">'
 puts        '<div class="row">'
 
-# Form for creating a new list
-puts            '<div class="col" id="listRow">'
-puts                '<h3 style="text-align: center;">List Details</h3>'
-puts                '<form id="newListForm" method="post" action="saveList.cgi">'
-puts                    '<label>Name</label>'
-puts                    '<input type="text" id="Name" name="listName" class="form-control" placeholder="Name" required>'
-puts                    '<br>'
-puts                    '<label>Type</label>'
-puts                    '<select id="Type" name="type" class="form-control">'
-puts                        '<option value="Series">Series</option>'
-puts                        '<option value="Seasons">Seasons</option>'
-puts                        '<option value="Episodes">Episodes</option>'
-puts                    '</select>'
-puts                    '<br>'
-puts                    '<label>Who Can View</label>'
-puts                    '<select id="views" name="views" class="form-control">'
-puts                        '<option value="Public">Public - anyone can view</option>'
-puts                        '<option value="Private">Private - no one can view</option>'
-puts                    '</select>'
-puts                    '<br>'
-puts                    '<label>Description</label>'
-puts                    '<textarea id="Description" name="description" class="form-control" rows="5"></textarea>'
-puts                    '<br>'
-puts                    '<input type="hidden" id="seriesArrayInput" name="seriesArray">'
-puts                    '<button id="saveList" class="btn btn-primary" type="submit">CREATE LIST</button>'
-puts                '</form>'
-puts            '</div>'
+# Left Column - Form to Create List
+puts '<div class="col" id="listRow">'
+puts '<h3 class="text-center">List Details</h3>'
+puts '<form id="newListForm" method="post" action="createNewList.cgi">'
+puts '<label>Name</label>'
+puts '<input type="text" name="listName" class="form-control" placeholder="Name">'
+puts '<br>'
+puts '<label>Who Can View</label>'
+puts '<select name="views" class="form-control">'
+puts '<option value="Public">Public - anyone can view</option>'
+puts '<option value="Private">Private - no one can view</option>'
+puts '</select>'
+puts '<br>'
+puts '<label>Description</label>'
+puts '<textarea name="description" class="form-control" rows="5"></textarea>'
+puts '<br>'
+puts '<input type="hidden" id="seriesArrayInput" name="seriesArray">'
+puts '<button id="saveList" class="btn btn-primary" type="submit">CREATE LIST</button>'
+puts '</form>'
+puts '</div>'
 
-# Selected series list
-puts            '<div class="col" id="listColumn">'
-puts                '<h3 style="text-align: center;">Selected Series</h3>'
-puts                '<ul id="seriesList" class="list-group"></ul>'
-puts            '</div>'
+# Middle Column - Selected Series List
+puts '<div class="col" id="listColumn">'
+puts '<h3 class="text-center">Selected Series</h3>'
+puts '<ul id="seriesList" class="list-group"></ul>'
+puts '</div>'
 
-# Search column
-puts            '<div class="col" id="searchColumn">'
-puts                '<h3 style="text-align: center;">Search for a Series</h3>'
-puts                '<br>'
-puts                '<form method="post" action="createNewList.cgi" class="TopFiveProfile">'
-puts                    '<select id="type" name="typeSearch" class="form-control">'
-puts                        '<option value="Series" selected>Series</option>'
-puts                        '<option value="Seasons">Seasons</option>'
-puts                        '<option value="Episodes">Episodes</option>'
-puts                    '</select>'
-puts                    '<br>'
-puts                    '<input type="text" name="mediaEntered" class="top5search">'
-puts                    '<input type="submit" value="Search">'
-puts                '</form>'
+# Right Column - Search for Series
+puts '<div class="col" id="searchColumn">'
+puts '<h3 class="text-center">Search for a Series</h3>'
+puts '<form id="searchForm" method="post" action="createNewList.cgi">'
+puts '<select id="type" name="typeSearch" class="form-control">'
+puts '<option value="Series" selected>Series</option>'
+puts '<option value="Seasons">Seasons</option>'
+puts '<option value="Episodes">Episodes</option>'
+puts '</select>'
+puts '<br>'
+puts '<input type="text" name="mediaEntered" class="form-control">'
+puts '<input type="submit" value="Search" class="btn btn-secondary mt-2">'
+puts '</form>'
 
-# Display search results dynamically
-if cgi['mediaEntered'] && cgi['typeSearch'] == "Series"
-    search = cgi['mediaEntered']
-    results = db.query("SELECT showName, showId FROM series WHERE showName LIKE '#{search}%'")
-    results.each do |row|
-        puts "<div class='searchResult'>"
-        puts "  <span>#{row['showName']}</span>"
-        puts "  <button class='btn btn-success addToList' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
-        puts "</div>"
+# Display Search Results
+if type == "Series" && search != ""
+    images = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{search}%'")
+    if !images.to_a.empty?
+        puts '<p>Is this the title you\'re looking for?</p>'
+        images.each do |image|
+            puts "<p>#{image['showName']} <img src='#{image['imageName']}' alt='#{image['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+            puts "<button class='addToList btn btn-success' data-series-id='#{image['showId']}' data-series-name='#{image['showName']}'>ADD</button></p>"
+        end
+    else
+        puts '<p>We can\'t seem to find this title!</p>'
     end
 end
+puts '</div>'
+puts '</div>'
+puts '</div>'
 
-puts            '</div>'  # End search column
-puts        '</div>'  # End row
-puts    '</div>'  # End container
-
-# JavaScript for list functionality
+# JavaScript Section
 puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
+puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
+puts '<script src="Televised.js"></script>'
 puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
-puts '    let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
+puts '    let seriesArray = [];'
+
+# Clear stored array when page loads
+puts '    sessionStorage.removeItem("seriesArray");'
 puts '    updateSeriesList();'
 
-# Add to list functionality
+# Click event for adding series
 puts '    document.addEventListener("click", function (event) {'
 puts '        if (event.target.classList.contains("addToList")) {'
 puts '            event.preventDefault();'
-puts '            let seriesName = event.target.dataset.seriesName;'
 puts '            let seriesId = event.target.dataset.seriesId;'
-puts ''
-puts '            if (seriesName && !seriesArray.some(series => series.id === seriesId)) {'
+puts '            let seriesName = event.target.dataset.seriesName;'
+puts '            if (seriesId && !seriesArray.some(s => s.id === seriesId)) {'
 puts '                seriesArray.push({ id: seriesId, name: seriesName });'
 puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
 puts '                updateSeriesList();'
@@ -124,34 +138,29 @@ puts '            }'
 puts '        }'
 puts '    });'
 
-# Delete from list functionality
+# Click event for deleting series
 puts '    document.addEventListener("click", function (event) {'
 puts '        if (event.target.classList.contains("deleteSeries")) {'
+puts '            event.preventDefault();'
 puts '            let seriesId = event.target.dataset.seriesId;'
-puts '            seriesArray = seriesArray.filter(series => series.id !== seriesId);'
+puts '            seriesArray = seriesArray.filter(s => s.id !== seriesId);'
 puts '            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
 puts '            updateSeriesList();'
 puts '        }'
 puts '    });'
 
-# Update displayed list
+# Function to update the series list display
 puts '    function updateSeriesList() {'
 puts '        let listColumn = document.getElementById("seriesList");'
 puts '        listColumn.innerHTML = "";'
 puts '        seriesArray.forEach(series => {'
 puts '            let listItem = document.createElement("li");'
 puts '            listItem.className = "list-group-item d-flex justify-content-between align-items-center";'
-puts '            listItem.innerHTML = series.name + '
-puts '                " <button class=\'btn btn-danger btn-sm deleteSeries\' data-series-id=\'" + series.id + "\'>X</button>";'
+puts '            listItem.innerHTML = series.name + " <button class=\'btn btn-danger btn-sm deleteSeries\' data-series-id=\'" + series.id + "\'>X</button>";'
 puts '            listColumn.appendChild(listItem);'
 puts '        });'
 puts '        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray.map(s => s.id));'
 puts '    }'
-
-# Clear session storage after form submission
-puts '    document.getElementById("newListForm").addEventListener("submit", function () {'
-puts '        sessionStorage.clear();'
-puts '    });'
 puts '});'
 puts '</script>'
 
