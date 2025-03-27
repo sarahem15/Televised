@@ -55,7 +55,7 @@ html {
 }
 
 /* M'Kiyah's Pages Backgrounds */
-#discoverPage, #showsPage, #listContent, #episodePage, #profile, #reviewIndiv, #profileReviews, #userRatings, #ListsPage, #userProfile {
+#discoverPage, #showsPage, #listContent, #episodePage, #profile, #reviewIndiv, #profileReviews, #userRatings, #ListsPage, #userProfile, #whoLiked, #viewOnOtherLists {
     background-color: #140044;
     min-height: 100vh;
     margin: 0;
@@ -261,6 +261,9 @@ button:hover {
     text-align: center;
 }
 
+#defaultImage{
+    margin-left: 600px;
+}
 
 /*Shows adding*/
 .seasonNav {
@@ -484,19 +487,20 @@ button:hover {
     border-radius: 50%;
     display: inline-block;
     object-fit: cover;
+    padding: 0;
   }
 
 .UserDisplay {
     display: grid;
     grid-template-columns: repeat(2, auto);
-    text-align: center;
-    width: 130px;
+    max-width: 280px;
+    text-align: left;
   }
 
 
 .UserDisplay h3 {
     padding-left: 10px;
-    padding-top: 5px;
+    padding-top: 15px;
 }
 
 #homePage .UserDisplay h3 {
@@ -792,7 +796,7 @@ button:hover {
     color: red;
 }
 
-#homePage .ReviewIndiv .ReviewContent a, #ListsPage a, #reviewIndiv a {
+#homePage .ReviewIndiv .ReviewContent a, #ListsPage a, #reviewIndiv a, #viewOnOtherLists a, #profile .listInfo a, #profile .createdLists a {
     text-decoration: none;
     color: white;
 }
@@ -809,8 +813,11 @@ button:hover {
 #homePage .ReviewIndiv .ReviewContent a :hover {color: lightpink;}
 #ListsPage a:hover {color: lightpink;}
 #reviewIndiv a:hover {color: lightpink;}
+#viewOnOtherLists a:hover {color: lightpink;}
+#profile .listInfo a:hover {color: lightpink;}
+#profile .createdLists a:hover {color: lightpink;}
 
-#reviewIndiv .originalReview .content-R .Rating , #profileReviews .originalReview .content-R .Rating , #userProfile .listWrapper .content-R .Rating , #userProfile .originalReview .content-R .Rating{
+#reviewIndiv .originalReview .content-R .Rating , #profileReviews .originalReview .content-R .Rating , #userProfile .listWrapper .content-R .Rating , #userProfile .originalReview .content-R .Rating, #episodePage .avgRating{
     display: grid;
     grid-template-columns: repeat(5, auto);
     background-color: transparent;
@@ -820,7 +827,7 @@ button:hover {
     padding: 10px;
 }
 
-#reviewIndiv .originalReview .content-R .Rating i, #profileReviews .originalReview .content-R .Rating i , #userProfile .listWrapper .content-R .Rating i, #userProfile .originalReview .content-R .Rating{
+#reviewIndiv .originalReview .content-R .Rating i, #profileReviews .originalReview .content-R .Rating i , #userProfile .listWrapper .content-R .Rating i, #userProfile .originalReview .content-R .Rating, #episodePage .avgRating{
     background-color: transparent;
     width: 15px;
     padding: 2;
@@ -927,4 +934,34 @@ button:hover {
 .listImages {
     width: 90%;
     margin: auto;
+}
+
+#showsPage .titleTime {
+    display: grid;
+    grid-template-columns: 90% 5%;
+}
+
+#whoLiked h5 {
+    background-color: #00156d;
+    width: 99%;
+    padding: 10px;
+}
+
+#whoLiked .LikesContent .Content-type {
+    display: grid;
+    grid-template-columns: 70% 30%;
+}
+
+#whoLiked .LikesContent .Content-type .images{
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    width: 80%;
+    margin: auto;
+}
+
+#whoLiked .LikesContent .Content-type .images img{
+    padding: 2px;
+    height: 170px;
+    width: 120px;
+    object-fit: cover;
 }
