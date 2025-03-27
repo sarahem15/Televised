@@ -127,6 +127,18 @@ function showSignInModal() {
     signInModal.show();
 }
 
+
+document.addEventListener("DOMContentLoaded", function () {
+    const reviewButton = document.getElementById("reviewButton");
+    const reviewModal = new bootstrap.Modal(document.getElementById("CreateReview"));
+
+    if (reviewButton) {
+        reviewButton.addEventListener("click", function () {
+            reviewModal.show();
+        });
+    }
+});
+
 function validateAccountCreation() {
   const username = document.getElementById("unameCreateInput").value.trim();
   const password = document.getElementById("passCreateInput").value.trim();
@@ -250,51 +262,16 @@ function handleSigningIn() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
-    let series = JSON.parse(localStorage.getItem("series")) || []; // Retrieve stored series
-
-    function updateLocalStorage() {
-        localStorage.setItem("series", JSON.stringify(series)); // Save to localStorage
-        updateSeriesList(); // Update displayed list
-    }
-
-    function updateSeriesList() {
-        let listContainer = document.getElementById("seriesList");
-        listContainer.innerHTML = ""; // Clear previous list
-        series.forEach(seriesID => {
-            let listItem = document.createElement("li");
-            listItem.className = "list-group-item";
-            listItem.textContent = "Series ID: " + seriesID; // Display ID (can be changed to name if needed)
-            listContainer.appendChild(listItem);
-        });
-    }
-
-    document.querySelectorAll("#addItem").forEach(button => {
-        button.addEventListener("click", function (event) {
-            event.preventDefault();
-            let seriesID = this.closest("form").querySelector("input[name='seriesID']").value;
-
-            if (!series.includes(seriesID)) {
-                series.push(seriesID);
-                updateLocalStorage();
-            }
-        });
-    });
-
-    document.getElementById("saveList").addEventListener("click", function (event) {
-        event.preventDefault();
-        let form = document.getElementById("newListForm");
-        let hiddenInput = document.createElement("input");
-        hiddenInput.type = "hidden";
-        hiddenInput.name = "seriesList";
-        hiddenInput.value = JSON.stringify(series);
-        form.appendChild(hiddenInput);
-        form.submit();
-        localStorage.removeItem("series");
-    });
-
-    updateSeriesList(); // Load stored series on page load
+//failed username functions
+/*
+document.addEventListener("DOMContentLoaded", function() {
+    let username = localStorage.getItem("username") || "Error";
+    let seriesURL = `series.cgi?clicked_image=${encodedURIComponent(seriesImage)}&seasonNumber=${seasonNumber}&username=${encodedURIComponent(username)}`;
+    console.log(username);
+    console.log(seriesURL):
+    window.location.href = seriesURL;
 });
+
 
 document.addEventListener("DOMContentLoaded", function () {
     let userName = localStorage.getItem("userName"); // Get userName from Local Storage
@@ -314,7 +291,7 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("Username not found in Local Storage");
     }
 });
-
+*/
 
 // Autofill profile settings
 function autofillProfileSettings() {
@@ -348,8 +325,8 @@ document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll(".watchedButton").forEach(button => {
         let icon = button.querySelector(".eye-icon");
         icon.style.fontSize = "35px";
-        icon.style.color = "white";
-
+        //icon.style.color = "white";
+/*
         button.addEventListener("click", function () {
             if(icon.style.color == "white"){
                 icon.style.color = "#6bdf10";
@@ -357,5 +334,21 @@ document.addEventListener("DOMContentLoaded", function() {
                 icon.style.color = "white"
             }
         });
+*/
     });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  var reviewModal = document.getElementById("CreateEpisodeReview");
+ 
+  reviewModal.addEventListener("show.bs.modal", function (event) {
+    var button = event.relatedTarget; // Button that triggered the modal
+    var episodeName = button.getAttribute("data-epName"); // Get data-epName attribute
+   
+    var epNameElement = document.getElementById("reviewEpName");
+    if (epNameElement) {
+      epNameElement.textContent = episodeName; // Update modal content
+      epNameElement.value = episodeName;
+    }
+  });
 });
