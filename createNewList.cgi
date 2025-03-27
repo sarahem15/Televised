@@ -6,17 +6,16 @@ puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
 require 'cgi/session'
-require 'securerandom'
 
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
+search = cgi['mediaEntered']
+type = cgi['typeSearch']
+seriesId = cgi['seriesId']
 
-# Capture form inputs
 listName = cgi['listName']
 description = cgi['description']
-privacy = cgi['views']
-seriesArray = cgi.params['seriesArray']
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -24,24 +23,6 @@ db = Mysql2::Client.new(
     password: 'TV_Group123!', 
     database: 'televised_w25'
 )
-
-# Handle list submission
-if listName && !listName.empty? && !seriesArray.empty?
-    listId = SecureRandom.uuid  # Generate a unique ID for the list
-    date = Time.now.strftime("%Y-%m-%d")
-
-    seriesArray.each do |seriesId|
-        db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
-                  VALUES ('#{db.escape(username)}', '#{db.escape(seriesId)}', '#{db.escape(listName)}',
-                          '#{db.escape(description)}', '#{db.escape(privacy)}', '#{date}', '#{listId}')")
-    end
-
-    puts '<script>'
-    puts '    sessionStorage.clear();'  # Clear stored list
-    puts '    alert("List successfully created!");'
-    puts '    window.location.href = "createNewList.cgi";'  # Refresh the page
-    puts '</script>'
-end
 
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -56,14 +37,22 @@ puts '</head>'
 puts '<body id="createNewList">'
 puts    '<nav id="changingNav"></nav>'
 puts    '<h2 class="text-center mt-3">Create a New List</h2>'
-puts    '<br><br>'
+puts    '<br>'
+puts    '<br>'
 puts    '<div class="container-fluid">'
 puts        '<div class="row">'
 puts            '<div class="col" id="listRow">'
 puts                '<h3 style="text-align: center;">List Details</h3>'
-puts                '<form id="newListForm" method="post" action="createNewList.cgi">'
+puts                '<form id="newListForm" method="post" action="newList.cgi">'
 puts                    '<label>Name</label>'
-puts                    '<input type="text" id="Name" name="listName" class="form-control" placeholder="Name" required>'
+puts                    '<input type="text" id="Name" name="listName" class="form-control" placeholder="Name">'
+puts                    '<br>'
+puts                    '<label>Type</label>'
+puts                    '<select id="Type" name="type" class="form-control">'
+puts                        '<option value="Series">Series</option>'
+puts                        '<option value="Seasons">Seasons</option>'
+puts                        '<option value="Episodes">Episodes</option>'
+puts                    '</select>'
 puts                    '<br>'
 puts                    '<label>Who Can View</label>'
 puts                    '<select id="views" name="views" class="form-control">'
@@ -74,7 +63,6 @@ puts                    '<br>'
 puts                    '<label>Description</label>'
 puts                    '<textarea id="Description" name="description" class="form-control" rows="5"></textarea>'
 puts                    '<br>'
-puts                    '<input type="hidden" id="seriesArrayInput" name="seriesArray">'
 puts                    '<button id="saveList" class="btn" style="background-color: #9daef6;" type="submit">CREATE LIST</button>'
 puts                '</form>'
 puts            '</div>'
@@ -87,7 +75,7 @@ puts            '</div>'
 puts            '<div class="col" id="searchColumn">'
 puts                '<h3 style="text-align: center;">Search for a Series</h3>'
 puts                '<br>'
-puts                '<form id="searchForm" method="post" action="createNewList.cgi" class="TopFiveProfile">'
+puts                '<form method="post" action="createNewList.cgi" class="TopFiveProfile">'
 puts                '<select id="type" name="typeSearch" class="form-control">'
 puts                    '<option value="Series" selected>Series</option>'
 puts                    '<option value="Seasons">Seasons</option>'
@@ -95,55 +83,80 @@ puts                    '<option value="Episodes">Episodes</option>'
 puts                '</select>'
 puts                    '<br>'
 puts                    '<input type="text" name="mediaEntered" class="top5search">'
-puts                    '<input type="submit" value="Search">'
+puts                    '<input type="submit" value="search">'
 puts                '</form>'
 
-puts '</div>'
-puts '</div>'
-puts '</div>'
+#current issues: 1. make search not refresh the page when clicked 2. need to get the actual series name from the bd for the array 3. make the list not look ugly
 
-# JavaScript section
-puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-puts '<script src="Televised.js"></script>'
+
+if (type == "Series" && search != "")
+    images = db.query("SELECT showName, imageName, showId FROM series WHERE showName like '" + search + "%';")
+    images = images.to_a
+    if (images.first.to_s != "")
+        puts 'Is this the title you\'re looking for?'
+        puts '<br>'
+        arraySize = images.size
+        (0...arraySize).each do |i|
+            puts images[i]['showName']
+            print '<img src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '" style=" height: 50px; width: 35px; object-fit: cover;">'
+            #puts '<br>'
+            #db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + images.first['showId'] + "', '" + ranking + "');")
+            images[i]['imageName'] = ""
+            puts '<form action="createNewList.cgi" method="get">'
+            puts "<button id='addToList' type='submit'>ADD</button>"
+            #puts '<input type="hidden" name="seriesID" value="' + images[i]['seriesId'].to_s + '">'
+            #puts '<input type="hidden" name="wantToWatch" value="TRUE">'
+            #puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+            puts '</form>'
+        end
+    else
+        puts 'We can\'t seem to find this title!'
+    end
+end
+puts            '</div>'
+puts        '</div>'
+puts    '</div>'
+
+puts    '<!-- Scripts -->'
+puts    '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
+puts    '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
+puts    '<script src="Televised.js"></script>'
 puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
-puts '    let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '    updateSeriesList();'
+puts '    let seriesArray = [];'
+puts 'console.log("here1");'
 
-# Handle adding series to the list
 puts '    document.addEventListener("click", function (event) {'
-puts '        if (event.target.classList.contains("addToList")) {'
-puts '            event.preventDefault();'
-puts '            let seriesName = event.target.dataset.seriesName;'
-puts '            let seriesId = event.target.dataset.seriesId;'
-puts ''
-puts '            if (seriesName && !seriesArray.some(series => series.id === seriesId)) {'
-puts '                seriesArray.push({ id: seriesId, name: seriesName });'
-puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
+puts 'console.log("here2");'
+puts '        if (event.target.id === "addToList") {'
+puts 'console.log("here3");'
+puts '            event.preventDefault(); // Prevent default button behavior'
+puts '            let seriesName = "TestName"; '
+puts 'console.log("here4");'
+puts 'console.log(seriesName);'
+puts '            if (seriesName && !seriesArray.includes(seriesName)) {'
+puts 'console.log("here5");'
+puts '                seriesArray.push(seriesName);'
 puts '                updateSeriesList();'
 puts '            }'
 puts '        }'
 puts '    });'
 
-# Function to update the displayed list
 puts '    function updateSeriesList() {'
+puts 'console.log("here6");'
 puts '        let listColumn = document.getElementById("seriesList");'
-puts '        listColumn.innerHTML = "";'
+puts '        listColumn.innerHTML = ""; // Clear the list before updating'
+
 puts '        seriesArray.forEach(series => {'
+puts 'console.log("here7");'
 puts '            let listItem = document.createElement("li");'
 puts '            listItem.className = "list-group-item";'
-puts '            listItem.textContent = series.name;'
+puts '            listItem.textContent = series;'
 puts '            listColumn.appendChild(listItem);'
 puts '        });'
-puts '        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray.map(s => s.id));'
 puts '    }'
-
-# Handle list submission
-puts '    document.getElementById("newListForm").addEventListener("submit", function () {'
-puts '        sessionStorage.clear();'
-puts '    });'
 puts '});'
+puts 'console.log(seriesArray);'
 puts '</script>'
 
 puts '</body>'
