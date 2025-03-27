@@ -37,8 +37,7 @@ puts '</head>'
 puts '<body id="createNewList">'
 puts    '<nav id="changingNav"></nav>'
 puts    '<h2 class="text-center mt-3">Create a New List</h2>'
-puts    '<br>'
-puts    '<br>'
+puts    '<br><br>'
 puts    '<div class="container-fluid">'
 puts        '<div class="row">'
 puts            '<div class="col" id="listRow">'
@@ -75,7 +74,7 @@ puts            '</div>'
 puts            '<div class="col" id="searchColumn">'
 puts                '<h3 style="text-align: center;">Search for a Series</h3>'
 puts                '<br>'
-puts                '<form method="post" action="createNewList.cgi" class="TopFiveProfile">'
+puts                '<form id="searchForm" method="post" action="createNewList.cgi" class="TopFiveProfile">'
 puts                '<select id="type" name="typeSearch" class="form-control">'
 puts                    '<option value="Series" selected>Series</option>'
 puts                    '<option value="Seasons">Seasons</option>'
@@ -83,72 +82,57 @@ puts                    '<option value="Episodes">Episodes</option>'
 puts                '</select>'
 puts                    '<br>'
 puts                    '<input type="text" name="mediaEntered" class="top5search">'
-puts                    '<input type="submit" value="search">'
+puts                    '<input type="submit" value="Search">'
 puts                '</form>'
 
-#current issues: 1. make search not refresh the page when clicked 2. need to get the actual series name from the bd for the array 3. make the list not look ugly
-
-
-if (type == "Series" && search != "")
-    images = db.query("SELECT showName, imageName, showId FROM series WHERE showName like '" + search + "%';")
+# Handle search results
+if type == "Series" && search != ""
+    images = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{search}%';")
     images = images.to_a
-    if (images.first.to_s != "")
+    if !images.empty?
         puts 'Is this the title you\'re looking for?'
         puts '<br>'
-        arraySize = images.size
-        (0...arraySize).each do |i|
-            puts images[i]['showName']
-            print '<img src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '" style=" height: 50px; width: 35px; object-fit: cover;">'
-            #puts '<br>'
-            #db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + images.first['showId'] + "', '" + ranking + "');")
-            images[i]['imageName'] = ""
-            puts '<form action="createNewList.cgi" method="get">'
-            puts "<button id='addToList' type='submit'>ADD</button>"
-            #puts '<input type="hidden" name="seriesID" value="' + images[i]['seriesId'].to_s + '">'
-            #puts '<input type="hidden" name="wantToWatch" value="TRUE">'
-            #puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
-            puts '</form>'
+        images.each do |image|
+            puts "#{image['showName']}"
+            puts "<img src='#{image['imageName']}' alt='#{image['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+            puts "<button class='addToList' data-series-name='#{image['showName']}'>ADD</button>"
         end
     else
         puts 'We can\'t seem to find this title!'
     end
 end
+
 puts            '</div>'
 puts        '</div>'
 puts    '</div>'
 
-puts    '<!-- Scripts -->'
-puts    '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-puts    '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-puts    '<script src="Televised.js"></script>'
+# JavaScript section
+puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
+puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
+puts '<script src="Televised.js"></script>'
 puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
-puts '    let seriesArray = [];'
-puts 'console.log("here1");'
-
+puts '    let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
+puts '    console.log("Initial seriesArray:", seriesArray);'
+puts '    updateSeriesList();'
+puts ''
 puts '    document.addEventListener("click", function (event) {'
-puts 'console.log("here2");'
-puts '        if (event.target.id === "addToList") {'
-puts 'console.log("here3");'
-puts '            event.preventDefault(); // Prevent default button behavior'
-puts '            let seriesName = "TestName"; '
-puts 'console.log("here4");'
-puts 'console.log(seriesName);'
+puts '        if (event.target.classList.contains("addToList")) {'
+puts '            event.preventDefault();'
+puts '            let seriesName = event.target.dataset.seriesName;'
+puts ''
 puts '            if (seriesName && !seriesArray.includes(seriesName)) {'
-puts 'console.log("here5");'
 puts '                seriesArray.push(seriesName);'
+puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
 puts '                updateSeriesList();'
 puts '            }'
 puts '        }'
 puts '    });'
-
+puts ''
 puts '    function updateSeriesList() {'
-puts 'console.log("here6");'
 puts '        let listColumn = document.getElementById("seriesList");'
-#puts '        listColumn.innerHTML = ""; // Clear the list before updating'
-
+puts '        listColumn.innerHTML = "";'
 puts '        seriesArray.forEach(series => {'
-puts 'console.log("here7");'
 puts '            let listItem = document.createElement("li");'
 puts '            listItem.className = "list-group-item";'
 puts '            listItem.textContent = series;'
@@ -156,179 +140,9 @@ puts '            listColumn.appendChild(listItem);'
 puts '        });'
 puts '    }'
 puts '});'
-puts 'console.log(seriesArray);'
 puts '</script>'
 
 puts '</body>'
 puts '</html>'
 
 session.close
-
-
-
-
-
-
-
-
-#!/usr/bin/ruby
-$stdout.sync = true
-$stderr.reopen $stdout
-
-require 'mysql2'
-require 'cgi'
-require 'json'
-require 'cgi/session'
-
-cgi = CGI.new
-session = CGI::Session.new(cgi)
-username = session['username']
-search = cgi['mediaEntered']
-type = cgi['typeSearch']
-
-db = Mysql2::Client.new(
-    host: '10.20.3.4', 
-    username: 'seniorproject25', 
-    password: 'TV_Group123!', 
-    database: 'televised_w25'
-)
-
-puts "Content-type: text/html\n\n"
-puts '<!DOCTYPE html>'
-puts '<html lang="en">'
-puts '<head>'
-puts '    <meta charset="UTF-8">'
-puts '    <meta name="viewport" content="width=device-width, initial-scale=1.0">'
-puts '    <title>Televised</title>'
-puts '    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">'
-puts '    <link rel="stylesheet" href="Televised.css">'
-puts '    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-puts '    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-puts '</head>'
-
-puts '<body id="createNewList">'
-puts '    <nav id="changingNav"></nav>'
-puts '    <h2 class="text-center mt-3">Create a New List</h2>'
-puts '    <br>'
-puts '    <br>'
-puts '    <div class="container-fluid">'
-puts '        <div class="row">'
-puts '            <div class="col" id="listRow">'
-puts '                <h3 style="text-align: center;">List Details</h3>'
-puts '                <form id="newListForm" method="post" action="newList.cgi">'
-puts '                    <label>Name</label>'
-puts '                    <input type="text" id="Name" name="listName" class="form-control" placeholder="Name">'
-puts '                    <br>'
-puts '                    <label>Type</label>'
-puts '                    <select id="Type" name="type" class="form-control">'
-puts '                        <option value="Series">Series</option>'
-puts '                        <option value="Seasons">Seasons</option>'
-puts '                        <option value="Episodes">Episodes</option>'
-puts '                    </select>'
-puts '                    <br>'
-puts '                    <label>Who Can View</label>'
-puts '                    <select id="views" name="views" class="form-control">'
-puts '                        <option value="Public">Public - anyone can view</option>'
-puts '                        <option value="Private">Private - no one can view</option>'
-puts '                    </select>'
-puts '                    <br>'
-puts '                    <label>Description</label>'
-puts '                    <textarea id="Description" name="description" class="form-control" rows="5"></textarea>'
-puts '                    <br>'
-puts '                    <button id="saveList" class="btn" style="background-color: #9daef6;" type="submit">CREATE LIST</button>'
-puts '                </form>'
-puts '            </div>'
-
-puts '            <div class="col" id="listColumn">'
-puts '                <h3 style="text-align: center;">Selected Series</h3>'
-puts '                <ul id="seriesList" class="list-group"></ul>'
-puts '            </div>'
-
-puts '            <div class="col" id="searchColumn">'
-puts '                <h3 style="text-align: center;">Search for a Series</h3>'
-puts '                <br>'
-puts '                <form id="searchForm" class="TopFiveProfile">'
-puts '                    <select id="type" name="typeSearch" class="form-control">'
-puts '                        <option value="Series" selected>Series</option>'
-puts '                        <option value="Seasons">Seasons</option>'
-puts '                        <option value="Episodes">Episodes</option>'
-puts '                    </select>'
-puts '                    <br>'
-puts '                    <input type="text" name="mediaEntered" class="top5search">'
-puts '                    <button id="searchButton" type="button">Search</button>'
-puts '                </form>'
-puts '                <div id="searchResults"></div>'
-puts '            </div>'
-puts '        </div>'
-puts '    </div>'
-
-# JavaScript section
-puts '<script>'
-puts '$(document).ready(function () {'
-puts '    $("#searchButton").click(function (event) {'
-puts '        event.preventDefault(); // Prevent page refresh'
-puts ''
-puts '        let searchQuery = $("input[name=\'mediaEntered\']").val();'
-puts '        let typeSearch = $("#type").val();'
-puts ''
-puts '        $.post("createNewList.cgi", { mediaEntered: searchQuery, typeSearch: typeSearch }, function (data) {'
-puts '            let resultsContainer = $("#searchResults");'
-puts '            resultsContainer.empty(); // Clear previous results'
-puts ''
-puts '            if (data.error) {'
-puts '                resultsContainer.append("<p>" + data.error + "</p>");'
-puts '            } else {'
-puts '                data.forEach(item => {'
-puts '                    resultsContainer.append('
-puts '                        `<div class="search-result">'
-puts '                            <p>${item.name}</p>'
-puts '                            <img src="${item.image}" alt="${item.name}" style="height: 50px; width: 35px; object-fit: cover;">'
-puts '                            <button class="addToList" data-id="${item.id}">ADD</button>'
-puts '                        </div>`'
-puts '                    );'
-puts '                });'
-puts '            }'
-puts '        }, "json").fail(function () {'
-puts '            alert("Error fetching search results.");'
-puts '        });'
-puts '    });'
-puts ''
-puts '    // Handle adding items to the list dynamically'
-puts '    $(document).on("click", ".addToList", function () {'
-puts '        let seriesId = $(this).data("id");'
-puts '        let seriesName = $(this).siblings("p").text();'
-puts ''
-puts '        let listColumn = $("#seriesList");'
-puts '        let listItem = $("<li>").addClass("list-group-item").text(seriesName);'
-puts '        listColumn.append(listItem);'
-puts '    });'
-puts '});'
-puts '</script>'
-
-puts '</body>'
-puts '</html>'
-
-# Handle AJAX search requests
-if !search.empty? && type == "Series"
-    images = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{search}%'")
-    images = images.to_a
-
-    if images.any?
-        results = images.map do |img|
-            {
-                name: img['showName'],
-                image: img['imageName'],
-                id: img['showId']
-            }
-        end
-        puts "Content-type: application/json\n\n"
-        puts results.to_json
-    else
-        puts "Content-type: application/json\n\n"
-        puts({ error: "No results found" }.to_json)
-    end
-    exit
-end
-
-session.close
-
