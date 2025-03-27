@@ -6,7 +6,6 @@ puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
 require 'cgi/session'
-require 'json'
 
 cgi = CGI.new
 session = CGI::Session.new(cgi)
@@ -76,7 +75,7 @@ puts '<button id="saveList" class="btn btn-primary" type="submit">CREATE LIST</b
 puts '</form>'
 puts '</div>'
 
-# Middle Column - Selected Series List (Clears on Page Load)
+# Middle Column - Selected Series List
 puts '<div class="col" id="listColumn">'
 puts '<h3 class="text-center">Selected Series</h3>'
 puts '<ul id="seriesList" class="list-group"></ul>'
@@ -85,17 +84,30 @@ puts '</div>'
 # Right Column - Search for Series
 puts '<div class="col" id="searchColumn">'
 puts '<h3 class="text-center">Search for a Series</h3>'
-puts '<form id="searchForm">'
+puts '<form id="searchForm" method="post" action="createNewList.cgi">'
 puts '<select id="type" name="typeSearch" class="form-control">'
 puts '<option value="Series" selected>Series</option>'
 puts '<option value="Seasons">Seasons</option>'
 puts '<option value="Episodes">Episodes</option>'
 puts '</select>'
 puts '<br>'
-puts '<input type="text" id="mediaEntered" name="mediaEntered" class="form-control">'
-puts '<button type="submit" class="btn btn-secondary mt-2">Search</button>'
+puts '<input type="text" name="mediaEntered" class="form-control">'
+puts '<input type="submit" value="Search" class="btn btn-secondary mt-2">'
 puts '</form>'
-puts '<div id="searchResults"></div>'  # Dynamic Search Results
+
+# Display Search Results
+if type == "Series" && search != ""
+    images = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{search}%'")
+    if !images.to_a.empty?
+        puts '<p>Is this the title you\'re looking for?</p>'
+        images.each do |image|
+            puts "<p>#{image['showName']} <img src='#{image['imageName']}' alt='#{image['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+            puts "<button class='addToList btn btn-success' data-series-id='#{image['showId']}' data-series-name='#{image['showName']}'>ADD</button></p>"
+        end
+    else
+        puts '<p>We can\'t seem to find this title!</p>'
+    end
+end
 puts '</div>'
 puts '</div>'
 puts '</div>'
@@ -106,24 +118,11 @@ puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstra
 puts '<script src="Televised.js"></script>'
 puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
-puts '    let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '    sessionStorage.removeItem("seriesArray");'  # Clear the middle column on load
-puts '    updateSeriesList();'
+puts '    let seriesArray = [];'
 
-# AJAX Search Function
-puts '    document.getElementById("searchForm").addEventListener("submit", function (event) {'
-puts '        event.preventDefault();'
-puts '        let formData = new FormData(this);'
-puts '        fetch("createNewList.cgi", {'
-puts '            method: "POST",'
-puts '            body: formData'
-puts '        })'
-puts '        .then(response => response.text())'
-puts '        .then(html => {'
-puts '            document.getElementById("searchResults").innerHTML = html;'
-puts '        })'
-puts '        .catch(error => console.error("Error:", error));'
-puts '    });'
+# Clear stored array when page loads
+puts '    sessionStorage.removeItem("seriesArray");'
+puts '    updateSeriesList();'
 
 # Click event for adding series
 puts '    document.addEventListener("click", function (event) {'
