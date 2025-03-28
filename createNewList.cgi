@@ -2,11 +2,11 @@
 $stdout.sync = true
 $stderr.reopen $stdout
 
+puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
 require 'cgi/session'
 
-puts "Content-type: text/html\n\n"
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
@@ -24,21 +24,6 @@ db = Mysql2::Client.new(
     password: 'TV_Group123!', 
     database: 'televised_w25'
 )
-
-# Handle AJAX search request
-if !search.empty? && !type.empty?
-    images = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{search}%'")
-    if !images.to_a.empty?
-        images.each do |image|
-            puts "<p>#{image['showName']} <img src='#{image['imageName']}' alt='#{image['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-            puts "<button class='addToList btn btn-success' data-series-id='#{image['showId']}' data-series-name='#{image['showName']}'>ADD</button></p>"
-        end
-    else
-        puts "<p>We can't seem to find this title!</p>"
-    end
-    session.close
-    exit
-end
 
 # If listName is provided, insert it into the database
 if listName && !listName.empty?
@@ -64,10 +49,10 @@ puts '    <link rel="stylesheet" href="Televised.css">'
 puts '</head>'
 
 puts '<body id="createNewList">'
-puts '<nav id="changingNav"></nav>'
-puts '<h2 class="text-center mt-3">Create a New List</h2>'
-puts '<div class="container-fluid">'
-puts '<div class="row">'
+puts    '<nav id="changingNav"></nav>'
+puts    '<h2 class="text-center mt-3">Create a New List</h2>'
+puts    '<div class="container-fluid">'
+puts        '<div class="row">'
 
 # Left Column - Form to Create List
 puts '<div class="col" id="listRow">'
@@ -110,27 +95,31 @@ puts '<input type="text" name="mediaEntered" class="form-control">'
 puts '<input type="submit" value="Search" class="btn btn-secondary mt-2">'
 puts '</form>'
 puts '<div id="searchResults"></div>'
+
+# Display Search Results
+if type == "Series" && search != ""
+    images = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{search}%'")
+    images.each do |image|
+        puts "<p>#{image['showName']} <img src='#{image['imageName']}' alt='#{image['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        puts "<button class='addToList btn btn-success' data-series-id='#{image['showId']}' data-series-name='#{image['showName']}'>ADD</button></p>"
+    end
+end
 puts '</div>'
 puts '</div>'
 puts '</div>'
 
 # JavaScript Section
 puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
+puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
+puts '<script src="Televised.js"></script>'
 puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
 puts '    document.getElementById("searchForm").addEventListener("submit", function (event) {'
 puts '        event.preventDefault();'
 puts '        let searchInput = document.querySelector("input[name='mediaEntered']").value;'
 puts '        let type = document.querySelector("select[name='typeSearch']").value;'
-puts '        fetch("createNewList.cgi", {'
-puts '            method: "POST", '
-puts '            headers: { "Content-Type": "application/x-www-form-urlencoded" }, '
-puts '            body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })'
-puts '        })'
-puts '        .then(response => response.text())'
-puts '        .then(data => { '
-puts '            document.getElementById("searchResults").innerHTML = data;'
-puts '        });'
+puts '        fetch("searchHandler.cgi", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type }) })'
+puts '        .then(response => response.text()).then(data => { document.getElementById("searchResults").innerHTML = data; });'
 puts '    });'
 puts '});'
 puts '</script>'
