@@ -257,6 +257,7 @@ puts "<body id=\"showsPage\">"
         puts "<button>View on Other's Lists</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
         puts "</div>"
         puts "</div>"
@@ -291,7 +292,7 @@ puts "<body id=\"showsPage\">"
 
     puts "<div class=\"words\">"
     puts '<section class="titleTime">'
-      puts "<a href=\"indivEp.cgi?ep_name=" + episode['epName'] + "&show_name=" + series.first['showName'] + "&seriesID=" + series.first['showId'].to_s + "&ep_num=" + epNum.to_s + "&seasonNumber=" + seasonNumber.to_s + "\"><h3 style=\"font-family: 'Times New Roman', Times, serif; text-align: left;\">" + epNum.to_s + ". " + episode['epName'] + "</h3></a>"
+      puts "<a href=\"indivEp.cgi?ep_name=" + episode['epName'].gsub("'", "\\\\'").gsub("#", "\\\#").gsub(".", "\\\.") + "&show_name=" + series.first['showName'] + "&seriesID=" + series.first['showId'].to_s + "&ep_num=" + epNum.to_s + "&seasonNumber=" + seasonNumber.to_s + "\"><h3 style=\"font-family: 'Times New Roman', Times, serif; text-align: left;\">" + epNum.to_s + ". " + episode['epName'] + "</h3></a>"
       puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + episode['runtime'].to_s + "m</h4>"
       puts '</section>'
       puts "<h5 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + episode['description'] + "</h5>"
@@ -362,9 +363,8 @@ puts "<body id=\"showsPage\">"
         puts '</form>'
         puts '<form action="otherLists.cgi" method="POST">'
         puts "<button>View on Other's Lists</button>"
-        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
-        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '<input type="hidden" name="epId" value="' + episode['epId'].to_s + '">'
+        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '</form>'
         puts "</div>"
         puts "</div>"

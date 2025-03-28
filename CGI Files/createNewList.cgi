@@ -38,6 +38,22 @@ if listName && !listName.empty?
     end
 end
 
+# Check if this is an AJAX search request
+if type == "Series" && search != ""
+    images = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{search}%'")
+    if !images.to_a.empty?
+        # Only return search results in the response, not the whole page
+        images.each do |image|
+            puts "<p>#{image['showName']} <img src='#{image['imageName']}' alt='#{image['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+            puts "<button class='addToList btn btn-success' data-series-id='#{image['showId']}' data-series-name='#{image['showName']}'>ADD</button></p>"
+        end
+    else
+        puts '<p>We can\'t seem to find this title!</p>'
+    end
+    exit  # Exit here to prevent the full HTML page from being rendered for AJAX requests
+end
+
+# Full page HTML (if it's not an AJAX request)
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
 puts '<head>'
@@ -84,7 +100,7 @@ puts '</div>'
 # Right Column - Search for Series
 puts '<div class="col" id="searchColumn">'
 puts '<h3 class="text-center">Search for a Series</h3>'
-puts '<form id="searchForm" method="post" action="createNewList.cgi">'
+puts '<form id="searchForm">'
 puts '<select id="type" name="typeSearch" class="form-control">'
 puts '<option value="Series" selected>Series</option>'
 puts '<option value="Seasons">Seasons</option>'
@@ -95,41 +111,47 @@ puts '<input type="text" name="mediaEntered" class="form-control">'
 puts '<input type="submit" value="Search" class="btn btn-secondary mt-2">'
 puts '</form>'
 
-# Display Search Results
-if type == "Series" && search != ""
-    images = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{search}%'")
-    if !images.to_a.empty?
-        puts '<p>Is this the title you\'re looking for?</p>'
-        images.each do |image|
-            puts "<p>#{image['showName']} <img src='#{image['imageName']}' alt='#{image['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-            puts "<button class='addToList btn btn-success' data-series-id='#{image['showId']}' data-series-name='#{image['showName']}'>ADD</button></p>"
-        end
-    else
-        puts '<p>We can\'t seem to find this title!</p>'
-    end
-end
+# Placeholder for search results
+puts '<div id="searchResults"></div>'
+
 puts '</div>'
 puts '</div>'
 puts '</div>'
 
-# JavaScript Section
+# JavaScript Section (AJAX search handling)
 puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
 puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
 puts '<script src="Televised.js"></script>'
 puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
-puts '    let seriesArray = [];'
 
-# Clear stored array when page loads
-puts '    sessionStorage.removeItem("seriesArray");'
-puts '    updateSeriesList();'
+# Prevent form submission and use AJAX
+puts '    document.getElementById("searchForm").addEventListener("submit", function (event) {'
+puts '        event.preventDefault();'  # Prevent form submission
+puts '        let searchInput = document.querySelector("input[name=\'mediaEntered\']").value;' 
+puts '        let type = document.querySelector("select[name=\'typeSearch\']").value;'
 
-# Click event for adding series
+puts '        fetch("createNewList.cgi", {'
+puts '            method: "POST",'
+puts '            headers: { "Content-Type": "application/x-www-form-urlencoded" },'
+puts '            body: new URLSearchParams({'
+puts '                mediaEntered: searchInput,'
+puts '                typeSearch: type'
+puts '            })'
+puts '        })'
+puts '        .then(response => response.text())'
+puts '        .then(data => {'
+puts '            document.getElementById("searchResults").innerHTML = data;'  # Insert search results
+puts '        });'
+puts '    });'
+
+# Adding/Removing series from the list
 puts '    document.addEventListener("click", function (event) {'
 puts '        if (event.target.classList.contains("addToList")) {'
 puts '            event.preventDefault();'
 puts '            let seriesId = event.target.dataset.seriesId;'
 puts '            let seriesName = event.target.dataset.seriesName;'
+puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
 puts '            if (seriesId && !seriesArray.some(s => s.id === seriesId)) {'
 puts '                seriesArray.push({ id: seriesId, name: seriesName });'
 puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
@@ -138,20 +160,9 @@ puts '            }'
 puts '        }'
 puts '    });'
 
-# Click event for deleting series
-puts '    document.addEventListener("click", function (event) {'
-puts '        if (event.target.classList.contains("deleteSeries")) {'
-puts '            event.preventDefault();'
-puts '            let seriesId = event.target.dataset.seriesId;'
-puts '            seriesArray = seriesArray.filter(s => s.id !== seriesId);'
-puts '            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
-puts '            updateSeriesList();'
-puts '        }'
-puts '    });'
-
-# Function to update the series list display
 puts '    function updateSeriesList() {'
 puts '        let listColumn = document.getElementById("seriesList");'
+puts '        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
 puts '        listColumn.innerHTML = "";'
 puts '        seriesArray.forEach(series => {'
 puts '            let listItem = document.createElement("li");'
@@ -159,8 +170,10 @@ puts '            listItem.className = "list-group-item d-flex justify-content-b
 puts '            listItem.innerHTML = series.name + " <button class=\'btn btn-danger btn-sm deleteSeries\' data-series-id=\'" + series.id + "\'>X</button>";'
 puts '            listColumn.appendChild(listItem);'
 puts '        });'
-puts '        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray.map(s => s.id));'
 puts '    }'
+
+puts '    updateSeriesList();'
+
 puts '});'
 puts '</script>'
 

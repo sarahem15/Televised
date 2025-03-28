@@ -21,14 +21,18 @@ db = Mysql2::Client.new(
     password: 'TV_Group123!', 
     database: 'televised_w25'
   )
-lists = db.query("SELECT DISTINCT name, description, date, username FROM curatedListSeries WHERE username = '" + username.to_s + "';")
-lists = lists.to_a
+
 #seriesImages = db.query("SELECT imageName FROM series;")
 #seriesImages = seriesImages.to_a()
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
 likeCount = 0
+seriesTab = cgi['seriesTab']
+if seriesTab == ""
+  seriesTab = "SERIES"
+end
+
 
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -68,15 +72,32 @@ puts '<body id="profile">'
 
   puts '<div class="listProfileButtons">'
   puts '<div class="profileListHeader">'
+      if seriesTab == "SERIES"
       puts '<a href="#"class="active">Series</a>'
-      puts '<a href="#">Seasons</a>'
-      puts '<a href="#">Episodes</a>'
+      puts '<a href="Profile_Lists.cgi?seriesTab=SEASON">Seasons</a>'
+      puts '<a href="Profile_Lists.cgi?seriesTab=EP">Episodes</a>'
+      lists = db.query("SELECT DISTINCT name, description, date, username FROM curatedListSeries WHERE username = '" + username.to_s + "';")
+      lists = lists.to_a
+  elsif seriesTab == "SEASON"
+      puts '<a href="Profile_Lists.cgi?seriesTab=SERIES">Series</a>'
+      puts '<a href="#" class="active">Seasons</a>'
+      puts '<a href="Profile_Lists.cgi?seriesTab=EP">Episodes</a>'
+      lists = db.query("SELECT DISTINCT name, description, username FROM curatedListSeason WHERE username = '" + username.to_s + "';")
+      lists = lists.to_a
+  elsif seriesTab == "EP"
+      puts '<a href="Profile_Lists.cgi?seriesTab=SERIES">Series</a>'
+      puts '<a href="Profile_Lists.cgi?seriesTab=SEASON">Seasons</a>'
+      puts '<a href="#" class="active">Episodes</a>'
+      lists = db.query("SELECT DISTINCT name, description, username FROM curatedListEpisode WHERE username = '" + username.to_s + "';")
+      lists = lists.to_a
+  end
     puts '</div>'
     puts '<button id="newListProfile" class="createListButton"> <a href="createNewList.cgi"> Create a New List </a> </button>'
 puts '</div>'
 
-(0...lists.size).each do |i|
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
+
+(0...lists.size).each do |i|
   puts '<div class="listImages">'
     puts '<div class="listWrapper">'
         puts '<section class="carousel-section" id="listsPlease">'
@@ -104,25 +125,24 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       listId = db.query("SELECT id FROM listOwnership WHERE username = '" + lists[i]['username'] + "' AND listName = '" + lists[i]['name'] + "';")
       puts '<form action="threebuttons.cgi" method="post">'
       alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.first['id'].to_s + "';")
-      (0...alreadyLiked.size).each do |i|
-        likeCount = likeCount + 1
-      end
       if (alreadyLiked.to_a != [])
         puts '<button class="LIKES" style="color: pink;">&#10084</button>'
       else
         puts '<button class="LIKES">&#10084</button>'
         end
+        currentLikes = db.query("SELECT * FROM likedList WHERE listId = '" + listId.first['id'].to_s + "';")
+        (0...currentLikes.size).each do |i|
+        likeCount = likeCount + 1
+      end
         puts '<a href="whoHasLiked.cgi?listName=' + lists[i]['name'] + '&listCreator=' + lists[i]['username'] + '&listId=' + listId.first['id'].to_s + '">' + likeCount.to_s + '</a>'
         puts '<input type="hidden" name="likedList" value="TRUE">'
         puts '<input type="hidden" name="listId" value="' + listId.first['id'].to_s + '">'
         puts '<input type="hidden" name="likeUser" value="' + username.to_s + '">'
         puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
-        
     puts '</form>'
       puts '</div>'
-      
     puts '</div>'
-    puts '<br>'
+puts '<hr style="margin-left: 80px; margin-right: 80px">'
     likeCount = 0
 end
     puts '<!-- Scripts -->'

@@ -84,7 +84,7 @@ if fromCreate == "true"
   else
     puts '<script>console.log("User made bad name, let them know and retry")</script>'
     puts "<script>"
-    puts 'alert("Username already in use.   Bad monkey, Bobo!");'
+    puts 'alert("Username already in use. Try again.");'
     puts 'localStorage.setItem("FalseFlag", "true");'
     puts 'localStorage.setItem("userSignedIn", "false");'
 #    puts 'location.reload(true)'

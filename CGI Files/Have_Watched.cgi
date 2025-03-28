@@ -112,8 +112,7 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
             if seriesTab == "SEASON"
               puts '<h6 style="text-align: center;">Season ' + images[size]['seasonNum'].to_s + '</h6>'
             elsif seriesTab == "EP"
-              puts '<h6 style="text-align: center;">Season ' + images[size]['seasonNum'].to_s + '</h6>'
-              puts '<h6 style="text-align: center;">' + images[size]['epName'] + '</h6>'
+              puts '<h6 style="text-align: center;">S' + images[size]['seasonNum'].to_s + ' ' + images[size]['epName'] + '</h6>'
              end
             size = size + 1
 

@@ -49,7 +49,7 @@ puts '<body id="profile">'
   puts '<br>'
   puts '<section class="ProfileInfo">'
   puts '<section class="UserDisplay">'
-    puts '<img src="ProfileImages/' + username.to_s + '.jpg" alt="' + username.to_s + '.jpg">'
+    puts '<img src="ProfileImages/' + username.to_s + '.jpg" alt="">'
     puts '<h3 id="DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
   puts '</section>'
   puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
@@ -73,13 +73,13 @@ puts '<body id="profile">'
       puts '<a href="#" class="active">Lists</a>'
     puts '</div>'
 
+puts '<hr style="margin-left: 80px; margin-right: 80px">'
 (0...likedLists.size).each do |i|
   seriesImages = db.query("SELECT series.imageName FROM series JOIN curatedListSeries ON curatedListSeries.seriesId = series.showId WHERE curatedListSeries.listId ='" + likedLists[i]['listId'].to_s + "';")
   seriesImages = seriesImages.to_a()
   info = db.query("SELECT * FROM curatedListSeries WHERE listId = '" + likedLists[i]['listId'].to_s + "';")
   info = info.to_a
   listDisplayName = db.query("SELECT displayName FROM account WHERE username = '" + info[i]['username'] + "';")
-puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<div class="listImages">'
     puts '<div class="listWrapper">'
         puts '<section class="carousel-section" id="listsPlease">'
@@ -94,23 +94,24 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       puts '</div>'
       puts '<div>'
       puts '<section class="titleDate">'
-      puts '<a href="listContents.cgi?title=' + info[i]['name'] + '">' + info[i]['name'] + '</a>'
+      puts '<a href="listContents.cgi?title=' + info[i]['name'] + '"><h3>' + info[i]['name'] + '</h3></a>'
       puts '<i><h4>' + info[i]['date'].to_s + '</h4></i>'
       puts '</section>'
       puts '<br>'
       puts '<section class="listInfo">'
         puts '<section class="UserDisplay">'
           puts '<img src="./ProfileImages/' + info[i]['username'] + '.jpg" alt="">'
-          puts '<h3 id="DisplayName">' + listDisplayName.first['displayName'].to_s + '</h3>'
+          puts '<a href="othersProfiles.cgi?username=' + info[i]['username'] + '"><h3 id="DisplayName">' + listDisplayName.first['displayName'].to_s + '</h3></a>'
         puts '</section>'
       puts '<h3> series </h3>'
       listId = db.query("SELECT id FROM listOwnership WHERE username = '" + info[i]['username'] + "' AND listName = '" + info[i]['name'] + "';")
       puts '<form action="threebuttons.cgi" method="post">'
       alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + info[i]['username'] + "' AND listId = '" + listId.first['id'].to_s + "';")
-      (0...alreadyLiked.size).each do |i|
+        puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+        currentLikes = db.query("SELECT * FROM likedList WHERE listId = '" + listId.first['id'].to_s + "';")
+        (0...currentLikes.size).each do |i|
         likeCount = likeCount + 1
       end
-        puts '<button class="LIKES" style="color: pink;">&#10084</button>'
         puts '<a href="whoHasLiked.cgi?listName=' + info[i]['name'] + '&listCreator=' + info[i]['username'] + '&listId=' + listId.first['id'].to_s + '">' + likeCount.to_s + '</a>'
         puts '<input type="hidden" name="likedList" value="TRUE">'
         puts '<input type="hidden" name="profileLikedList" value="TRUE">'
@@ -120,11 +121,10 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
         
     puts '</form>'
       puts '</section>'
-      puts '<br>'
       puts '<h3>' + info[i]['description'] + '</h3>'
       puts '</div>'
     puts '</div>'
-    puts '<br>'
+puts '<hr style="margin-left: 80px; margin-right: 80px">'
 end
  puts '<br>'
   puts '<br>'

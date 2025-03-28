@@ -70,7 +70,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       puts '</div>'
       puts '<div>'
       puts '<section class="titleDate">'
-      puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '">' + lists[i]['name'] + '</a>'
+      puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '&contentType=SERIES">' + lists[i]['name'] + '</a>'
       puts '<h4>' + lists[i]['date'].to_s + '</h4>'
       puts '</section>'
       puts '<br>'
@@ -84,14 +84,16 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
         listId = db.query("SELECT id FROM listOwnership WHERE username = '" + lists[i]['username'] + "' AND listName = '" + lists[i]['name'] + "';")
       puts '<form action="threebuttons.cgi" method="post">'
       alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.first['id'].to_s + "';")
-      (0...alreadyLiked.size).each do |i|
-        likeCount = likeCount + 1
-      end
+      
       if (alreadyLiked.to_a != [])
         puts '<button class="LIKES" style="color: pink;">&#10084</button>'
       else
         puts '<button class="LIKES">&#10084</button>'
         end
+        currentLikes = db.query("SELECT * FROM likedList WHERE listId = '" + listId.first['id'].to_s + "';")
+      (0...currentLikes.size).each do |i|
+        likeCount = likeCount + 1
+      end
         puts '<a href="whoHasLiked.cgi?listName=' + lists[i]['name'] + '&listCreator=' + lists[i]['username'] + '&listId=' + listId.first['id'].to_s + '">' + likeCount.to_s + '</a>'
         puts '<input type="hidden" name="likedList" value="TRUE">'
         puts '<input type="hidden" name="listId" value="' + listId.first['id'].to_s + '">'

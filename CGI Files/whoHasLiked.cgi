@@ -25,10 +25,9 @@ db = Mysql2::Client.new(
 listName = cgi['listName']
 listId = cgi['listId']
 listCreator = cgi['listCreator']
-displayName = db.query("SELECT displayName FROM account WHERE username = '" + username + "';")
 likes = db.query("SELECT * FROM likedList WHERE listId = '" + listId + "';")
 likes = likes.to_a
-
+displayName = db.query("SELECT displayName FROM account WHERE username = '" + likes.first['userWhoCreated'] + "';")
 listImages = db.query ("SELECT imageName FROM series JOIN curatedListSeries ON curatedListSeries.seriesId = series.showId WHERE curatedListSeries.name ='" + listName + "';")
 listImages = listImages.to_a
 
@@ -48,7 +47,7 @@ puts "<body id=\"whoLiked\">"
     puts '<br>'
     puts '<section class="LikesContent" style="margin-left: 5%; margin-right: 5%;">'
   puts '<section class="UserDisplay" style="max-width: 390px">'
-    puts '<img src="./ProfileImages/' + username + '.jpg" alt="here">'
+    puts '<img src="./ProfileImages/' + likes.first['userWhoCreated'] + '.jpg" alt="">'
     puts '<h3 style="color: #a3afe1;">Likes for ' + displayName.first['displayName'].to_s + '\'s List</h3>'
   puts '</section>'
   puts '<br>'
@@ -62,8 +61,9 @@ puts "<body id=\"whoLiked\">"
         likeDisplayName = db.query("SELECT displayName FROM account JOIN likedList ON likedList.userWhoLiked = account.username WHERE likedList.userWhoLiked = '" + likes[i]['userWhoLiked'] + "';")
         puts '<section class="UserDisplay" style="max-width: 390px">'
             puts '<img src="./ProfileImages/' + likes[i]['userWhoLiked'] + '.jpg" alt="">'
-            puts '<h3>' + likeDisplayName.first['displayName'].to_s + '</h3>'
+            puts '<a href="othersProfiles.cgi?username=' + likes[i]['userWhoLiked'] + '"><h3>' + likeDisplayName.first['displayName'].to_s + '</h3></a>'
         puts '</section>'
+        puts '<br>'
     end
 
   puts '</section>'

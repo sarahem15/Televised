@@ -65,7 +65,7 @@ elsif likedList == "TRUE" && profileLikedList == ""
 elsif profileLikedList != ""
     print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/Likes_Lists.cgi'>\n"
 else
-    print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
+    print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
 end
 puts "</head>"
 puts "<body>"

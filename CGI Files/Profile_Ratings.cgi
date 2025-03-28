@@ -95,8 +95,8 @@ puts '<body id="userRatings">'
     puts '</div>'
 puts '</div>'
 
-(0...ratings.size).each do |i|
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
+(0...ratings.size).each do |i|
     puts '<div class="listWrapper">'
     if seriesTab == "SERIES"
         rateImages = db.query("SELECT series.imageName, series.showName, series.year FROM series JOIN seriesRating ON series.showId = seriesRating.seriesId WHERE username = '" + username.to_s + "';")
@@ -106,22 +106,19 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       rateImages = db.query("SELECT series.imageName, series.showName, series.year, season.seasonNum, episode.epName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN episodeRating ON episodeRating.epId = episode.epId WHERE username = '" + username.to_s + "';")
     end
         rateImages = rateImages.to_a
-        puts "<img src=\"" + rateImages[i]['imageName'] + "\"alt=\"" + rateImages[i]['imageName'] + "\" style='width: 100px; height: 150px;'>" 
+        puts "<img src=\"" + rateImages[i]['imageName'] + "\"alt=\"" + rateImages[i]['imageName'] + "\" style='width: 150px; height: 220px; object-fit: cover;'>" 
   puts '<div class="content-R">'
       puts '<br>'
       puts '<section class="NameAndYear">'
       puts '<h3>' + rateImages[i]['showName'] + '</h3>'
-      if seriesTab == 'SEASON'
-        puts '<br>'
-        puts '<h3>Season ' + rateImages[i]['seasonNum'].to_s + '</h3>'
-      elsif seriesTab == 'EP'
-        puts '<br>'
-        puts '<h3>Season ' + rateImages[i]['seasonNum'].to_s + '</h3>'
-        puts '<br>'
-        puts '<h3>' + rateImages[i]['epName'] + '</h3>'
-      end
       puts '<h3 style="color: #436eb1;">' + rateImages[i]['year'].to_s + '</h3>'
       puts '</section>'
+      if seriesTab == 'SEASON'
+        puts '<h3>Season ' + rateImages[i]['seasonNum'].to_s + '</h3>'
+      elsif seriesTab == 'EP'
+        puts '<h3>Season ' + rateImages[i]['seasonNum'].to_s + '</h3>'
+        puts '<h3>' + rateImages[i]['epName'] + '</h3>'
+      end
   puts '<section class="Rating">'
           (0...5).each do |j|
             if (j < ratings[i]['rating'].to_i)
@@ -133,8 +130,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
         puts '</section>'
   puts '</div>'
   puts '</div>'
-
-    puts '<br>'
+puts '<hr style="margin-left: 80px; margin-right: 80px">'
 end
     puts '<!-- Scripts -->'
   puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'

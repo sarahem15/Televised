@@ -13,7 +13,7 @@ cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
 listTitle = cgi['title']
-
+type = cgi['contentType']
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -23,9 +23,17 @@ db = Mysql2::Client.new(
 
 haveWatched = db.query("SELECT seriesId FROM haveWatchedSeries WHERE username = '" + username.to_s + "';")
 haveWatched = haveWatched.to_a
-listContent = db.query("SELECT imageName, seriesId, showName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE name = '" + listTitle + "';")
+if type == 'SERIES'
+  listContent = db.query("SELECT series.imageName, series.showId, series.showName, curatedListSeries.username FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE name = '" + listTitle + "';")
+elsif type == 'SEASON'
+  listContent = db.query("SELECT series.imageName, series.showId, series.showName, curatedListSeason.username FROM series JOIN season ON series.showId = season.seriesId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE name = '" + listTitle + "';")
+else
+  listContent = db.query("SELECT series.imageName, series.showId, series.showName, curatedListEpisode.username FROM series JOIN season ON series.showId = season.seriesId JOIN episode ON episode.seasonId = season.seasonId JOIN curatedListEpisode ON episode.epId = curatedListEpisode.epId WHERE name = '" + listTitle + "';")
+end
 listContent = listContent.to_a
-displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
+
+displayName = db.query("SELECT displayName FROM account WHERE username = '" + listContent.first['username'] + "';")
+
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
 
@@ -41,8 +49,8 @@ puts '<body id="listContent">'
   
   puts '<section class="contentList">'
   puts '<section class="UserDisplay" style="max-width: 390px">'
-    puts '<img src="./ProfileImages/' + username.to_s + '.jpg" alt="">'
-    puts '<h3>List by ' + displayName.first['displayName'].to_s + '</h3>'
+    puts '<img src="./ProfileImages/' + listContent.first['username'] + '.jpg" alt="">'
+    puts '<h3>List by ' + displayName.first['displayName'] + '</h3>'
   puts '</section>'
   puts '<br>'
   puts '<h1>' + listTitle.to_s + '</h1>'

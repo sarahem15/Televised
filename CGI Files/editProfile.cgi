@@ -58,7 +58,7 @@ end
 
 # Retrieve form parameters
 displayName = cgi['displayName']
-bio = cgi['bio']
+bio = cgi['bio'].gsub("'", "\\\\'").gsub('"', '\\\\"')
 pronouns = cgi['pronouns']
 if cgi['replies'] == "Public"
   replies = 1
@@ -76,7 +76,7 @@ puts "<head>"
 puts "<meta charset='UTF-8'>"
 puts "<title>Edit Settings</title>"
 puts "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
-print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/Profile.cgi'>\n"
+print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/Profile.cgi'>\n"
 puts "</head>"
 puts "<body>"
 #puts "<div class='container mt-5'>"
