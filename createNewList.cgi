@@ -84,7 +84,7 @@ puts '</div>'
 # Right Column - Search for Series
 puts '<div class="col" id="searchColumn">'
 puts '<h3 class="text-center">Search for a Series</h3>'
-puts '<form id="searchForm" method="post" action="createNewList.cgi">'
+puts '<form id="searchForm">'
 puts '<select id="type" name="typeSearch" class="form-control">'
 puts '<option value="Series" selected>Series</option>'
 puts '<option value="Seasons">Seasons</option>'
@@ -102,7 +102,7 @@ if type == "Series" && search != ""
         puts '<p>Is this the title you\'re looking for?</p>'
         images.each do |image|
             puts "<p>#{image['showName']} <img src='#{image['imageName']}' alt='#{image['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-            puts "<button class='addToList btn btn-success' data-series-id='#{image['showId']}' data-series-name='#{image['showName']}' onclick='updateSeriesList()'>ADD</button></p>"
+            puts "<button class='addToList btn btn-success' data-series-id='#{image['showId']}' data-series-name='#{image['showName']}'>ADD</button></p>"
         end
     else
         puts '<p>We can\'t seem to find this title!</p>'
@@ -118,7 +118,7 @@ puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstra
 puts '<script src="Televised.js"></script>'
 puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
-puts '    let seriesArray = [];'
+puts '    let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
 
 # Click event for adding series
 puts '    document.addEventListener("click", function (event) {'
@@ -130,10 +130,10 @@ puts '            if (seriesId && !seriesArray.some(s => s.id === seriesId)) {'
 puts '                seriesArray.push({ id: seriesId, name: seriesName });'
 puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
 puts '                updateSeriesList();'
+puts '                console.log("Updated seriesArray:", seriesArray);'
 puts '            }'
 puts '        }'
 puts '    });'
-
 
 # Click event for deleting series
 puts '    document.addEventListener("click", function (event) {'
@@ -157,8 +157,19 @@ puts '            listItem.innerHTML = series.name + " <button class=\'btn btn-d
 puts '            listColumn.appendChild(listItem);'
 puts '        });'
 puts '        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray.map(s => s.id));'
+puts '        console.log("Series Array after update:", seriesArray);'
 puts '    }'
-puts 'console.log(seriesArray)'
+
+# AJAX Search Handling
+puts '    document.getElementById("searchForm").addEventListener("submit", function (event) {'
+puts '        event.preventDefault();'
+puts '        let searchInput = document.querySelector(\'input[name="mediaEntered"]\').value;'
+puts '        let type = document.querySelector(\'select[name="typeSearch"]\').value;'
+puts '        fetch("createNewList.cgi", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type }) })'
+puts '        .then(response => response.text()).then(data => { document.getElementById("searchColumn").innerHTML = data; });'
+puts '    });'
+
+puts '    updateSeriesList();'
 puts '});'
 puts '</script>'
 
