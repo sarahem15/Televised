@@ -111,19 +111,70 @@ puts '<input type="text" name="mediaEntered" class="form-control">'
 puts '<input type="submit" value="Search" class="btn btn-secondary mt-2">'
 puts '</form>'
 
+# Placeholder for search results
+puts '<div id="searchResults"></div>'
+
 puts '</div>'
 puts '</div>'
 puts '</div>'
 
-# JavaScript Section (same as before)
+# JavaScript Section (AJAX search handling)
 puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
 puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
 puts '<script src="Televised.js"></script>'
 puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
 
-# Your existing JavaScript code here (search functionality, adding/deleting series, etc.)
+# Prevent form submission and use AJAX
+puts '    document.getElementById("searchForm").addEventListener("submit", function (event) {'
+puts '        event.preventDefault();'  # Prevent form submission
+puts '        let searchInput = document.querySelector("input[name=\'mediaEntered\']").value;' 
+puts '        let type = document.querySelector("select[name=\'typeSearch\']").value;'
 
+puts '        fetch("createNewList.cgi", {'
+puts '            method: "POST",'
+puts '            headers: { "Content-Type": "application/x-www-form-urlencoded" },'
+puts '            body: new URLSearchParams({'
+puts '                mediaEntered: searchInput,'
+puts '                typeSearch: type'
+puts '            })'
+puts '        })'
+puts '        .then(response => response.text())'
+puts '        .then(data => {'
+puts '            document.getElementById("searchResults").innerHTML = data;'  # Insert search results
+puts '        });'
+puts '    });'
+
+# Adding/Removing series from the list
+puts '    document.addEventListener("click", function (event) {'
+puts '        if (event.target.classList.contains("addToList")) {'
+puts '            event.preventDefault();'
+puts '            let seriesId = event.target.dataset.seriesId;'
+puts '            let seriesName = event.target.dataset.seriesName;'
+puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
+puts '            if (seriesId && !seriesArray.some(s => s.id === seriesId)) {'
+puts '                seriesArray.push({ id: seriesId, name: seriesName });'
+puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
+puts '                updateSeriesList();'
+puts '            }'
+puts '        }'
+puts '    });'
+
+puts '    function updateSeriesList() {'
+puts '        let listColumn = document.getElementById("seriesList");'
+puts '        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
+puts '        listColumn.innerHTML = "";'
+puts '        seriesArray.forEach(series => {'
+puts '            let listItem = document.createElement("li");'
+puts '            listItem.className = "list-group-item d-flex justify-content-between align-items-center";'
+puts '            listItem.innerHTML = series.name + " <button class=\'btn btn-danger btn-sm deleteSeries\' data-series-id=\'" + series.id + "\'>X</button>";'
+puts '            listColumn.appendChild(listItem);'
+puts '        });'
+puts '    }'
+
+puts '    updateSeriesList();'
+
+puts '});'
 puts '</script>'
 
 puts '</body>'
