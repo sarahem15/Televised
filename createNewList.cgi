@@ -177,6 +177,9 @@ puts '    updateSeriesList();'
 puts '});'
 puts '</script>'
 
+#when you press create list on the making a list page it should take you to the list page, when clicking the create list on the list page it should show a blank middle column/the array should be cleared on submission
+#of a new list. i also need the remove buttons to work and make the query statment to be able to submit a list. lastly i need to figure out wtf is going on with the alignment of everything on the page. 
+
 puts '</body>'
 puts '</html>'
 
