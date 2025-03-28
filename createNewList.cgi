@@ -168,9 +168,10 @@ puts '        let type = document.querySelector(\'select[name="typeSearch"]\').v
 puts '        fetch("createNewList.cgi", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type }) })'
 puts '        .then(response => response.text()).then(data => { document.getElementById("searchColumn").innerHTML = data; });'
 puts '    });'
-
+puts ''
 puts '    updateSeriesList();'
 puts '});'
+
 puts '</script>'
 
 puts '</body>'
