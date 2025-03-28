@@ -102,7 +102,7 @@ if type == "Series" && search != ""
         puts '<p>Is this the title you\'re looking for?</p>'
         images.each do |image|
             puts "<p>#{image['showName']} <img src='#{image['imageName']}' alt='#{image['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-            puts "<button class='addToList btn btn-success' data-series-id='#{image['showId']}' data-series-name='#{image['showName']}'>ADD</button></p>"
+            puts "<button class='addToList btn btn-success' data-series-id='#{image['showId']}' data-series-name='#{image['showName']}' onclick='updateSeriesList()'>ADD</button></p>"
         end
     else
         puts '<p>We can\'t seem to find this title!</p>'
@@ -120,10 +120,6 @@ puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
 puts '    let seriesArray = [];'
 
-# Clear stored array when page loads
-puts '    sessionStorage.removeItem("seriesArray");'
-puts '    updateSeriesList();'
-
 # Click event for adding series
 puts '    document.addEventListener("click", function (event) {'
 puts '        if (event.target.classList.contains("addToList")) {'
@@ -137,6 +133,7 @@ puts '                updateSeriesList();'
 puts '            }'
 puts '        }'
 puts '    });'
+
 
 # Click event for deleting series
 puts '    document.addEventListener("click", function (event) {'
@@ -161,6 +158,7 @@ puts '            listColumn.appendChild(listItem);'
 puts '        });'
 puts '        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray.map(s => s.id));'
 puts '    }'
+puts 'console.log(seriesArray)'
 puts '});'
 puts '</script>'
 
