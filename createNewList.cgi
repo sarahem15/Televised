@@ -42,7 +42,6 @@ end
 if type == "Series" && search != ""
     images = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{search}%'")
     if !images.to_a.empty?
-        # Only return search results in the response, not the whole page
         images.each do |image|
             puts "<p>#{image['showName']} <img src='#{image['imageName']}' alt='#{image['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
             puts "<button class='addToList btn btn-success' data-series-id='#{image['showId']}' data-series-name='#{image['showName']}'>ADD</button></p>"
@@ -50,10 +49,10 @@ if type == "Series" && search != ""
     else
         puts '<p>We can\'t seem to find this title!</p>'
     end
-    exit  # Exit here to prevent the full HTML page from being rendered for AJAX requests
+    exit
 end
 
-# Full page HTML (if it's not an AJAX request)
+# Full page HTML
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
 puts '<head>'
@@ -65,10 +64,10 @@ puts '    <link rel="stylesheet" href="Televised.css">'
 puts '</head>'
 
 puts '<body id="createNewList">'
-puts    '<nav id="changingNav"></nav>'
-puts    '<h2 class="text-center mt-3">Create a New List</h2>'
-puts    '<div class="container-fluid">'
-puts        '<div class="row">'
+puts '<nav id="changingNav"></nav>'
+puts '<h2 class="text-center mt-3">Create a New List</h2>'
+puts '<div class="container-fluid">'
+puts '<div class="row">'
 
 # Left Column - Form to Create List
 puts '<div class="col" id="listRow">'
@@ -118,34 +117,29 @@ puts '</div>'
 puts '</div>'
 puts '</div>'
 
-# JavaScript Section (AJAX search handling)
+# JavaScript Section (Updated for Removing Items)
 puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
 puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
 puts '<script src="Televised.js"></script>'
 puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
 
-# Prevent form submission and use AJAX
+# AJAX Search Handling
 puts '    document.getElementById("searchForm").addEventListener("submit", function (event) {'
-puts '        event.preventDefault();'  # Prevent form submission
+puts '        event.preventDefault();'
 puts '        let searchInput = document.querySelector("input[name=\'mediaEntered\']").value;' 
 puts '        let type = document.querySelector("select[name=\'typeSearch\']").value;'
 
 puts '        fetch("createNewList.cgi", {'
 puts '            method: "POST",'
 puts '            headers: { "Content-Type": "application/x-www-form-urlencoded" },'
-puts '            body: new URLSearchParams({'
-puts '                mediaEntered: searchInput,'
-puts '                typeSearch: type'
-puts '            })'
+puts '            body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })'
 puts '        })'
 puts '        .then(response => response.text())'
-puts '        .then(data => {'
-puts '            document.getElementById("searchResults").innerHTML = data;'  # Insert search results
-puts '        });'
+puts '        .then(data => { document.getElementById("searchResults").innerHTML = data; });'
 puts '    });'
 
-# Adding/Removing series from the list
+# Add & Remove Series Handling
 puts '    document.addEventListener("click", function (event) {'
 puts '        if (event.target.classList.contains("addToList")) {'
 puts '            event.preventDefault();'
@@ -157,9 +151,17 @@ puts '                seriesArray.push({ id: seriesId, name: seriesName });'
 puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
 puts '                updateSeriesList();'
 puts '            }'
+puts '        } else if (event.target.classList.contains("deleteSeries")) {'
+puts '            event.preventDefault();'
+puts '            let seriesId = event.target.dataset.seriesId;'
+puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
+puts '            seriesArray = seriesArray.filter(series => series.id !== seriesId);'
+puts '            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
+puts '            updateSeriesList();'
 puts '        }'
 puts '    });'
 
+# Function to Update List
 puts '    function updateSeriesList() {'
 puts '        let listColumn = document.getElementById("seriesList");'
 puts '        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
@@ -170,10 +172,10 @@ puts '            listItem.className = "list-group-item d-flex justify-content-b
 puts '            listItem.innerHTML = series.name + " <button class=\'btn btn-danger btn-sm deleteSeries\' data-series-id=\'" + series.id + "\'>X</button>";'
 puts '            listColumn.appendChild(listItem);'
 puts '        });'
+puts '        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray);'
 puts '    }'
 
 puts '    updateSeriesList();'
-
 puts '});'
 puts '</script>'
 
