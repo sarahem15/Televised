@@ -46,11 +46,12 @@ if type == "Series" && search != ""
 end
 
 # Process the list creation only when the "saveList" button is clicked
-if cgi['saveList']
+if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.empty?
     # Check if the user already has a list with the same name
     existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
 
     if existing_list.count > 0
+        # Show error message only if the "saveList" button is clicked
         puts "<script>alert('Sorry, but you already have a list with this name. Try a different name to be able to submit your new list.');</script>"
         exit
     end
@@ -138,7 +139,7 @@ puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
 
 # AJAX Search Handling
-puts '    document.getElementById("searchForm").addEventListener("submit", function (event) {'
+puts '    document.getElementById("searchForm").addEventListener("submit", function (event) {' 
 puts '        event.preventDefault();'
 puts '        let searchInput = document.querySelector("input[name=\'mediaEntered\']").value;'
 puts '        let type = document.querySelector("select[name=\'typeSearch\']").value;'
@@ -153,14 +154,14 @@ puts '        .then(data => { document.getElementById("searchResults").innerHTML
 puts '    });'
 
 # Add & Remove Series Handling
-puts '    document.addEventListener("click", function (event) {'
-puts '        if (event.target.classList.contains("addToList")) {'
+puts '    document.addEventListener("click", function (event) {' 
+puts '        if (event.target.classList.contains("addToList")) {' 
 puts '            event.preventDefault();'
 puts '            let seriesId = event.target.dataset.seriesId;'
 puts '            let seriesName = event.target.dataset.seriesName;'
 puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '            if (!seriesArray.some(s => s.id === seriesId)) {'
-puts '                seriesArray.push({ id: seriesId, name: seriesName });'
+puts '            if (!seriesArray.some(s => s.id === seriesId)) {' 
+puts '                seriesArray.push({ id: seriesId, name: seriesName });' 
 puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
 puts '                updateSeriesList();'
 puts '            }'
