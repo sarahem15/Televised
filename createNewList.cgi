@@ -138,14 +138,13 @@ puts '</div>'
 puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
 puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
 puts '<script src="Televised.js"></script>'
-      <script type="text/javascript">
-        window.onload = function() {
-          let seriesArray = []; // Empty array
+puts      '<script type="text/javascript">'
+puts        'window.onload = function() {'
+puts          'let seriesArray = []; // Empty array'
 
-          // Output to the console
-          console.log("seriesArray is empty:", seriesArray.length === 0);
-        };
-      </script>
+puts          'console.log("seriesArray is empty:", seriesArray.length === 0);'
+puts        '};'
+puts      '</script>'
 puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
 
