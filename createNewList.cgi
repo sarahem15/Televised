@@ -60,11 +60,13 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
     db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
     list_id = db.last_id  # Get the inserted list ID
 
+
+#THIS DOES NOT WORK IT CRASHES THE PAGE!
     # Insert list details into curatedSeriesList for each series in the array
-    seriesArray.each do |series_id|
-        db.query("INSERT INTO curatedSeriesList (username, seriesId, name, description, privacy, date, listId)
-                  VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
-    end
+  #  seriesArray.each do |series_id|
+ #       db.query("INSERT INTO curatedSeriesList (username, seriesId, name, description, privacy, date, listId)
+#                  VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
+#    end
 
     # Confirmation message
     puts "<script>alert('Your list has been successfully created!');</script>"
