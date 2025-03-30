@@ -1,4 +1,3 @@
-Sorry, but you already have a list with this name. Try a different name to be able to submit your new list.
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
