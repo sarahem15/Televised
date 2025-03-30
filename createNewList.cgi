@@ -183,11 +183,12 @@ puts '        let seriesList = document.getElementById("seriesList");'
 puts '        seriesList.innerHTML = "";'
 puts '        seriesArray.forEach(function(series) {'
 puts '            let li = document.createElement("li");'
-puts '            li.classList.add("list-group-item");'
-puts '            li.innerHTML = series.name + " <button class=\'removeFromList btn btn-danger btn-sm\' data-series-id=\'" + series.id + "\'>Remove</button>";'
+puts '            li.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");'  # Flexbox for alignment
+puts '            li.innerHTML = series.name + " <button class=\'removeFromList btn btn-danger btn-sm\' data-series-id=\'" + series.id + "\' style=\'border-radius: 50%; width: 25px; height: 25px; text-align: center; padding: 0;\'>X</button>";'
 puts '            seriesList.appendChild(li);'
 puts '        });'
 puts '    }'
+
 
 puts '    updateSeriesList();'
 puts '});'
