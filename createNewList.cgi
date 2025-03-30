@@ -10,178 +10,168 @@ require 'json'
 
 cgi = CGI.new
 session = CGI::Session.new(cgi)
-username = session['username']
 
-listName = cgi['listName']
-description = cgi['description']
-privacy = cgi['views'] == "Public" ? 1 : 0  # Convert privacy to 1 for Public, 0 for Private
-
-begin
-    seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
-rescue JSON::ParserError
-    seriesArray = []  # Default to an empty array if JSON is invalid
-end
-
-
-db = Mysql2::Client.new(
-    host: '10.20.3.4', 
-    username: 'seniorproject25', 
-    password: 'TV_Group123!', 
-    database: 'televised_w25'
-)
-
-# Check if the user already has a list with the same name
-existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
-
-if existing_list.count > 0
-    puts "<p class='text-danger'>Sorry, but you already have a list with this name. Try a different name to be able to submit your new list.</p>"
+# Ensure session has a username
+if !session['username'] || session['username'].empty?
+    puts "<script>alert('You must be logged in to create a list.'); window.location.href='loginPage.cgi';</script>"
     exit
 end
 
-# Insert new list into listOwnership
-db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
-list_id = db.last_id  # Get the inserted list ID
+username = session['username']
 
-# Insert series into curatedSeriesList
-seriesArray.each do |series_id|
-    db.query("INSERT INTO curatedSeriesList (username, seriesId, name, description, privacy, date, listId)
-              VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
+# Only process when "Create List" is clicked
+if cgi.has_key?('saveList')
+    listName = cgi['listName']
+    description = cgi['description']
+    privacy = cgi['views'] == "Public" ? 1 : 0  # Convert privacy to 1 for Public, 0 for Private
+
+    # Parse seriesArray safely
+    begin
+        seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
+    rescue JSON::ParserError
+        seriesArray = []  # Default to an empty array if JSON is invalid
+    end
+
+    db = Mysql2::Client.new(
+        host: '10.20.3.4', 
+        username: 'seniorproject25', 
+        password: 'TV_Group123!', 
+        database: 'televised_w25'
+    )
+
+    # Check if the user already has a list with the same name
+    existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
+
+    if existing_list.count > 0
+        puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
+        exit
+    end
+
+    # Insert new list into listOwnership
+    db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
+    list_id = db.last_id  # Get the inserted list ID
+
+    # Insert series into curatedSeriesList
+    seriesArray.each do |series_id|
+        db.query("INSERT INTO curatedSeriesList (username, seriesId, name, description, privacy, date, listId)
+                  VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
+    end
+
+    # Success message
+    puts "<script>alert('Your list has been successfully created!'); window.location.href='createNewList.cgi';</script>"
+    session.close
+    exit
 end
 
-# Confirmation message
-puts "<p class='text-success'>Your list has been successfully created!</p>"
+# HTML Page
+puts <<-HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Televised</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="Televised.css">
+</head>
 
-session.close
+<body id="createNewList">
+<nav id="changingNav"></nav>
+<h2 class="text-center mt-3">Create a New List</h2>
+<div class="container-fluid">
+    <div class="row">
 
-# Full page HTML
-puts '<!DOCTYPE html>'
-puts '<html lang="en">'
-puts '<head>'
-puts '    <meta charset="UTF-8">'
-puts '    <meta name="viewport" content="width=device-width, initial-scale=1.0">'
-puts '    <title>Televised</title>'
-puts '    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">'
-puts '    <link rel="stylesheet" href="Televised.css">'
-puts '</head>'
+        <!-- Left Column - Form -->
+        <div class="col" id="listRow">
+            <h3 class="text-center">List Details</h3>
+            <form id="newListForm">
+                <label>Name</label>
+                <input type="text" id="listName" name="listName" class="form-control" placeholder="Name" required>
+                <br>
+                <label>Who Can View</label>
+                <select id="views" name="views" class="form-control">
+                    <option value="Public">Public - anyone can view</option>
+                    <option value="Private">Private - no one can view</option>
+                </select>
+                <br>
+                <label>Description</label>
+                <textarea id="description" name="description" class="form-control" rows="5"></textarea>
+                <br>
+                <input type="hidden" id="seriesArrayInput" name="seriesArray">
+                <button id="saveList" class="btn btn-primary" type="button">CREATE LIST</button>
+            </form>
+        </div>
 
-puts '<body id="createNewList">'
-puts '<nav id="changingNav"></nav>'
-puts '<h2 class="text-center mt-3">Create a New List</h2>'
-puts '<div class="container-fluid">'
-puts '<div class="row">'
+        <!-- Middle Column - Selected Series -->
+        <div class="col" id="listColumn">
+            <h3 class="text-center">Selected Series</h3>
+            <ul id="seriesList" class="list-group"></ul>
+        </div>
 
-# Left Column - Form to Create List
-puts '<div class="col" id="listRow">'
-puts '<h3 class="text-center">List Details</h3>'
-puts '<form id="newListForm" method="post" action="createNewList.cgi">'
-puts '<label>Name</label>'
-puts '<input type="text" name="listName" class="form-control" placeholder="Name" required>'
-puts '<br>'
-puts '<label>Who Can View</label>'
-puts '<select name="views" class="form-control">'
-puts '<option value="Public">Public - anyone can view</option>'
-puts '<option value="Private">Private - no one can view</option>'
-puts '</select>'
-puts '<br>'
-puts '<label>Description</label>'
-puts '<textarea name="description" class="form-control" rows="5"></textarea>'
-puts '<br>'
-puts '<input type="hidden" id="seriesArrayInput" name="seriesArray">'
-puts '<button id="saveList" class="btn btn-primary" type="submit">CREATE LIST</button>'
-puts '<div id="messageBox"></div>' # Placeholder for messages
-puts '</form>'
-puts '</div>'
+        <!-- Right Column - Search for Series -->
+        <div class="col" id="searchColumn">
+            <h3 class="text-center">Search for a Series</h3>
+            <form id="searchForm">
+                <select id="type" name="typeSearch" class="form-control">
+                    <option value="Series" selected>Series</option>
+                    <option value="Seasons">Seasons</option>
+                    <option value="Episodes">Episodes</option>
+                </select>
+                <br>
+                <input type="text" id="mediaEntered" name="mediaEntered" class="form-control">
+                <input type="submit" value="Search" class="btn btn-secondary mt-2">
+            </form>
+            <div id="searchResults"></div>
+        </div>
+    </div>
+</div>
 
-# Middle Column - Selected Series List
-puts '<div class="col" id="listColumn">'
-puts '<h3 class="text-center">Selected Series</h3>'
-puts '<ul id="seriesList" class="list-group"></ul>'
-puts '</div>'
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="Televised.js"></script>
 
-# Right Column - Search for Series
-puts '<div class="col" id="searchColumn">'
-puts '<h3 class="text-center">Search for a Series</h3>'
-puts '<form id="searchForm">'
-puts '<select id="type" name="typeSearch" class="form-control">'
-puts '<option value="Series" selected>Series</option>'
-puts '<option value="Seasons">Seasons</option>'
-puts '<option value="Episodes">Episodes</option>'
-puts '</select>'
-puts '<br>'
-puts '<input type="text" name="mediaEntered" class="form-control">'
-puts '<input type="submit" value="Search" class="btn btn-secondary mt-2">'
-puts '</form>'
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    sessionStorage.setItem("seriesArray", "[]"); // Reset series array
 
-# Placeholder for search results
-puts '<div id="searchResults"></div>'
+    // AJAX form submission
+    document.getElementById("saveList").addEventListener("click", function () {
+        let listName = document.getElementById("listName").value;
+        let description = document.getElementById("description").value;
+        let privacy = document.getElementById("views").value;
+        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
 
-puts '</div>'
-puts '</div>'
-puts '</div>'
+        fetch("createNewList.cgi", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                saveList: "1", 
+                listName: listName,
+                description: description,
+                views: privacy,
+                seriesArray: JSON.stringify(seriesArray)
+            })
+        })
+        .then(response => response.text())
+        .then(data => { eval(data); }); // Execute alert message from the server
+    });
 
-# JavaScript Section (Updated for Removing Items)
-puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-puts '<script src="Televised.js"></script>'
-puts '<script>'
-puts 'document.addEventListener("DOMContentLoaded", function () {'
+    function updateSeriesList() {
+        let listColumn = document.getElementById("seriesList");
+        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
+        listColumn.innerHTML = "";
+        seriesArray.forEach(series => {
+            let listItem = document.createElement("li");
+            listItem.innerHTML = series.name;
+            listColumn.appendChild(listItem);
+        });
+        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray);
+    }
 
-# AJAX Form Submission Handling
-puts '    document.getElementById("newListForm").addEventListener("submit", function (event) {'
-puts '        event.preventDefault();' # Prevent form submission
+    updateSeriesList();
+});
+</script>
 
-puts '        let listName = document.querySelector("input[name=\'listName\']").value;'
-puts '        let description = document.querySelector("textarea[name=\'description\']").value;'
-puts '        let privacy = document.querySelector("select[name=\'views\']").value;'
-puts '        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-
-puts '        fetch("createNewList.cgi", {'
-puts '            method: "POST",'
-puts '            headers: { "Content-Type": "application/x-www-form-urlencoded" },'
-puts '            body: new URLSearchParams({'
-puts '                listName: listName,'
-puts '                description: description,'
-puts '                views: privacy,'
-puts '                seriesArray: JSON.stringify(seriesArray)'
-puts '            })'
-puts '        })'
-puts '        .then(response => response.text())'
-puts '        .then(data => {'
-puts '            let messageBox = document.getElementById("messageBox");'
-puts '            messageBox.innerHTML = data;'
-puts '        });'
-puts '    });'
-
-# Add & Remove Series Handling
-puts '    document.addEventListener("click", function (event) {'
-puts '        if (event.target.classList.contains("addToList")) {'
-puts '            event.preventDefault();'
-puts '            let seriesId = event.target.dataset.seriesId;'
-puts '            let seriesName = event.target.dataset.seriesName;'
-puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '            if (!seriesArray.some(s => s.id === seriesId)) {'
-puts '                seriesArray.push({ id: seriesId, name: seriesName });'
-puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
-puts '                updateSeriesList();'
-puts '            }'
-puts '        }'
-puts '    });'
-
-puts '    function updateSeriesList() {'
-puts '        let listColumn = document.getElementById("seriesList");'
-puts '        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '        listColumn.innerHTML = "";'
-puts '        seriesArray.forEach(series => {'
-puts '            let listItem = document.createElement("li");'
-puts '            listItem.innerHTML = series.name;'
-puts '            listColumn.appendChild(listItem);'
-puts '        });'
-puts '        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray);'
-puts '    }'
-
-puts '    updateSeriesList();'
-puts '});'
-puts '</script>'
-
-puts '</body>'
-puts '</html>'
+</body>
+</html>
+HTML
