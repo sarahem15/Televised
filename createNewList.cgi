@@ -1,3 +1,5 @@
+#/usr/share/ruby/json/common.rb:216:in `parse': 809: unexpected token at '' (JSON::ParserError) from /usr/share/ruby/json/common.rb:216:in `parse' from /mnt/web/www/Televised/createNewList.cgi:18:in `
+
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
