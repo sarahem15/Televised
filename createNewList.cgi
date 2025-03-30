@@ -60,11 +60,13 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
     db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
     list_id = db.last_id  # Get the inserted list ID
 
+
+#THIS DOES NOT WORK IT CRASHES THE PAGE
     # Insert list details into curatedSeriesList for each series in the array
-    seriesArray.each do |series_id|
-        db.query("INSERT INTO curatedSeriesList (username, seriesId, name, description, privacy, date, listId)
-                  VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
-    end
+  #  seriesArray.each do |series_id|
+ #       db.query("INSERT INTO curatedSeriesList (username, seriesId, name, description, privacy, date, listId)
+#                  VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
+#    end
 
     # Confirmation message
     puts "<script>alert('Your list has been successfully created!');</script>"
@@ -82,31 +84,7 @@ puts '    <link rel="stylesheet" href="Televised.css">'
 puts '</head>'
 
 puts '<body id="createNewList">'
-
-# Navigation bar
-puts '<nav id="changingNav" class="navbar navbar-expand-lg navbar-light bg-light">'
-puts '  <a class="navbar-brand" href="#">Televised</a>'
-puts '  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">'
-puts '    <span class="navbar-toggler-icon"></span>'
-puts '  </button>'
-puts '  <div class="collapse navbar-collapse" id="navbarNav">'
-puts '    <ul class="navbar-nav">'
-puts '      <li class="nav-item active">'
-puts '        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>'
-puts '      </li>'
-puts '      <li class="nav-item">'
-puts '        <a class="nav-link" href="#">Features</a>'
-puts '      </li>'
-puts '      <li class="nav-item">'
-puts '        <a class="nav-link" href="#">Pricing</a>'
-puts '      </li>'
-puts '      <li class="nav-item">'
-puts '        <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>'
-puts '      </li>'
-puts '    </ul>'
-puts '  </div>'
-puts '</nav>'
-
+puts '<nav id="changingNav"></nav>'
 puts '<h2 class="text-center mt-3">Create a New List</h2>'
 puts '<div class="container-fluid">'
 puts '<div class="row">'
@@ -200,7 +178,7 @@ puts '            updateSeriesList();'
 puts '        }'
 puts '    });'
 
-puts '    function updateSeriesList() {' 
+puts '    function updateSeriesList() {'
 puts '        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
 puts '        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray);'
 puts '        let seriesList = document.getElementById("seriesList");'
@@ -212,6 +190,7 @@ puts '            li.innerHTML = series.name + " <button class=\'removeFromList 
 puts '            seriesList.appendChild(li);'
 puts '        });'
 puts '    }'
+
 
 puts '    updateSeriesList();'
 puts '});'
