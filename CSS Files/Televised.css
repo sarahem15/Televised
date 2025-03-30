@@ -268,7 +268,7 @@ button:hover {
 /*Shows adding*/
 .seasonNav {
     display: grid;
-    grid-template-columns: repeat(2, auto);
+    grid-template-columns: repeat(3, auto);
 }
 
 /* Dropdown for seasons */
@@ -746,7 +746,7 @@ button:hover {
 
 #profileSettings .TopFiveProfile form {
     display: grid;
-    grid-template-columns: repeat(3, auto);
+    grid-template-columns: repeat(4, auto);
 }
 
 #createNewList .container-fluid {
@@ -819,7 +819,7 @@ button:hover {
 #whoLiked a:hover {color: lightpink;}
 #profile .titleDate a:hover {color: lightpink;}
 
-#reviewIndiv .originalReview .content-R .Rating , #profileReviews .originalReview .content-R .Rating , #userProfile .listWrapper .content-R .Rating , #userProfile .originalReview .content-R .Rating, #episodePage .avgRating, #userRatings .content-R .Rating{
+#reviewIndiv .originalReview .content-R .Rating , #profileReviews .originalReview .content-R .Rating , #userProfile .listWrapper .content-R .Rating , #userProfile .originalReview .content-R .Rating, #episodePage .avgRating, #userRatings .content-R .Rating, #showsPage .avgRating{
     display: grid;
     grid-template-columns: repeat(5, auto);
     background-color: transparent;
@@ -829,7 +829,7 @@ button:hover {
     padding: 10px;
 }
 
-#reviewIndiv .originalReview .content-R .Rating i, #profileReviews .originalReview .content-R .Rating i , #userProfile .listWrapper .content-R .Rating i, #userProfile .originalReview .content-R .Rating, #episodePage .avgRating, #userRatings .content-R .Rating{
+#reviewIndiv .originalReview .content-R .Rating i, #profileReviews .originalReview .content-R .Rating i , #userProfile .listWrapper .content-R .Rating i, #userProfile .originalReview .content-R .Rating, #episodePage .avgRating, #userRatings .content-R .Rating, #showsPage .avgRating{
     background-color: transparent;
     width: 15px;
     padding: 2;
@@ -968,4 +968,9 @@ button:hover {
     height: 170px;
     width: 120px;
     object-fit: cover;
+}
+
+#showsPage .titleRating {
+    display: grid;
+    grid-template-columns: 20% auto;
 }
