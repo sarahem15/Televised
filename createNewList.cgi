@@ -45,8 +45,8 @@ if type == "Series" && search != ""
     exit
 end
 
-# Process the list creation only when the "saveList" button is clicked
-if cgi['saveList']
+# Process the list creation only when the form is submitted via POST with a valid list name
+if cgi.request_method == "POST" && listName && !listName.empty?
     # Check if the user already has a list with the same name
     existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
 
@@ -167,7 +167,6 @@ puts '            }'
 puts '        }'
 puts '    });'
 
-# Function to Update List
 puts '    function updateSeriesList() {'
 puts '        let listColumn = document.getElementById("seriesList");'
 puts '        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
