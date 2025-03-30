@@ -60,13 +60,11 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
     db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
     list_id = db.last_id  # Get the inserted list ID
 
-
-#THIS DOES NOT WORK IT CRASHES THE PAGE
     # Insert list details into curatedSeriesList for each series in the array
-  #  seriesArray.each do |series_id|
- #       db.query("INSERT INTO curatedSeriesList (username, seriesId, name, description, privacy, date, listId)
-#                  VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
-#    end
+    seriesArray.each do |series_id|
+        db.query("INSERT INTO curatedSeriesList (username, seriesId, name, description, privacy, date, listId)
+                  VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
+    end
 
     # Confirmation message
     puts "<script>alert('Your list has been successfully created!');</script>"
@@ -190,7 +188,8 @@ puts '    function updateSeriesList() {'
 puts '        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
 puts '        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray);'
 puts '        let seriesList = document.getElementById("seriesList");'
-puts '        seriesList.innerHTML = "";'
+puts '        seriesList.innerHTML = "";'  # Clear the list before adding any items
+
 puts '        seriesArray.forEach(function(series) {'
 puts '            let li = document.createElement("li");'
 puts '            li.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");'  # Flexbox for alignment
@@ -198,7 +197,6 @@ puts '            li.innerHTML = series.name + " <button class=\'removeFromList 
 puts '            seriesList.appendChild(li);'
 puts '        });'
 puts '    }'
-
 
 puts '    updateSeriesList();'
 puts '});'
