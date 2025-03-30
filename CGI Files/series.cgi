@@ -38,6 +38,30 @@ seriesRating = 0
 seasonRating = 0
 episodeRating = 0
 
+sumRating = 0
+avgSeasonRating = 0
+seasonRatings = db.query("SELECT rating FROM seasonRating where seasonId = '" + seasonId.to_s + "';")
+seasonRatings = seasonRatings.to_a
+(0...seasonRatings.size).each do |i|
+  sumRating = sumRating + seasonRatings[i]['rating'].to_i
+end
+if seasonRatings.size != 0
+  avgSeasonRating = sumRating/seasonRatings.size
+end
+
+sumRating = 0
+avgSeriesRating = 0
+seriesRatings = db.query("SELECT rating FROM seriesRating where seriesId = '" + seriesId.to_s + "';")
+seriesRatings = seriesRatings.to_a
+(0...seriesRatings.size).each do |i|
+  sumRating = sumRating + seriesRatings[i]['rating'].to_i
+end
+if seriesRatings.size != 0
+  avgSeriesRating = sumRating/seriesRatings.size
+end
+
+
+#puts username.to_s
 puts "<!DOCTYPE html>"
 puts "<html lang=\"en\">"
 puts "<head>"
@@ -65,7 +89,23 @@ puts "<body id=\"showsPage\">"
     puts "<br>"
 
     puts "<div class=\"showWords\">"
+      puts '<div class="titleRating">'
       puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + series.first['showName'] + "</h1>"
+      puts '<section class="avgRating" style="height: 10px;">'
+        if avgSeriesRating != 0
+          (0...5).each do |j|
+            if (j < avgSeriesRating)
+                puts '<i class="fa fa-star" style="color: white;"></i>'
+            else
+              puts '<i class="fa fa-star"></i>'
+            end
+          end
+        else
+            puts '<h3 style="width: 300px;">NO AVG RATING</h3>'
+        end
+        puts '</section>'      
+        puts '</div>'
+        puts '<br>'
       puts "<h2 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + series.first['genre'] + "</h2>"
       puts "<br>"
       puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + series.first['description']+ "</h4>"
@@ -74,7 +114,7 @@ puts "<body id=\"showsPage\">"
       puts "<br>"
       puts "<br>"
 
-      puts "<div class=\"editButtons\">"
+      puts "<div class=\"editButtons\" >"
       puts '<form action="threebuttons.cgi" method="POST">'
       alreadyWatchedSeries = db.query("SELECT * FROM haveWatchedSeries WHERE username = '" + username + "'AND seriesId = '" + seriesId.to_s + "';")
         if (alreadyWatchedSeries.to_a.to_s != "[]")
@@ -97,7 +137,7 @@ puts "<body id=\"showsPage\">"
           #alreadyRated = alreadyRated.to_a
 
 
-        puts '<section class="Rating">'
+      puts '<section class="Rating">'
         (0...5).each do |i|
           puts '<form action="threebuttons.cgi" method="POST">'
           if (i < seriesRating)
@@ -191,6 +231,23 @@ puts "<body id=\"showsPage\">"
       end
     puts "</div>"
   puts "</div>"
+
+  puts '<section class="avgRating" style="height: 10px;">'
+        if avgSeasonRating != 0
+          puts 
+          (0...5).each do |j|
+            if (j < avgSeasonRating)
+                puts '<i class="fa fa-star" style="color: white;"></i>'
+            else
+              puts '<i class="fa fa-star"></i>'
+            end
+          end
+        else
+            puts '<h3 style="width: 300px;">NO AVG RATING</h3>'
+        end
+        puts '</section>'
+
+
   puts "<div class=\"editButtons\">"
       puts '<form action="threebuttons.cgi" method="POST">'
         #puts "<button class=\"watchedButton\">EYE</button>"
@@ -401,8 +458,6 @@ puts "              </div>"
 puts "              <div class='col' id='showInfo'>"
 puts "                <p id='reviewHeader'>I WATCHED…</p>"
 puts "                <p id='reviewShowTitle'>" + series.first['showName'] + "</p>"
-#puts "                <p id='reviewSENum'>" + seasonNumber.to_s + "/Episode</p>"
-#puts "                <p id='reviewEpName'>Episode Name</p>"
 puts "              </div>"
   puts "<br>"
 puts "            </div>"
@@ -411,24 +466,43 @@ puts "              <textarea name='reviewText' class='form-control' id='userRev
 puts "            </div>"
 puts "            <div class='row'>"
 puts "              <div class='col'>"
-puts "            <section class='Rating'>"
+#puts "            <section class='Rating'>"
 
+if seriesRating == 0
+   puts '<label for="Rating">You must provide a rating: </label><br>'
+   #puts '<select name"Rating" id="Rating">'
+                    puts '<select id="rating" name="ratingId" class="form-control">'
+
+                    puts '<option value="1">1</option>'
+                    puts '<option value="2">2</option>'
+                    puts '<option value="3">3</option>'
+                    puts '<option value="4">4</option>'
+                    puts '<option value="4">5</option>'
+  puts '</select>'
+
+else 
+ratingId = db.query("SELECT id from seriesRating WHERE username = '" + username.to_s + "' AND seriesId = '" + seriesId.to_s + "';")
+ratingId = ratingId.first['id'].to_s
 (0...5).each do |i|
  # puts "              <form action='threebuttons.cgi' method='POST'>"
   if (i < seriesRating)
-            puts '<button class="fa fa-star" style="color: yellow;"></button>'
+            #puts '<button class="fa fa-star" style="color: yellow;"></button>'
+            puts '<i class="fa fa-star" style="font-size:24px;color:yellow"></i>'
           else
-            puts '<button class="fa fa-star"></button>'
+            #puts '<button class="fa fa-star"></button>'
+            puts '<i class="fa fa-star" style="font-size:24px;color:white"></i>'
           end
+=begin
   puts "                <input type='hidden' name='seriesRating' value='#{i}'>"
   puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
   puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
   puts "                <input type='hidden' name='rated' value='TRUE'>"
   puts "                <input type='hidden' name='review' value='true'>"
-
+=end
   #puts "              </form>"
 end
-puts "            </section>"
+end
+#puts "            </section>"
 puts "              </div>"
 
 
@@ -436,10 +510,18 @@ puts "                <input type='hidden' name='year' value='#{time.year}'>"
 puts "                <input type='hidden' name='month' value='#{time.month}'>"
 puts "                <input type='hidden' name='day' value='#{time.day}'>"
 
+  puts "                <input type='hidden' name='seriesRating' value='#{seriesRating}'>"
+  puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
+  puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
+  puts "                <input type='hidden' name='ratingId' value='#{ratingId}'>"
+  puts "                <input type='hidden' name='review' value='true'>"
+
+=begin
 puts "              <div class='col'>"
 puts "            <button class='LIKES' style='color: pink;'' id='likeBtn'>&#10084</button>"
 puts "              </div>"
 puts "            </div>"
+=end
 puts '<br>'
 puts "            <div class='modal-footer'>"
 puts "              <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>"
@@ -485,7 +567,7 @@ puts "            <section class='Rating'>"
 
 (0...5).each do |i|
  # puts "              <form action='threebuttons.cgi' method='POST'>"
-  if (i < seriesRating)
+  if (i < seasonRating)
             puts '<button class="fa fa-star" style="color: yellow;"></button>'
           else
             puts '<button class="fa fa-star"></button>'
@@ -556,7 +638,7 @@ puts "            <section class='Rating'>"
 
 (0...5).each do |i|
  # puts "              <form action='threebuttons.cgi' method='POST'>"
-  if (i < seriesRating)
+  if (i < episodeRating)
             puts '<button class="fa fa-star" style="color: yellow;"></button>'
           else
             puts '<button class="fa fa-star"></button>'

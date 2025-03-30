@@ -18,7 +18,7 @@ db = Mysql2::Client.new(
     password: 'TV_Group123!', 
     database: 'televised_w25'
   )
-
+#puts username.to_s
 series = db.query("SELECT imageName, showName FROM series;")
 series = series.to_a
 

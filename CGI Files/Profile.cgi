@@ -22,12 +22,12 @@ db = Mysql2::Client.new(
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
-topFiveSeries = db.query("SELECT imageName FROM series JOIN topFiveSeries ON topFiveSeries.seriesId = series.showId WHERE username = '" + username.to_s + "';")
+topFiveSeries = db.query("SELECT imageName, showName FROM series JOIN topFiveSeries ON topFiveSeries.seriesId = series.showId WHERE username = '" + username.to_s + "';")
 topFiveSeries = topFiveSeries.to_a
-topFiveSeason = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN topFiveSeason ON topFiveSeason.seasonId = season.seasonId WHERE username = '" + username.to_s + "';")
+topFiveSeason = db.query("SELECT imageName, showName, seasonNum FROM series JOIN season ON season.seriesId = series.showId JOIN topFiveSeason ON topFiveSeason.seasonId = season.seasonId WHERE username = '" + username.to_s + "';")
 topFiveSeason = topFiveSeason.to_a
-topFiveEpisode = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN topFiveEpisode ON topFiveEpisode.epId = episode.epId WHERE username = '" + username.to_s + "';")
-
+topFiveEpisode = db.query("SELECT imageName, showName, seasonNum, epName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN topFiveEpisode ON topFiveEpisode.epId = episode.epId WHERE username = '" + username.to_s + "';")
+topFiveEpisode = topFiveEpisode.to_a
 
 puts "Content-type: text/html\n\n"
 puts '<!DOCTYPE html>'
@@ -73,15 +73,19 @@ puts '<body id="profile">'
       puts '<section class="carousel-section" id="topFiveSeries">'
       (0...5).each do |i|
         puts '<div class="item">'
-          puts '<form action="series.cgi" method="POST">'
           if i < topFiveSeries.size
+            puts '<form action="series.cgi" method="POST">'
             puts '<input type="image" src="' + topFiveSeries[i]['imageName'] + '" alt="">'
+            puts '<input type="hidden" name="clicked_image" value="' + topFiveSeries[i]['imageName'] + '">'
             puts '<input type="hidden" name="seasonNumber" value="1">'
           else 
             puts '<input type="image" src="" alt="">'
           end
             puts '<input type="hidden" name="clicked_image" value="">'
           puts '</form>'
+          if topFiveSeries[i]
+            puts '<h6 style="text-align: center;">' + topFiveSeries[i]['showName'].to_s + '</h6>'
+          end
         puts '</div>'
       end
       puts '</section>'
@@ -93,15 +97,20 @@ puts '<body id="profile">'
       puts '<section class="carousel-section" id="topFiveSeasons">'
         (0...5).each do |i|
         puts '<div class="item">'
-          puts '<form action="series.cgi" method="POST">'
           if i < topFiveSeason.size
+            puts '<form action="series.cgi" method="POST">'
             puts '<input type="image" src="' + topFiveSeason[i]['imageName'] + '" alt="">'
+            puts '<input type="hidden" name="clicked_image" value="' + topFiveSeason[i]['imageName'] + '">'
             puts '<input type="hidden" name="seasonNumber" value="1">'
           else
             puts '<input type="image" src="" alt="">'
           end
             puts '<input type="hidden" name="clicked_image" value="">'
           puts '</form>'
+          if topFiveSeason[i]
+            puts '<h6 style="text-align: center;">' + topFiveSeason[i]['showName'].to_s + '</h6>'
+            puts '<h6 style="text-align: center;">Season ' + topFiveSeason[i]['seasonNum'].to_s + '</h6>'
+          end
         puts '</div>'
       end
       puts '</section>'
@@ -114,15 +123,20 @@ puts '<body id="profile">'
       puts '<section class="carousel-section" id="topFiveEpisodes">'
         (0...5).each do |i|
         puts '<div class="item">'
-          puts '<form action="series.cgi" method="POST">'
           if i < topFiveEpisode.size
+            puts '<form action="series.cgi" method="POST">'
             puts '<input type="image" src="' + topFiveEpisode[i]['imageName'] + '" alt="">'
+            puts '<input type="hidden" name="clicked_image" value="' + topFiveEpisode[i]['imageName'] + '">'
             puts '<input type="hidden" name="seasonNumber" value="1">'
           else
             puts '<input type="image" src="" alt="">'
           end
             puts '<input type="hidden" name="clicked_image" value="">'
           puts '</form>'
+          if topFiveEpisode[i]
+            puts '<h6 style="text-align: center;">' + topFiveEpisode[i]['showName'].to_s + '</h6>'
+            puts '<h6 style="text-align: center;">S' + topFiveEpisode[i]['seasonNum'].to_s + ' ' + topFiveEpisode[i]['epName'].to_s + '</h6>'
+          end
         puts '</div>'
       end
       puts '</section>'

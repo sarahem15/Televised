@@ -27,11 +27,12 @@ reviewText = cgi['reviewText']
 year = cgi['year']
 month = cgi['month']
 day = cgi['day']
-#rateId = cgi['ratingId']
+rateId = cgi['ratingId']
 review = cgi['review']
 fromIndivEp = cgi['fromIndivEp']
 epNum = cgi['epNum']
 likedList = cgi['likedList']
+otherList = cgi['otherList']
 userWhoLiked = cgi['likeUser']
 listId = cgi['listId']
 listCreator = cgi['listCreator']
@@ -62,10 +63,12 @@ if fromIndivEp == 'TRUE'
     print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/indivEp.cgi?ep_name=" + epName.first['epName'].to_s + "&show_name=" + imageName.first['showName'] + "&seriesID=" + seriesId + "&epNum=" + epNum + "&seasonNumber=" + seasonNumber + "'>\n"
 elsif likedList == "TRUE" && profileLikedList == ""
     print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/Lists.cgi'>\n"
+elsif otherList == "TRUE"
+    print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/otherLists.cgi?seriesID=" + seriesId + "seasonNumber=" + seasonNumber + "&seasonId=" + seasonId + "&epId=" + epId + "'>\n"
 elsif profileLikedList != ""
     print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/Likes_Lists.cgi'>\n"
 else
-    print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
+    print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
 end
 puts "</head>"
 puts "<body>"
@@ -203,14 +206,14 @@ elsif rated == "TRUE" && seriesRating == "" && seasonRating == "" && review != "
 end
  if review != ""
     date = year + "-" + month + "-" + day
-    #db.query("INSERT INTO seriesReview VALUES (NULL, '" + review + "', '" + username.to_s + "', '" + seriesId.to_s + "', '" + ratingId.to_s + "', '" +  date + "');")
+    db.query("INSERT INTO seriesReview VALUES (NULL, '" + reviewText + "', '" + username.to_s + "', '" + seriesId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
     puts seriesId.to_s
     puts 'rating is' + seriesRating
     puts reviewText
     puts epname
 end
 
-if likedList == "TRUE"
+if (likedList == "TRUE") || (otherList == "TRUE")
     alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + listCreator + "';")
     if alreadyLiked.to_a == []
         db.query("INSERT INTO likedList VALUES ('" + userWhoLiked + "', '" + listCreator + "', '" + listId + "');")

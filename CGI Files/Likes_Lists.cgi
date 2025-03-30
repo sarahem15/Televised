@@ -76,7 +76,7 @@ puts '<body id="profile">'
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
 (0...likedLists.size).each do |i|
   seriesImages = db.query("SELECT series.imageName FROM series JOIN curatedListSeries ON curatedListSeries.seriesId = series.showId WHERE curatedListSeries.listId ='" + likedLists[i]['listId'].to_s + "';")
-  seriesImages = seriesImages.to_a()
+  seriesImages = seriesImages.to_a
   info = db.query("SELECT * FROM curatedListSeries WHERE listId = '" + likedLists[i]['listId'].to_s + "';")
   info = info.to_a
   listDisplayName = db.query("SELECT displayName FROM account WHERE username = '" + info[i]['username'] + "';")
@@ -124,6 +124,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       puts '<h3>' + info[i]['description'] + '</h3>'
       puts '</div>'
     puts '</div>'
+     puts '<br>'
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
 end
  puts '<br>'

@@ -104,12 +104,12 @@ puts "<body id=\"episodePage\">"
             end
           end
         else
-            puts '<h3>NO AVG RATING</h3>'
+            puts '<h3 style="width: 300px;">NO AVG RATING</h3>'
         end
         puts '</section>'
       puts "<h3>" + episode.first['epName'] + "</h3>"
       puts "<h3>" + episode.first['releaseDate'] + "</h3>"
-      puts "<h3>" + episode.first['runtime'].to_s + "m</h3>"
+      puts "<h3 style=\"text-align: center;\">" + episode.first['runtime'].to_s + "m</h3>"
     puts "</div>"
    puts "<br>"
   puts "<h4 class=\"epDes\">"
@@ -206,19 +206,26 @@ puts "<body id=\"episodePage\">"
 
   puts "<br>"
   puts "<hr>"
-
+  puts '<h4> Reviews </h4>'
+epReviews = db.query("SELECT * FROM episodeReview WHERE epId = '" + episode.first['epId'].to_s + "';" )
+epReviews = epReviews.to_a
+if epReviews.size == 0 
+  puts '<h5 style="text-align: center;"> Reviews for this episode will appear here! </h5>'
+  puts '<br>'
+else
   puts '<section class="epReviews">'
-  (0...6).each do |i|
+  (0...epReviews.size).each do |i|
     puts '<div class="ReviewIndiv">'
     puts '<div class="ReviewContent">'
+    reviewDisplayName = db.query("SELECT displayName FROM account WHERE username = '" + epReviews[i]['username'] + "';")
         puts '<section class="UserDisplay">'
-            puts '<img src="./Episodes/adventureTime1.1.jpg" alt="here">'
-            puts '<h3> Username </h3>'
+            puts '<img src="./ProfileImages/' + epReviews[i]['username'] + '.jpg" alt="" style="height: 50px; width: 50px; corner-rounding: 100%">'
+            puts '<h3>' + reviewDisplayName.first['displayName'] + '</h3>'
             #RATING!
         puts '</section>'
         puts '<br>'
         puts '<br>'
-        puts '<h4> This show is great! </h4>'
+        puts '<h4>' + epReviews[i]['review'] + '</h4>'
         puts '<section class="Likes">'
           puts '<h5 id="Heart">&#9829</h5>'
           puts '<h4>12</h4>' #db query to get likes
@@ -228,7 +235,7 @@ puts "<body id=\"episodePage\">"
 end
 puts '</section>'
 puts "</div>"
-
+end
 
 puts "<div id='reviewEpisodeModal'>"
 puts "  <div class='modal fade' id='CreateEpisodeReview' tabindex='-1' aria-labelledby='createReviewLabel' aria-hidden='true'>"

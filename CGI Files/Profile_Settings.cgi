@@ -15,11 +15,18 @@ cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
 search = cgi['top5search']
-type = "Series"
 type = cgi['typeSearch']
 topSeries = cgi['topSeries']
+topSeason = cgi['topSeason']
 ranking = cgi['rank']
+seasonNum = cgi['seasonNum']
 selectedSeries = cgi['SELECT']
+epNum = cgi['epNum']
+if seasonNum == ""
+    seasonNum = "1"
+end
+
+
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -32,6 +39,9 @@ bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "'
 pronouns =db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
 replies = db.query("SELECT replies FROM account WHERE username = '" + username.to_s + "';")
 topFiveSeries = db.query("SELECT seriesId FROM topFiveSeries WHERE username = '" + username.to_s + "';")
+if type == ""
+    type = "Series"
+end
 puts "Content-type: text/html\n\n"
 
 
@@ -50,14 +60,14 @@ puts '<body id="profileSettings">'
     puts '<nav id="changingNav"></nav>' # <!-- Navbar dynamically loaded -->
     puts '<div class="container-fluid">'
         puts '<br>'
-        puts '<h2 style="text-align: center;">Profile Settings</h2>'
+        puts '<h2 style="text-align: center;">Settings</h2>'
         puts '<br>'
         puts '<div class="container">'
                 puts '<div class="col-5" id="profileRow">'
                     puts '<form id="profileSettinsForm" enctype="multipart/form-data" method="post" action="editProfile.cgi">'
-                    puts '<span>Username</span>'
-                    puts '<input type="text" id="userName" name="userNameX" class="form-control" readonly>'
-                    puts '<br>'
+                    #puts '<span>Username</span>'
+                    puts '<input type="hidden" id="userName" name="userNameX" class="form-control" readonly>'
+                    #puts '<br>'
                     puts '<span>Display Name</span>'
                     puts '<input type="text" id="displayName" value="' + displayName.first['displayName'].to_s + '" name="displayName" class="form-control" >'
                     puts '<br>'
@@ -111,7 +121,7 @@ puts '<body id="profileSettings">'
                     end
                     puts '</select>'
                     puts '<br>'
-                    puts '<label for="replies">Replies</label>'
+                    puts '<label for="replies">Who can reply to your reviews</label>'
                     puts '<select id="replies" name="replies" class="form-control">'
 
                     if replies.first['replies'].to_i == 1
@@ -123,7 +133,7 @@ puts '<body id="profileSettings">'
                     end
                     puts '</select>'
                     puts '<br>'
-                    puts '<span>Avatar</span>'
+                    puts '<span>Avatar: Upload a JPEG or PNG</span>'
                     puts '<input type="File" name="fileName" accept="image/png, image/jpeg, image/jpg">'
                     puts '<br>'
                     puts '<br>'
@@ -135,10 +145,27 @@ puts '<body id="profileSettings">'
         puts '<div class="TopFiveProfile">'
             puts '<form method="post" action="Profile_Settings.cgi">'
             puts '<select id="type" name="typeSearch" class="form-control">'
+            if type == "Series"
                 puts '<option value="Series" selected>Series</option>'
-                puts '<option value="Seasons">Season</option>'
+                puts '<option value="Season">Season</option>'
                 puts '<option value="Episodes">Episodes</option>'
+            elsif type == "Season"
+                puts '<option value="Series">Series</option>'
+                puts '<option value="Season" selected>Season</option>'
+                puts '<option value="Episodes">Episodes</option>'
+            else
+                puts '<option value="Series">Series</option>'
+                puts '<option value="Season">Season</option>'
+                puts '<option value="Episodes" selected>Episodes</option>'
+            end
             puts '</select>'
+            if type == "Episodes"
+                puts '<select id="type" name="seasonNum" class="form-control">'
+                puts '<option value="1" selected>1</option>'
+                puts '<option value="2">2</option>'
+                puts '<option value="3">3</option>'
+                puts '</select>'
+            end
                 puts '<input type="text" name="top5search" class="top5search">'
                 puts '<input type="submit" value="Search">'
             puts '</form>'
@@ -173,16 +200,115 @@ puts '<body id="profileSettings">'
                 else
                     puts 'We can\'t seem to find this title!'
                 end
+            elsif (type == "Season" && search != "")
+                images = db.query("SELECT showName, imageName, showId FROM series WHERE showName like '" + search + "%';")
+                images = images.to_a
+                if (images.first.to_s != "")
+                    puts 'Is this the title you\'re looking for?'
+                    puts '<br>'
+                    arraySize = images.size
+                    (0...arraySize).each do |i|
+                        seasons = db.query("SELECT seasonId from season WHERE seriesId = '" + images[i]['showId'].to_s + "';")
+                        seasons = seasons.to_a
+                        #puts seasons.first['seasonId'].to_s
+                        puts '<form method="get" action="Profile_Settings.cgi">'
+                        puts images[i]['showName']
+                        puts '<img src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '" style=" height: 50px; width: 35px; object-fit: cover;">'
+                        puts '<input type="hidden" name="topSeason" value="' + images[i]['showId'].to_s + '">'
+                        puts '<input type="hidden" name="typeSearch" value="Season">'
+                         puts '<select id="typeSeason" name="seasonNum" class="form-control">'
+                         puts '<option value="" selected>Season</option>'
+                            (0...seasons.size).each do |h|
+                                puts '<option value="' + seasons[h]['seasonId'].to_s + '">' + (h+1).to_s + '</option>'
+                            end
+                        puts '</select>'
+                        puts '<select id="type" name="rank" class="form-control">'
+                            puts '<option value="SELECT" selected>RANK</option>'
+                            puts '<option value="1">1</option>'
+                            puts '<option value="2">2</option>'
+                            puts '<option value="3">3</option>'
+                            puts '<option value="4">4</option>'
+                            puts '<option value="5">5</option>'
+                        puts '</select>'
+                        puts '<input type="submit" value="SELECT">'
+                        puts '</form>'
+                        puts '<br>'
+                        images[i]['imageName'] = ""
+                    end 
+                else
+                    puts 'We can\'t seem to find this title!'
+                end
+            elsif (type == "Episodes" && search != "")
+                images = db.query("SELECT showName, imageName, showId FROM series WHERE showName like '" + search + "%';")
+                images = images.to_a
+                if (images.first.to_s != "")
+                    puts 'Is this the title you\'re looking for?'
+                    puts '<br>'
+                    arraySize = images.size
+                    (0...arraySize).each do |i|
+                        seasons = db.query("SELECT seasonId from season WHERE seriesId = '" + images[i]['showId'].to_s + "';")
+                        seasons = seasons.to_a
+                        #puts seasons.first['seasonId'].to_s
+                        puts '<form method="get" action="Profile_Settings.cgi">'
+                        puts images[i]['showName']
+                        puts '<img src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '" style=" height: 50px; width: 35px; object-fit: cover;">'
+                        puts '<input type="hidden" name="topSeason" value="' + images[i]['showId'].to_s + '">'
+                        puts '<input type="hidden" name="typeSearch" value="Episodes">'
+                        episodes = db.query("SELECT * FROM episode JOIN season ON season.seasonId = episode.seasonId WHERE seasonNum = '" + seasonNum + "' AND seriesId = '" + images[i]['showId'].to_s + "';")
+                        episodes = episodes.to_a
+                        puts '<select id="typeSeason" name="epNum" class="form-control">'
+                         puts '<option value="" selected>Episode</option>'
+                            (0...episodes.size).each do |h|
+                                puts '<option value="' + episodes[h]['epId'].to_s + '">' + episodes[h]['epName'] + '</option>'
+                            end
+                        puts '</select>'
+                        puts '<select id="type" name="rank" class="form-control">'
+                            puts '<option value="SELECT" selected>Rank</option>'
+                            puts '<option value="1">1</option>'
+                            puts '<option value="2">2</option>'
+                            puts '<option value="3">3</option>'
+                            puts '<option value="4">4</option>'
+                            puts '<option value="5">5</option>'
+                        puts '</select>'
+                        puts '<input type="submit" value="SELECT">'
+                        puts '</form>'
+                        puts '<br>'
+                        images[i]['imageName'] = ""
+                    end 
+                else
+                    puts 'We can\'t seem to find this title!'
+                end
             end
             if (type == "Series" && ranking != "" && ranking != "SELECT")
-                db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
-                #puts 'hey!'
-            end
+                alreadyRated = db.query("SELECT * FROM topFiveSeries WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
+                if (alreadyRated.to_a.to_s != '[]')
+                    db.query("DELETE FROM topFiveSeries WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
+                    db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
+                else
+                    db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
+                end
+            elsif (type == "Season" && ranking != "" && ranking != "SELECT" && seasonNum != "")
+                alreadyRated = db.query("SELECT * FROM topFiveSeason WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
+                if (alreadyRated.to_a.to_s != '[]')
+                    db.query("DELETE FROM topFiveSeason WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
+                    db.query("INSERT INTO topFiveSeason VALUES('" + username.to_s + "', '" + seasonNum + "', '" + ranking + "');")
+                else
+                    db.query("INSERT INTO topFiveSeason VALUES('" + username.to_s + "', '" + seasonNum + "', '" + ranking + "');")
+                end
+            elsif (type == "Episodes" && ranking != "" && ranking != "SELECT" && seasonNum != "" && epNum != "")
+                alreadyRated = db.query("SELECT * FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
+                if (alreadyRated.to_a.to_s != '[]')
+                    db.query("DELETE FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
+                    db.query("INSERT INTO topFiveEpisode VALUES('" + username.to_s + "', '" + epNum + "', '" + ranking + "');")
+                else
+                    db.query("INSERT INTO topFiveEpisode VALUES('" + username.to_s + "', '" + epNum + "', '" + ranking + "');")
+                end
+            end 
 
             size = 0
             
             #seasons = db.query("SELECT season.* FROM season JOIN series ON season.seriesId = series.showId WHERE series.imageName = '" + seriesImage + "';")
-            topSeriesImage = db.query("SELECT imageName, ranking FROM series JOIN topFiveSeries ON series.showId = topFiveSeries.seriesId WHERE username = '" + username.to_s + "' ORDER BY ranking ASC;")
+            topSeriesImage = db.query("SELECT imageName, series.showName, ranking FROM series JOIN topFiveSeries ON series.showId = topFiveSeries.seriesId WHERE username = '" + username.to_s + "' ORDER BY ranking ASC;")
             topSeriesImage = topSeriesImage.to_a
             
             puts '<div class="TopFiveSeries">'
@@ -190,9 +316,9 @@ puts '<body id="profileSettings">'
                     puts '<section class="carousel-section" id="section' + size.to_s() + '">'
                     (0...5).each do |i|
                         puts '<div class="item">'
-                            puts '<form action="series.cgi" method="POST">'
                             #puts topSeriesImage.size
                             if (i < topSeriesImage.size)
+                                puts '<form action="series.cgi" method="POST">'
                                 if (topSeriesImage[i]['ranking'].to_i == (i + 1))
                                     puts '<input type="image" src="' + topSeriesImage[i]['imageName'] + '" alt="' + topSeriesImage[i]['imageName'] + '" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
@@ -205,23 +331,29 @@ puts '<body id="profileSettings">'
                                 puts '<input type="hidden" name="clicked_image" value="">'
                             end
                                 puts '<input type="hidden" name="seasonNumber" value="1">'
+                                
                             puts '</form>'
+                            if topSeriesImage[i]
+                                puts '<h6 style="text-align: center;">' + topSeriesImage[i]['showName'].to_s + '</h6>'
+                            end
                         puts '</div>'
                     end
                     puts '</section>'
                 puts '</div>'
 
                 #Season
+                topSeasonImage = db.query("SELECT series.imageName, series.showName, season.seasonNum, topFiveSeason.ranking FROM series JOIN season ON series.showId = season.seriesId JOIN topFiveSeason ON season.seasonId = topFiveSeason.seasonId WHERE username = '" + username.to_s + "' ORDER BY topFiveSeason.ranking ASC;")
+                topSeasonImage = topSeasonImage.to_a
                 puts '<div class="TopFiveSeason">'
                 puts '<div class="wrapper">'
                     puts '<section class="carousel-section" id="section' + size.to_s() + '">'
                     (0...5).each do |i|
                         puts '<div class="item">'
-                            puts '<form action="series.cgi" method="POST">'
-                            if (i < topSeriesImage.size)
-                                if (topSeriesImage[i]['ranking'].to_i == (i + 1))
-                                    puts '<input type="image" src="' + topSeriesImage[i]['imageName'] + '" alt="' + topSeriesImage[i]['imageName'] + '" style=" height: 100px; width: 80px">'
-                                    puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
+                            if (i < topSeasonImage.size)
+                                puts '<form action="series.cgi" method="POST">'
+                                if (topSeasonImage[i]['ranking'].to_i == (i + 1))
+                                    puts '<input type="image" src="' + topSeasonImage[i]['imageName'] + '" alt="" style=" height: 100px; width: 80px">'
+                                    puts '<input type="hidden" name="clicked_image" value="' + topSeasonImage[i]['imageName'] + '">'
                                 else
                                     puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="">'
@@ -232,22 +364,28 @@ puts '<body id="profileSettings">'
                             end
                                 puts '<input type="hidden" name="seasonNumber" value="1">'
                             puts '</form>'
+                            if topSeasonImage[i]
+                                puts '<h6 style="text-align: center;">' + topSeasonImage[i]['showName'].to_s + '</h6>'
+                                puts '<h6 style="text-align: center;">Season ' + topSeasonImage[i]['seasonNum'].to_s + '</h6>'
+                            end
                         puts '</div>'
                     end
                     puts '</section>'
                 puts '</div>'
 
                 #Episode
+                topEpImage = db.query("SELECT series.imageName, series.showName, season.seasonNum, episode.epName, topFiveEpisode.ranking FROM series JOIN season ON series.showId = season.seriesId JOIN episode ON season.seasonId = episode.seasonId JOIN topFiveEpisode ON episode.epId = topFiveEpisode.epId WHERE username = '" + username.to_s + "' ORDER BY topFiveEpisode.ranking ASC;")
+                topEpImage = topEpImage.to_a
                 puts '<div class="TopFiveEpisode">'
                 puts '<div class="wrapper">'
                     puts '<section class="carousel-section" id="section' + size.to_s() + '">'
                     (0...5).each do |i|
                         puts '<div class="item">'
-                            puts '<form action="series.cgi" method="POST">'
-                            if (i < topSeriesImage.size)
-                                if (topSeriesImage[i]['ranking'].to_i == (i + 1))
-                                    puts '<input type="image" src="' + topSeriesImage[i]['imageName'] + '" alt="' + topSeriesImage[i]['imageName'] + '" style=" height: 100px; width: 80px">'
-                                    puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
+                            if (i < topEpImage.size)
+                                puts '<form action="series.cgi" method="POST">'
+                                if (topEpImage[i]['ranking'].to_i == (i + 1))
+                                    puts '<input type="image" src="' + topEpImage[i]['imageName'] + '" alt="' + topEpImage[i]['imageName'] + '" style=" height: 100px; width: 80px">'
+                                    puts '<input type="hidden" name="clicked_image" value="' + topEpImage[i]['imageName'] + '">'
                                 else
                                     puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="">'
@@ -258,6 +396,10 @@ puts '<body id="profileSettings">'
                             end
                                 puts '<input type="hidden" name="seasonNumber" value="1">'
                             puts '</form>'
+                            if topEpImage[i]
+                                puts '<h6 style="text-align: center;">' + topEpImage[i]['showName'].to_s + '</h6>'
+                                puts '<h6 style="text-align: center;">S' + topEpImage[i]['seasonNum'].to_s + ' ' + topEpImage[i]['epName'].to_s + '</h6>'
+                            end
                         puts '</div>'
                     end
                     puts '</section>'

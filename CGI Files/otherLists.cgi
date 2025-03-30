@@ -125,10 +125,13 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
         likeCount = likeCount + 1
       end
         puts '<a href="whoHasLiked.cgi?listName=' + lists[i]['name'] + '&listCreator=' + lists[i]['username'] + '&listId=' + listId.first['id'].to_s + '">' + likeCount.to_s + '</a>'
-        puts '<input type="hidden" name="likedList" value="TRUE">'
+        puts '<input type="hidden" name="otherList" value="TRUE">'
         puts '<input type="hidden" name="listId" value="' + listId.first['id'].to_s + '">'
         puts '<input type="hidden" name="likeUser" value="' + username.to_s + '">'
         puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
+        puts '<input type="hidden" name="seriesID" value="' + seriesId + '">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNum + '">'
+        puts '<input type="hidden" name="epID" value="' + epId + '">'
         
         
     puts '</form>'
