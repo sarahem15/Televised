@@ -1,3 +1,7 @@
+/usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `_query': Table 'televised_w25.curatedSeriesList' doesn't exist (Mysql2::Error) from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `block in query' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `handle_interrupt' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `query' from /mnt/web/www/Televised/createNewList.cgi:65:in `block in
+' from /mnt/web/www/Televised/createNewList.cgi:64:in `each' from /mnt/web/www/Televised/createNewList.cgi:64:in `
+' 
+
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
