@@ -45,8 +45,8 @@ if type == "Series" && search != ""
     exit
 end
 
-# Process the list creation only when the form is submitted via POST with a valid list name
-if cgi.request_method == "POST" && listName && !listName.empty?
+# Process the list creation only when the "saveList" button is clicked
+if cgi['saveList']
     # Check if the user already has a list with the same name
     existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
 
@@ -59,10 +59,14 @@ if cgi.request_method == "POST" && listName && !listName.empty?
     db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
     list_id = db.last_id  # Get the inserted list ID
 
+    # Insert list details into curatedListSeries
+    db.query("INSERT INTO curatedListSeries (username, listId, name, description, privacy, date) 
+              VALUES ('#{username}', '#{list_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW())")
+
     # Insert series into curatedSeriesList
     seriesArray.each do |series_id|
-        db.query("INSERT INTO curatedSeriesList (username, seriesId, name, description, privacy, date, listId)
-                  VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
+        db.query("INSERT INTO curatedSeriesList (username, seriesId, listId, name, description, privacy, date)
+                  VALUES ('#{username}', '#{series_id}', '#{list_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW())")
     end
 
     # Confirmation message
@@ -168,14 +172,8 @@ puts '        }'
 puts '    });'
 
 puts '    function updateSeriesList() {'
-puts '        let listColumn = document.getElementById("seriesList");'
 puts '        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '        listColumn.innerHTML = "";'
-puts '        seriesArray.forEach(series => {'
-puts '            let listItem = document.createElement("li");'
-puts '            listItem.innerHTML = series.name;'
-puts '            listColumn.appendChild(listItem);'
-puts '        });'
+puts '        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray);'
 puts '    }'
 
 puts '    updateSeriesList();'
