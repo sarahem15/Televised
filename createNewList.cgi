@@ -18,11 +18,8 @@ listName = cgi['listName']
 description = cgi['description']
 privacy = cgi['views'] == "Public" ? 1 : 0  # Convert privacy to 1 for Public, 0 for Private
 
-begin
-    seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
-rescue JSON::ParserError
-    seriesArray = []  # Default to an empty array if JSON is invalid
-end
+# Ensure that seriesArray is empty on the initial load
+seriesArray = []  # Clear the series array when the page loads
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -60,13 +57,11 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
     db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
     list_id = db.last_id  # Get the inserted list ID
 
-
-#THIS DOES NOT WORK IT CRASHES THE PAGE!
     # Insert list details into curatedSeriesList for each series in the array
-  #  seriesArray.each do |series_id|
- #       db.query("INSERT INTO curatedSeriesList (username, seriesId, name, description, privacy, date, listId)
-#                  VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
-#    end
+    seriesArray.each do |series_id|
+        db.query("INSERT INTO curatedSeriesList (username, seriesId, name, description, privacy, date, listId)
+                  VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
+    end
 
     # Confirmation message
     puts "<script>alert('Your list has been successfully created!');</script>"
@@ -140,8 +135,30 @@ puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstra
 puts '<script>'
 puts 'document.addEventListener("DOMContentLoaded", function () {'
 
-# AJAX Search Handling
-puts '    document.getElementById("searchForm").addEventListener("submit", function (event) {' 
+# Initialize seriesArray to an empty array if not already set in sessionStorage
+puts '    if (!sessionStorage.getItem("seriesArray")) {'
+puts '        sessionStorage.setItem("seriesArray", JSON.stringify([]));  // Empty array on page load'
+puts '    }'
+
+# Function to update the series list in the middle column
+puts '    function updateSeriesList() {'
+puts '        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
+puts '        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray);'
+puts '        let seriesList = document.getElementById("seriesList");'
+puts '        seriesList.innerHTML = "";  // Clear the existing list'
+puts '        seriesArray.forEach(function(series) {'
+puts '            let li = document.createElement("li");'
+puts '            li.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");'
+puts '            li.innerHTML = series.name + " <button class=\'removeFromList btn btn-danger btn-sm\' data-series-id=\'" + series.id + "\' style=\'border-radius: 50%; width: 25px; height: 25px; text-align: center; padding: 0;\'>X</button>";'
+puts '            seriesList.appendChild(li);'
+puts '        });'
+puts '    }'
+
+# Ensure the series list is updated on page load
+puts '    updateSeriesList();'
+
+# Handle search functionality via AJAX
+puts '    document.getElementById("searchForm").addEventListener("submit", function (event) {'
 puts '        event.preventDefault();'
 puts '        let searchInput = document.querySelector("input[name=\'mediaEntered\']").value;'
 puts '        let type = document.querySelector("select[name=\'typeSearch\']").value;'
@@ -156,43 +173,27 @@ puts '        .then(data => { document.getElementById("searchResults").innerHTML
 puts '    });'
 
 # Add & Remove Series Handling
-puts '    document.addEventListener("click", function (event) {' 
-puts '        if (event.target.classList.contains("addToList")) {' 
+puts '    document.addEventListener("click", function (event) {'
+puts '        if (event.target.classList.contains("addToList")) {'
 puts '            event.preventDefault();'
 puts '            let seriesId = event.target.dataset.seriesId;'
 puts '            let seriesName = event.target.dataset.seriesName;'
 puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '            if (!seriesArray.some(s => s.id === seriesId)) {' 
-puts '                seriesArray.push({ id: seriesId, name: seriesName });' 
+puts '            if (!seriesArray.some(s => s.id === seriesId)) {'
+puts '                seriesArray.push({ id: seriesId, name: seriesName });'
 puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
 puts '                updateSeriesList();'
 puts '            }'
 puts '        }'
-puts '        if (event.target.classList.contains("removeFromList")) {' 
+puts '        if (event.target.classList.contains("removeFromList")) {'
 puts '            event.preventDefault();'
 puts '            let seriesId = event.target.dataset.seriesId;'
 puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '            seriesArray = seriesArray.filter(s => s.id !== seriesId);' 
+puts '            seriesArray = seriesArray.filter(s => s.id !== seriesId);'
 puts '            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
 puts '            updateSeriesList();'
 puts '        }'
 puts '    });'
-
-puts '    function updateSeriesList() {'
-puts '        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '        document.getElementById("seriesArrayInput").value = JSON.stringify(seriesArray);'
-puts '        let seriesList = document.getElementById("seriesList");'
-puts '        seriesList.innerHTML = "";'
-puts '        seriesArray.forEach(function(series) {'
-puts '            let li = document.createElement("li");'
-puts '            li.classList.add("list-group-item", "d-flex", "justify-content-between", "align-items-center");'  # Flexbox for alignment
-puts '            li.innerHTML = series.name + " <button class=\'removeFromList btn btn-danger btn-sm\' data-series-id=\'" + series.id + "\' style=\'border-radius: 50%; width: 25px; height: 25px; text-align: center; padding: 0;\'>X</button>";'
-puts '            seriesList.appendChild(li);'
-puts '        });'
-puts '    }'
-
-
-puts '    updateSeriesList();'
 puts '});'
 puts '</script>'
 
