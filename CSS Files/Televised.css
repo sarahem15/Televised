@@ -974,3 +974,41 @@ button:hover {
     display: grid;
     grid-template-columns: 20% auto;
 }
+
+
+#showsPage .editButtons .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+#showsPage .editButtons:hover .tooltiptext {
+  visibility: visible;
+}
+
+#profileSettings .wrapper .item .tooltiptext form input {
+    visibility: hidden;
+    width: 20px;
+    height: 20px;
+    bottom:  95%;
+    left:  90%;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 100%;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+}
+
+#profileSettings .wrapper .item:hover .tooltiptext form input {visibility: visible;}
