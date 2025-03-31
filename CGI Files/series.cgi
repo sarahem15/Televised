@@ -471,7 +471,7 @@ puts "              <div class='col'>"
 if seriesRating == 0
    puts '<label for="Rating">You must provide a rating: </label><br>'
    #puts '<select name"Rating" id="Rating">'
-                    puts '<select id="rating" name="ratingId" class="form-control">'
+                    puts '<select id="rating" name="seriesRating" class="form-control">'
 
                     puts '<option value="1">1</option>'
                     puts '<option value="2">2</option>'

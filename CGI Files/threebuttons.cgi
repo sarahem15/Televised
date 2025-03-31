@@ -205,12 +205,30 @@ elsif rated == "TRUE" && seriesRating == "" && seasonRating == "" && review != "
     end
 end
  if review != ""
-    date = year + "-" + month + "-" + day
-    db.query("INSERT INTO seriesReview VALUES (NULL, '" + reviewText + "', '" + username.to_s + "', '" + seriesId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
-    puts seriesId.to_s
-    puts 'rating is' + seriesRating
-    puts reviewText
-    puts epname
+    if rateId != ""
+        date = year + "-" + month + "-" + day
+        db.query("INSERT INTO seriesReview VALUES (NULL, '" + reviewText + "', '" + username.to_s + "', '" + seriesId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+=begin  
+        puts seriesId.to_s
+        puts 'rating is' + seriesRating
+        puts reviewText
+        puts epname
+=end
+    else
+        ###### SOMETHING WEIRD HAPPEING ######
+        date = year + "-" + month + "-" + day
+        db.query("INSERT INTO seriesRating (rating, username, seriesId) VALUES ('" + seriesRating.to_s + "', '" + username.to_s + "', '" + seriesId.to_s + "');")
+        rateId = db.query("SELECT id from seriesRating WHERE username = '" + username.to_s + "' AND seriesId = '" + seriesId.to_s + "';")
+        rateId = rateId.first['id'].to_s
+        #puts "rateId" + rateId.to_s
+        db.query("INSERT INTO seriesReview VALUES (NULL, '" + reviewText + "', '" + username.to_s + "', '" + seriesId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+=begin
+        puts seriesId.to_s
+        puts 'rating is' + seriesRating
+        puts reviewText
+        puts epname
+=end
+    end
 end
 
 if (likedList == "TRUE") || (otherList == "TRUE")
