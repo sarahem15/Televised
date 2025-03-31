@@ -134,7 +134,7 @@ lists = lists.to_a
       puts '</div>'
       puts '<div>'
       puts '<section class="titleDate">'
-      puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '&contentType=SERIES">' + lists[i]['name'] + '</a>'
+      puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '&contentType=EP">' + lists[i]['name'] + '</a>'
       puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
       puts '</section>'
       puts '<br>'
