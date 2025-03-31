@@ -79,8 +79,9 @@ puts'<body id="profileReviews">'
       puts '<a href="Profile_Reviews.cgi?seriesTab=SERIES">Series</a>'
       puts '<a href="Profile_Reviews.cgi?seriesTab=SEASON">Seasons</a>'
       puts '<a href="#" class="active">Episodes</a>'
-       seriesReviews = db.query("SELECT * FROM episodeReview WHERE username = '" + username.to_s + "';")
+      seriesReviews = db.query("SELECT * FROM episodeReview WHERE username = '" + username.to_s + "';")
   end
+  seriesReviews = seriesReviews.to_a
     puts '</div>'
 puts '</div>'
 puts '<hr>'

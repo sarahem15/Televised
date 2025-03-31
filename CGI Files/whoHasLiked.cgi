@@ -27,8 +27,17 @@ listId = cgi['listId']
 listCreator = cgi['listCreator']
 likes = db.query("SELECT * FROM likedList WHERE listId = '" + listId + "';")
 likes = likes.to_a
-displayName = db.query("SELECT displayName FROM account WHERE username = '" + likes.first['userWhoCreated'] + "';")
+displayName = db.query("SELECT displayName FROM account WHERE username = '" + listCreator + "';")
 listImages = db.query ("SELECT imageName FROM series JOIN curatedListSeries ON curatedListSeries.seriesId = series.showId WHERE curatedListSeries.name ='" + listName + "';")
+type = "series"
+if listImages.size == 0
+    listImages = db.query ("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON curatedListSeason.seasonId = season.seasonId WHERE curatedListSeason.name ='" + listName + "';")
+    type = "seasons"
+end
+if listImages.size == 0
+    listImages = db.query ("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN curatedListEpisode ON curatedListEpisode.epId = episode.epId WHERE curatedListEpisode.name ='" + listName + "';")
+    type = "episodes"
+end
 listImages = listImages.to_a
 
 puts '<!DOCTYPE html>'
@@ -46,38 +55,43 @@ puts "<body id=\"whoLiked\">"
     puts '<br>'
     puts '<br>'
     puts '<section class="LikesContent" style="margin-left: 5%; margin-right: 5%;">'
-  puts '<section class="UserDisplay" style="max-width: 390px">'
-    puts '<img src="./ProfileImages/' + likes.first['userWhoCreated'] + '.jpg" alt="">'
-    puts '<h3 style="color: #a3afe1;">Likes for ' + displayName.first['displayName'].to_s + '\'s List</h3>'
-  puts '</section>'
-  puts '<br>'
-  puts '<h1>' + listName + '</h1>'
-  puts '<hr style="border-width: 5px; color: #a3afe1;">'
-  puts '<div class="Content-type">'
-  puts '<section>'
-  puts '<h5 id="nameHeader"> Name </h5>'
-  puts '<br>'
-    (0...likes.size).each do |i|
-        likeDisplayName = db.query("SELECT displayName FROM account JOIN likedList ON likedList.userWhoLiked = account.username WHERE likedList.userWhoLiked = '" + likes[i]['userWhoLiked'] + "';")
-        puts '<section class="UserDisplay" style="max-width: 390px">'
-            puts '<img src="./ProfileImages/' + likes[i]['userWhoLiked'] + '.jpg" alt="">'
-            puts '<a href="othersProfiles.cgi?username=' + likes[i]['userWhoLiked'] + '"><h3>' + likeDisplayName.first['displayName'].to_s + '</h3></a>'
-        puts '</section>'
-        puts '<br>'
-    end
+    
+      puts '<section class="UserDisplay" style="max-width: 390px">'
+        puts '<img src="./ProfileImages/' + listCreator + '.jpg" alt="">'
+        puts '<h3 style="color: #a3afe1;">Likes for ' + displayName.first['displayName'].to_s + '\'s List</h3>'
+      puts '</section>'
+      puts '<br>'
+      puts '<h1>' + listName + '</h1>'
+      puts '<hr style="border-width: 5px; color: #a3afe1;">'
+      puts '<div class="Content-type">'
+      puts '<section>'
+      puts '<h5 id="nameHeader"> Name </h5>'
+      puts '<br>'
+      if likes.size != 0
+        (0...likes.size).each do |i|
+            likeDisplayName = db.query("SELECT displayName FROM account JOIN likedList ON likedList.userWhoLiked = account.username WHERE likedList.userWhoLiked = '" + likes[i]['userWhoLiked'] + "';")
+            puts '<section class="UserDisplay" style="max-width: 390px">'
+                puts '<img src="./ProfileImages/' + likes[i]['userWhoLiked'] + '.jpg" alt="">'
+                puts '<a href="othersProfiles.cgi?username=' + likes[i]['userWhoLiked'] + '"><h3>' + likeDisplayName.first['displayName'].to_s + '</h3></a>'
+            puts '</section>'
+            puts '<br>'
+        end
+  else
+    puts '<h6>Users who have liked this list will appear here!</h6>'
+end
+      puts '</section>'
 
-  puts '</section>'
-  puts '<section>'
-  puts '<section class="images">'
-  (0...listImages.size).each do |i|
-    puts '<img src="' + listImages[i]['imageName'] + '" alt="">'
-   end
-  puts '</section>'
-  puts '<br>'
-  puts '<h6 style="text-align: center;">' + listImages.size.to_s + ' shows</h6>'
-  puts '</section>'
-  puts '</div>'
-puts '</section>'
+      puts '<section>'
+      puts '<section class="images">'
+      (0...listImages.size).each do |i|
+        puts '<img src="' + listImages[i]['imageName'] + '" alt="">'
+       end
+      puts '</section>'
+      puts '<br>'
+      puts '<h6 style="text-align: center;">' + listImages.size.to_s + ' ' + type + '</h6>'
+      puts '</section>'
+      puts '</div>'
+    puts '</section>'
 puts '<!-- Scripts -->'
   puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
   puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'

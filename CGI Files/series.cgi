@@ -477,7 +477,7 @@ if seriesRating == 0
                     puts '<option value="2">2</option>'
                     puts '<option value="3">3</option>'
                     puts '<option value="4">4</option>'
-                    puts '<option value="4">5</option>'
+                    puts '<option value="5">5</option>'
   puts '</select>'
 
 else 
@@ -492,17 +492,9 @@ ratingId = ratingId.first['id'].to_s
             #puts '<button class="fa fa-star"></button>'
             puts '<i class="fa fa-star" style="font-size:24px;color:white"></i>'
           end
-=begin
-  puts "                <input type='hidden' name='seriesRating' value='#{i}'>"
-  puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
-  puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
-  puts "                <input type='hidden' name='rated' value='TRUE'>"
-  puts "                <input type='hidden' name='review' value='true'>"
-=end
-  #puts "              </form>"
+
 end
 end
-#puts "            </section>"
 puts "              </div>"
 
 
@@ -516,12 +508,6 @@ puts "                <input type='hidden' name='day' value='#{time.day}'>"
   puts "                <input type='hidden' name='ratingId' value='#{ratingId}'>"
   puts "                <input type='hidden' name='review' value='true'>"
 
-=begin
-puts "              <div class='col'>"
-puts "            <button class='LIKES' style='color: pink;'' id='likeBtn'>&#10084</button>"
-puts "              </div>"
-puts "            </div>"
-=end
 puts '<br>'
 puts "            <div class='modal-footer'>"
 puts "              <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>"
@@ -554,7 +540,6 @@ puts "              <div class='col' id='showInfo'>"
 puts "                <p id='reviewHeader'>I WATCHED…</p>"
 puts "                <p id='reviewShowTitle'>" + series.first['showName'] + "</p>"
 puts "                <p id='reviewSENum'>Season " + seasonNumber.to_s + "</p>"
-#puts "                <p id='reviewEpName'>Episode Name</p>"
 puts "              </div>"
   puts "<br>"
 puts "            </div>"
@@ -563,24 +548,34 @@ puts "              <textarea name='reviewText' class='form-control' id='userRev
 puts "            </div>"
 puts "            <div class='row'>"
 puts "              <div class='col'>"
-puts "            <section class='Rating'>"
+#puts "            <section class='Rating'>"
 
+
+if seasonRating == 0
+   puts '<label for="Rating">You must provide a rating: </label><br>'
+                    puts '<select id="rating" name="seasonRating" class="form-control">'
+
+                    puts '<option value="1">1</option>'
+                    puts '<option value="2">2</option>'
+                    puts '<option value="3">3</option>'
+                    puts '<option value="4">4</option>'
+                    puts '<option value="5">5</option>'
+  puts '</select>'
+
+
+else 
+ratingId = db.query("SELECT id from seasonRating WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonId.to_s + "';")
+ratingId = ratingId.first['id'].to_s
 (0...5).each do |i|
- # puts "              <form action='threebuttons.cgi' method='POST'>"
   if (i < seasonRating)
-            puts '<button class="fa fa-star" style="color: yellow;"></button>'
+            puts '<i class="fa fa-star" style="font-size:24px;color:yellow"></i>'
           else
-            puts '<button class="fa fa-star"></button>'
+            puts '<i class="fa fa-star" style="font-size:24px;color:white"></i>'
           end
-  puts "                <input type='hidden' name='seriesRating' value='#{i}'>"
-  puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
-  puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
-  puts "                <input type='hidden' name='rated' value='TRUE'>"
-  puts "                <input type='hidden' name='review' value='true'>"
 
-  #puts "              </form>"
 end
-puts "            </section>"
+end
+
 puts "              </div>"
 
 
@@ -588,10 +583,13 @@ puts "                <input type='hidden' name='year' value='#{time.year}'>"
 puts "                <input type='hidden' name='month' value='#{time.month}'>"
 puts "                <input type='hidden' name='day' value='#{time.day}'>"
 
-puts "              <div class='col'>"
-puts "            <button class='LIKES' style='color: pink;'' id='likeBtn'>&#10084</button>"
-puts "              </div>"
-puts "            </div>"
+puts "                <input type='hidden' name='seasonRating' value='#{seasonRating}'>"
+puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
+puts "                <input type='hidden' name='seasonId' value='#{seasonId}'>"
+puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
+puts "                <input type='hidden' name='rated' value='TRUE'>"
+puts "                <input type='hidden' name='review' value='true'>"
+
 puts '<br>'
 puts "            <div class='modal-footer'>"
 puts "              <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>"
@@ -658,12 +656,7 @@ puts "              </div>"
 puts "                <input type='hidden' name='year' value='#{time.year}'>"
 puts "                <input type='hidden' name='month' value='#{time.month}'>"
 puts "                <input type='hidden' name='day' value='#{time.day}'>"
-=begin
-puts "              <div class='col'>"
-puts "            <button class='LIKES' style='color: pink;'' id='likeBtn'>&#10084</button>"
-puts "              </div>"
-puts "            </div>"
-=end
+
 puts '<br>'
 puts "            <div class='modal-footer'>"
 puts "              <button type='button' class='btn btn-secondary' data-bs-dismiss='modal'>Close</button>"

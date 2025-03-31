@@ -22,11 +22,14 @@ ranking = cgi['rank']
 seasonNum = cgi['seasonNum']
 selectedSeries = cgi['SELECT']
 epNum = cgi['epNum']
+seriesQuery = cgi['seriesQuery']
+seriesId = cgi['seriesId']
+removeSeries = cgi['removeSeries']
 if seasonNum == ""
     seasonNum = "1"
 end
-
-
+seriesQuery = ""
+tempCount = 0
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -42,6 +45,14 @@ topFiveSeries = db.query("SELECT seriesId FROM topFiveSeries WHERE username = '"
 if type == ""
     type = "Series"
 end
+
+if removeSeries != ""
+    begin
+        db.query("DELETE FROM topFiveSeries WHERE username = '" + username.to_s + "' AND seriesId ='" + seriesId + "';")
+    rescue => e
+    end
+end
+
 puts "Content-type: text/html\n\n"
 
 
@@ -138,6 +149,7 @@ puts '<body id="profileSettings">'
                     puts '<br>'
                     puts '<br>'
                     puts '<br>'
+                    #puts '<input type="hidden" name="seriesQuery" value="' + seriesQuery + '">'
                     puts '<button id="saveProfile" class="btn" style="background-color: #9daef6;" type="submit">Save Changes</button>'
                 puts '</form>'
                 puts '</div>'
@@ -262,15 +274,15 @@ puts '<body id="profileSettings">'
                                 puts '<option value="' + episodes[h]['epId'].to_s + '">' + episodes[h]['epName'] + '</option>'
                             end
                         puts '</select>'
-                        puts '<select id="type" name="rank" class="form-control">'
-                            puts '<option value="SELECT" selected>Rank</option>'
+                        puts '<select id="type" name="rank" class="form-control" style="width: 60px;">'
+                            puts '<option value="SELECT">Rank</option>'
                             puts '<option value="1">1</option>'
                             puts '<option value="2">2</option>'
                             puts '<option value="3">3</option>'
                             puts '<option value="4">4</option>'
                             puts '<option value="5">5</option>'
                         puts '</select>'
-                        puts '<input type="submit" value="SELECT">'
+                        puts '<input type="submit" value="select" style="width: 60px;">'
                         puts '</form>'
                         puts '<br>'
                         images[i]['imageName'] = ""
@@ -308,20 +320,21 @@ puts '<body id="profileSettings">'
             size = 0
             
             #seasons = db.query("SELECT season.* FROM season JOIN series ON season.seriesId = series.showId WHERE series.imageName = '" + seriesImage + "';")
-            topSeriesImage = db.query("SELECT imageName, series.showName, ranking FROM series JOIN topFiveSeries ON series.showId = topFiveSeries.seriesId WHERE username = '" + username.to_s + "' ORDER BY ranking ASC;")
+            topSeriesImage = db.query("SELECT series.imageName, series.showName, series.showId, topFiveSeries.ranking FROM series JOIN topFiveSeries ON series.showId = topFiveSeries.seriesId WHERE username = '" + username.to_s + "' ORDER BY ranking ASC;")
             topSeriesImage = topSeriesImage.to_a
-            
+            puts '<h3>My Top Five Favs</h3>'
+            puts '<h5>Shows</h5>'
             puts '<div class="TopFiveSeries">'
                 puts '<div class="wrapper">'
                     puts '<section class="carousel-section" id="section' + size.to_s() + '">'
                     (0...5).each do |i|
                         puts '<div class="item">'
                             #puts topSeriesImage.size
-                            if (i < topSeriesImage.size)
+                            if (tempCount < topSeriesImage.size)
                                 puts '<form action="series.cgi" method="POST">'
-                                if (topSeriesImage[i]['ranking'].to_i == (i + 1))
-                                    puts '<input type="image" src="' + topSeriesImage[i]['imageName'] + '" alt="' + topSeriesImage[i]['imageName'] + '" style=" height: 100px; width: 80px">'
-                                    puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[i]['imageName'] + '">'
+                                if (topSeriesImage[tempCount]['ranking'].to_i == (i + 1))
+                                    puts '<input type="image" src="' + topSeriesImage[tempCount]['imageName'] + '" alt="' + topSeriesImage[tempCount]['imageName'] + '" style=" height: 100px; width: 80px">'
+                                    puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[tempCount]['imageName'] + '">'
                                 else
                                     puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="">'
@@ -333,27 +346,35 @@ puts '<body id="profileSettings">'
                                 puts '<input type="hidden" name="seasonNumber" value="1">'
                                 
                             puts '</form>'
-                            if topSeriesImage[i]
-                                puts '<h6 style="text-align: center;">' + topSeriesImage[i]['showName'].to_s + '</h6>'
+                            if topSeriesImage[tempCount] && (topSeriesImage[tempCount]['ranking'].to_i == (i + 1))
+                                puts '<h6 style="text-align: center;">' + topSeriesImage[tempCount]['showName'].to_s + '</h6>'
+                                puts '<span class="tooltiptext">'
+                                puts '<form action="Profile_Settings.cgi" method="POST">'
+                                puts' <input type="submit" name="removeSeries" value="X">'
+                                puts '<input type="hidden" name="seriesId" value="' + topSeriesImage[tempCount]['showId'].to_s + '">'
+                                puts '</form></span>'
+                                tempCount = tempCount + 1
                             end
                         puts '</div>'
                     end
                     puts '</section>'
                 puts '</div>'
-
+                puts '</div>'
+                tempCount = 0
                 #Season
                 topSeasonImage = db.query("SELECT series.imageName, series.showName, season.seasonNum, topFiveSeason.ranking FROM series JOIN season ON series.showId = season.seriesId JOIN topFiveSeason ON season.seasonId = topFiveSeason.seasonId WHERE username = '" + username.to_s + "' ORDER BY topFiveSeason.ranking ASC;")
                 topSeasonImage = topSeasonImage.to_a
+                puts '<h5>Seasons</h5>'
                 puts '<div class="TopFiveSeason">'
                 puts '<div class="wrapper">'
                     puts '<section class="carousel-section" id="section' + size.to_s() + '">'
                     (0...5).each do |i|
                         puts '<div class="item">'
-                            if (i < topSeasonImage.size)
+                            if (tempCount < topSeasonImage.size)
                                 puts '<form action="series.cgi" method="POST">'
-                                if (topSeasonImage[i]['ranking'].to_i == (i + 1))
-                                    puts '<input type="image" src="' + topSeasonImage[i]['imageName'] + '" alt="" style=" height: 100px; width: 80px">'
-                                    puts '<input type="hidden" name="clicked_image" value="' + topSeasonImage[i]['imageName'] + '">'
+                                if (topSeasonImage[tempCount]['ranking'].to_i == (i + 1))
+                                    puts '<input type="image" src="' + topSeasonImage[tempCount]['imageName'] + '" alt="" style=" height: 100px; width: 80px">'
+                                    puts '<input type="hidden" name="clicked_image" value="' + topSeasonImage[tempCount]['imageName'] + '">'
                                 else
                                     puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="">'
@@ -364,28 +385,32 @@ puts '<body id="profileSettings">'
                             end
                                 puts '<input type="hidden" name="seasonNumber" value="1">'
                             puts '</form>'
-                            if topSeasonImage[i]
-                                puts '<h6 style="text-align: center;">' + topSeasonImage[i]['showName'].to_s + '</h6>'
-                                puts '<h6 style="text-align: center;">Season ' + topSeasonImage[i]['seasonNum'].to_s + '</h6>'
+                            if topSeasonImage[tempCount] && (topSeasonImage[tempCount]['ranking'].to_i == (i + 1))
+                                puts '<h6 style="text-align: center;">' + topSeasonImage[tempCount]['showName'].to_s + '</h6>'
+                                puts '<h6 style="text-align: center;">Season ' + topSeasonImage[tempCount]['seasonNum'].to_s + '</h6>'
+                                tempCount = tempCount + 1
                             end
                         puts '</div>'
                     end
                     puts '</section>'
                 puts '</div>'
+                puts '</div>'
 
+                tempCount = 0
                 #Episode
                 topEpImage = db.query("SELECT series.imageName, series.showName, season.seasonNum, episode.epName, topFiveEpisode.ranking FROM series JOIN season ON series.showId = season.seriesId JOIN episode ON season.seasonId = episode.seasonId JOIN topFiveEpisode ON episode.epId = topFiveEpisode.epId WHERE username = '" + username.to_s + "' ORDER BY topFiveEpisode.ranking ASC;")
                 topEpImage = topEpImage.to_a
+                puts '<h5>Episodes</h5>'
                 puts '<div class="TopFiveEpisode">'
                 puts '<div class="wrapper">'
                     puts '<section class="carousel-section" id="section' + size.to_s() + '">'
                     (0...5).each do |i|
                         puts '<div class="item">'
-                            if (i < topEpImage.size)
+                            if (tempCount < topEpImage.size)
                                 puts '<form action="series.cgi" method="POST">'
-                                if (topEpImage[i]['ranking'].to_i == (i + 1))
-                                    puts '<input type="image" src="' + topEpImage[i]['imageName'] + '" alt="' + topEpImage[i]['imageName'] + '" style=" height: 100px; width: 80px">'
-                                    puts '<input type="hidden" name="clicked_image" value="' + topEpImage[i]['imageName'] + '">'
+                                if (topEpImage[tempCount]['ranking'].to_i == (i + 1))
+                                    puts '<input type="image" src="' + topEpImage[tempCount]['imageName'] + '" alt="' + topEpImage[tempCount]['imageName'] + '" style=" height: 100px; width: 80px">'
+                                    puts '<input type="hidden" name="clicked_image" value="' + topEpImage[tempCount]['imageName'] + '">'
                                 else
                                     puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="">'
@@ -396,9 +421,10 @@ puts '<body id="profileSettings">'
                             end
                                 puts '<input type="hidden" name="seasonNumber" value="1">'
                             puts '</form>'
-                            if topEpImage[i]
-                                puts '<h6 style="text-align: center;">' + topEpImage[i]['showName'].to_s + '</h6>'
-                                puts '<h6 style="text-align: center;">S' + topEpImage[i]['seasonNum'].to_s + ' ' + topEpImage[i]['epName'].to_s + '</h6>'
+                            if topEpImage[tempCount] && (topEpImage[tempCount]['ranking'].to_i == (i + 1))
+                                puts '<h6 style="text-align: center;">' + topEpImage[tempCount]['showName'].to_s + '</h6>'
+                                puts '<h6 style="text-align: center;">S' + topEpImage[tempCount]['seasonNum'].to_s + ' ' + topEpImage[tempCount]['epName'].to_s + '</h6>'
+                                tempCount = tempCount + 1
                             end
                         puts '</div>'
                     end

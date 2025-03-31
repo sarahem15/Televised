@@ -27,6 +27,19 @@ sortedSeries = sortedSeries.to_a
 
 reviews = db.query("SELECT * FROM seriesReview")
 reviews = reviews.to_a
+likeCount = 0
+alreadyLiked = false
+reviewId = cgi['reviewId']
+reviewCreator = cgi['reviewCreator']
+likedReview = cgi['likedReview']
+
+if likedReview == "TRUE"
+    begin
+        db.query("INSERT INTO likedSeriesReview VALUES ('" + username.to_s + "', '" + reviewCreator + "', '" + reviewId + "');")
+    rescue => e
+        db.query("DELETE FROM likedSeriesReview WHERE userWhoLiked = '" + username.to_s + "' AND reviewId = '" + reviewId + "';")
+    end
+end
 
 puts'<!DOCTYPE html>'
 puts'<html lang="en">'
@@ -175,14 +188,39 @@ puts '<div class="ReviewIndiv">'
       puts '</a>'
       puts '<br>'
       puts '<h6>' + reviews[i]['review'] + '</h6>'
+
+
+      likes = db.query("SELECT * FROM likedSeriesReview WHERE reviewId = '" + reviews[i]['id'].to_s + "';")
+      likes = likes.to_a
+      (0...likes.size).each do |i|
+        likeCount = likeCount + 1
+        if likes[i]['userWhoLiked'] == username.to_s
+            alreadyLiked = true
+        end
+    end
+
+    puts '<form action="Home.cgi" method="post">'
+    if alreadyLiked == true
       puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+    else
+        puts '<button class="LIKES">&#10084</button>'
+    end
+    puts '<input type="hidden" name="likedReview" value="TRUE">'
+    puts '<a href="whoHasLiked.cgi?reviewId=' + reviews[i]['id'].to_s + '">' + likeCount.to_s + '</a>'
+    puts '<input type="hidden" name="reviewId" value="' + reviews[i]['id'].to_s + '">'
+    puts '<input type="hidden" name="reviewCreator" value="' + reviews[i]['username'].to_s + '">'
+    puts '</form>'
+
+
+
   puts '</div>'
 puts '</div>'
-
+    likeCount = 0
+    alreadyLiked = false
 end
 
 puts '</section>'
-
+puts '<br>'
 
 
 

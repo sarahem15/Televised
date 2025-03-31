@@ -29,6 +29,7 @@ month = cgi['month']
 day = cgi['day']
 rateId = cgi['ratingId']
 review = cgi['review']
+
 fromIndivEp = cgi['fromIndivEp']
 epNum = cgi['epNum']
 likedList = cgi['likedList']
@@ -157,7 +158,11 @@ end
 #puts '<br>'
 #puts 'add to want to watch: ' + wantToWatch 
 if (wantToWatch == "TRUE" && epId == "" && seasonId == "")
-    db.query('INSERT INTO wantToWatchSeries VALUES ("' + username.to_s + '", "' + seriesId.to_s + '");')
+    begin
+        db.query('INSERT INTO wantToWatchSeries VALUES ("' + username.to_s + '", "' + seriesId.to_s + '");')
+    rescue => e
+        db.query('DELETE FROM wantToWatchSeries WHERE username = "' + username.to_s + '" AND seriesId = "' + seriesId.to_s + '";')
+    end
 elsif (wantToWatch == "TRUE" && seasonId != "")
     db.query('INSERT INTO wantToWatchSeason VALUES ("' + username.to_s + '", "' + seasonId.to_s + '");')
 elsif (wantToWatch == "TRUE" && epId != "")
@@ -204,35 +209,40 @@ elsif rated == "TRUE" && seriesRating == "" && seasonRating == "" && review != "
         db.query('INSERT INTO haveWatchedEpisode VALUES ("' + username.to_s + '", "' + epId.to_s + '");')
     end
 end
- if review != ""
-    if rateId != ""
-        date = year + "-" + month + "-" + day
-        db.query("INSERT INTO seriesReview VALUES (NULL, '" + reviewText + "', '" + username.to_s + "', '" + seriesId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
-=begin  
-        puts seriesId.to_s
-        puts 'rating is' + seriesRating
-        puts reviewText
-        puts epname
-=end
-    else
-        ###### SOMETHING WEIRD HAPPEING ######
-        date = year + "-" + month + "-" + day
-        db.query("INSERT INTO seriesRating (rating, username, seriesId) VALUES ('" + seriesRating.to_s + "', '" + username.to_s + "', '" + seriesId.to_s + "');")
-        rateId = db.query("SELECT id from seriesRating WHERE username = '" + username.to_s + "' AND seriesId = '" + seriesId.to_s + "';")
-        rateId = rateId.first['id'].to_s
-        #puts "rateId" + rateId.to_s
-        db.query("INSERT INTO seriesReview VALUES (NULL, '" + reviewText + "', '" + username.to_s + "', '" + seriesId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
-=begin
-        puts seriesId.to_s
-        puts 'rating is' + seriesRating
-        puts reviewText
-        puts epname
-=end
+
+if review != ""
+    if seriesRating != ""
+        if rateId != ""
+            date = year + "-" + month + "-" + day
+            db.query("INSERT INTO seriesReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seriesId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+        else
+            date = year + "-" + month + "-" + day
+            db.query("INSERT INTO seriesRating (rating, username, seriesId) VALUES ('" + seriesRating.to_s + "', '" + username.to_s + "', '" + seriesId.to_s + "');")
+            rateId = db.query("SELECT id from seriesRating WHERE username = '" + username.to_s + "' AND seriesId = '" + seriesId.to_s + "';")
+            rateId = rateId.first['id'].to_s
+            db.query("INSERT INTO seriesReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seriesId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+        end
+    elsif seasonRating != ""
+        if rateId != ""
+            date = year + "-" + month + "-" + day
+            db.query("INSERT INTO seasonReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seasonId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+        else
+            date = year + "-" + month + "-" + day
+            #puts seasonRating.to_s + " split "
+            puts seasonId.to_s
+            db.query("INSERT INTO seasonRating (rating, username, seasonId) VALUES ('" + seasonRating.to_s + "', '" + username.to_s + "', '" + seasonId.to_s + "');")
+            rateId = db.query("SELECT id from seasonRating WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonId.to_s + "';")
+            rateId = rateId.first['id'].to_s
+            puts reviewText
+            puts seasonId.to_s
+            puts " split " + rateId.to_s
+            db.query("INSERT INTO seasonReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seasonId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+        end
     end
 end
 
 if (likedList == "TRUE") || (otherList == "TRUE")
-    alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + listCreator + "';")
+    alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND listId = '" + listId + "';")
     if alreadyLiked.to_a == []
         db.query("INSERT INTO likedList VALUES ('" + userWhoLiked + "', '" + listCreator + "', '" + listId + "');")
     else

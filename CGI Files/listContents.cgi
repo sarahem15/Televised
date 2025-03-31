@@ -74,7 +74,7 @@ puts '<body id="listContent">'
   if (haveWatched.size > 0)
   (0...listContent.size).each do |i|
     (0...haveWatched.size).each do |h|
-      if (haveWatched[h]['seriesId'] == listContent[i]['seriesId'])
+      if (haveWatched[h]['seriesId'] == listContent[i]['showId'])
           tempCount = tempCount + 1
       end
     end
