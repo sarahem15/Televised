@@ -1,6 +1,3 @@
-/mnt/web/www/Televised/createNewList.cgi:28:in `
-': undefined method `empty?' for # (NoMethodError) 
-
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
@@ -19,8 +16,8 @@ print cgi.header(
   'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
 )
 
-search = cgi['mediaEntered']
-type = cgi['typeSearch']
+search = cgi['mediaEntered'] || ''  # Make sure it's a string
+type = cgi['typeSearch'] || ''      # Make sure it's a string
 
 listName = cgi['listName']
 description = cgi['description']
@@ -41,8 +38,8 @@ db = Mysql2::Client.new(
 )
 
 # ✅ Handle AJAX search requests correctly
-if cgi.params['mediaEntered'] && !cgi.params['mediaEntered'].empty?
-  search = db.escape(cgi['mediaEntered'])
+if !search.empty?  # Check if search string is not empty
+  search = db.escape(search)
   results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{search}%'")
 
   print "Content-type: text/html\n\n"  # ✅ Ensure proper content-type header for AJAX
