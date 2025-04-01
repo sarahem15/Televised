@@ -1,63 +1,60 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
 $stdout.sync = true
-$stderr.reopen($stdout)
-
-require 'mysql2'
 require 'cgi'
 require 'cgi/session'
+require 'mysql2'
 require 'json'
 
 cgi = CGI.new
+
+# Start session handling
 begin
   session = CGI::Session.new(cgi)
-  username = session['username'] || ''
+  username = session['username']
 rescue => e
   puts "Content-Type: text/html\n\n"
   puts "<p>Session error: #{e.message}</p>"
   exit
 end
 
-# Ensure CGI header is only printed when needed
+# Output the required CGI header
 def print_header
   puts "Content-Type: text/html\n\n"
 end
 
-# Parse `seriesArray` safely
-begin
-  seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
-rescue JSON::ParserError
-  seriesArray = []
-end
-
-# Console debug message (visible in logs)
-puts "<script>console.log('Series Array:', #{seriesArray.to_json});</script>"
-
-# Database connection with error handling
+# Handle database connection
 begin
   db = Mysql2::Client.new(
-    host: '10.20.3.4', 
-    username: 'seniorproject25', 
-    password: 'TV_Group123!', 
+    host: '10.20.3.4',
+    username: 'seniorproject25',
+    password: 'TV_Group123!',
     database: 'televised_w25'
   )
 rescue Mysql2::Error => e
   print_header
-  puts "<p>Database Connection Failed: #{e.message}</p>"
+  puts "<p>Database connection failed: #{e.message}</p>"
   exit
 end
 
-search = cgi['mediaEntered'] || ''
-type = cgi['typeSearch'] || ''
-listName = cgi['listName'] || ''
-description = cgi['description'] || ''
-privacy = cgi['views'] == "Public" ? 1 : 0  
+# Retrieve form input
+search = cgi['mediaEntered'].to_s.strip
+type = cgi['typeSearch'].to_s.strip
+listName = cgi['listName'].to_s.strip
+description = cgi['description'].to_s.strip
+privacy = (cgi['views'] == "Public" ? 1 : 0)
 
-# **AJAX Search Functionality**
-if type == "Series" && !search.strip.empty?
-  print_header  # Ensure proper CGI header for AJAX response
-  
-  results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-  
+# Parse series array safely
+begin
+  seriesArray = cgi['seriesArray'].empty? ? [] : JSON.parse(cgi['seriesArray'])
+rescue JSON::ParserError
+  seriesArray = []
+end
+
+# **AJAX Search Handling**
+if type == "Series" && !search.empty?
+  print_header
+  results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%' LIMIT 10")
+
   if results.count > 0
     results.each do |row|
       puts "<div class='search-result'>"
@@ -68,11 +65,11 @@ if type == "Series" && !search.strip.empty?
   else
     puts "<p>No results found.</p>"
   end
-  exit  # Stop further execution for AJAX requests
+  exit
 end
 
-# **Handle list creation**
-if cgi['saveList'] && !listName.strip.empty? && !description.strip.empty? && !seriesArray.empty?
+# **List Creation**
+if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.empty?
   existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
 
   if existing_list.count > 0
@@ -82,7 +79,7 @@ if cgi['saveList'] && !listName.strip.empty? && !description.strip.empty? && !se
   end
 
   db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
-  list_id = db.last_id  
+  list_id = db.last_id
 
   seriesArray.each do |series|
     series_id = series["id"]
@@ -95,7 +92,7 @@ if cgi['saveList'] && !listName.strip.empty? && !description.strip.empty? && !se
   exit
 end
 
-# **Start HTML Output**
+# **HTML Output**
 print_header
 puts "<!DOCTYPE html>"
 puts "<html lang='en'>"
@@ -157,9 +154,7 @@ puts "      document.getElementById('searchForm').addEventListener('submit', fun
 puts "        event.preventDefault();"
 puts "        let searchInput = document.querySelector('input[name=\"mediaEntered\"]').value;"
 puts "        let type = document.querySelector('select[name=\"typeSearch\"]').value;"
-puts "        fetch('createNewList.cgi?mediaEntered=' + encodeURIComponent(searchInput) + '&typeSearch=' + encodeURIComponent(type), {"
-puts "          method: 'GET',"
-puts "        })"
+puts "        fetch('createNewList.cgi?mediaEntered=' + encodeURIComponent(searchInput) + '&typeSearch=' + encodeURIComponent(type))"
 puts "        .then(response => response.text())"
 puts "        .then(data => {"
 puts "          document.getElementById('searchResults').innerHTML = data;"
