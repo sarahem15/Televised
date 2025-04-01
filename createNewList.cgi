@@ -37,10 +37,9 @@ db = Mysql2::Client.new(
   database: 'televised_w25'
 )
 
-# ✅ Handle AJAX search requests correctly
-if !search.empty?  # Check if search string is not empty
-  search = db.escape(search)
-  results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{search}%'")
+# ✅ Handle AJAX search requests correctly (Original search function)
+if type == "Series" && !search.empty?  # Ensure we only search when the input isn't empty
+  results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
 
   print "Content-type: text/html\n\n"  # ✅ Ensure proper content-type header for AJAX
 
@@ -139,16 +138,15 @@ puts "  <script>"
 puts "    document.addEventListener('DOMContentLoaded', function () {"
 puts "      document.getElementById('searchForm').addEventListener('submit', function (event) {"
 puts "        event.preventDefault();"
-puts "        let formData = new FormData(this);"
-puts "        fetch('createNewList.cgi', {"
-puts "          method: 'POST',"
-puts "          body: formData"
+puts "        let searchInput = document.querySelector('input[name=\"mediaEntered\"]').value;"
+puts "        let type = document.querySelector('select[name=\"typeSearch\"]').value;"
+puts "        fetch('createNewList.cgi?mediaEntered=' + encodeURIComponent(searchInput) + '&typeSearch=' + encodeURIComponent(type), {"
+puts "          method: 'GET',"
 puts "        })"
 puts "        .then(response => response.text())"
 puts "        .then(data => {"
 puts "          document.getElementById('searchResults').innerHTML = data;"
-puts "        })"
-puts "        .catch(error => console.error('Error fetching search results:', error));"
+puts "        });"
 puts "      });"
 puts "    });"
 puts "  </script>"
