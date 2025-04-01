@@ -172,6 +172,7 @@ puts "      }"
 puts "      updateSeriesList();"
 puts "    });"
 puts "  </script>"
+
 puts "</body>"
 puts "</html>"
 
