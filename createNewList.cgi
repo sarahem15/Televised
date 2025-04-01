@@ -1,3 +1,6 @@
+/mnt/web/www/Televised/createNewList.cgi:28:in `
+': undefined method `empty?' for # (NoMethodError) 
+
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
