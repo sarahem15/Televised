@@ -1,3 +1,4 @@
+#test and check if add and remove still exist
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
