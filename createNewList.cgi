@@ -41,8 +41,7 @@ db = Mysql2::Client.new(
 if type == "Series" && !search.empty?  # Ensure we only search when the input isn't empty
   results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
 
-  print "Content-type: text/html\n\n"  # Ensure proper content-type header for AJAX
-
+  # Output only the search results for AJAX (no Content-Type here)
   if results.count > 0
     results.each do |row|
       puts "<div class='search-result'>"
@@ -148,6 +147,27 @@ puts "        .then(data => {"
 puts "          document.getElementById('searchResults').innerHTML = data;"
 puts "        });"
 puts "      });"
+puts "    });"
+
+puts "    // Handle adding series to the list"
+puts "    document.addEventListener('click', function (event) {"
+puts "      if (event.target && event.target.classList.contains('addToList')) {"
+puts "        const seriesId = event.target.getAttribute('data-series-id');"
+puts "        const seriesName = event.target.getAttribute('data-series-name');"
+puts "        const seriesItem = {id: seriesId, name: seriesName};"
+puts "        // Add to the seriesArray (stored in local storage for persistence)"
+puts "        let seriesArray = JSON.parse(localStorage.getItem('seriesArray')) || [];"
+puts "        seriesArray.push(seriesItem);"
+puts "        localStorage.setItem('seriesArray', JSON.stringify(seriesArray));"
+puts "        console.log('Series Array:', seriesArray);"  // ✅ Log the series array to console"
+
+puts "        // Update the UI"
+puts "        const seriesList = document.getElementById('seriesList');"
+puts "        const newSeries = document.createElement('li');"
+puts "        newSeries.className = 'list-group-item';"
+puts "        newSeries.innerHTML = seriesName;"
+puts "        seriesList.appendChild(newSeries);"
+puts "      }"
 puts "    });"
 puts "  </script>"
 puts "</body>"
