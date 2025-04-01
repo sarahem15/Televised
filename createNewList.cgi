@@ -1,7 +1,3 @@
-/usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `_query': Incorrect integer value: '{"id"=>"29", "name"=>"Smiling Friends"}' for column 'seriesId' at row 1 (Mysql2::Error) from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `block in query' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `handle_interrupt' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `query' from /mnt/web/www/Televised/createNewList.cgi:67:in `block in
-' from /mnt/web/www/Televised/createNewList.cgi:66:in `each' from /mnt/web/www/Televised/createNewList.cgi:66:in `
-' 
-
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
@@ -27,6 +23,7 @@ listName = cgi['listName']
 description = cgi['description']
 privacy = cgi['views'] == "Public" ? 1 : 0  
 
+# Parse seriesArray safely
 begin
   seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
 rescue JSON::ParserError
@@ -67,7 +64,9 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
   db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
   list_id = db.last_id  
 
-  seriesArray.each do |series_id|
+  # Ensure we are only inserting the series ID
+  seriesArray.each do |series|
+    series_id = series["id"] # Extract only the ID
     db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
               VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
   end
@@ -145,41 +144,6 @@ puts "        })"
 puts "        .then(response => response.text())"
 puts "        .then(data => { document.getElementById('searchResults').innerHTML = data; });"
 puts "      });"
-# Add & Remove Series Handling
-puts '    document.addEventListener("click", function (event) {' 
-puts '        if (event.target.classList.contains("addToList")) {' 
-puts '            event.preventDefault();'
-puts '            let seriesId = event.target.dataset.seriesId;'
-puts '            let seriesName = event.target.dataset.seriesName;'
-puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '            if (!seriesArray.some(s => s.id === seriesId)) {' 
-puts '                seriesArray.push({ id: seriesId, name: seriesName });' 
-puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
-puts '                updateSeriesList();'
-puts '            }'
-puts '        }'
-puts '        if (event.target.classList.contains("removeFromList")) {' 
-puts '            event.preventDefault();'
-puts '            let seriesId = event.target.dataset.seriesId;'
-puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '            seriesArray = seriesArray.filter(s => s.id !== seriesId);' 
-puts '            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
-puts '            updateSeriesList();'
-puts '        }'
-puts '    });'
-puts "      function updateSeriesList() {"
-puts "        let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
-puts "        document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
-puts "        let seriesList = document.getElementById('seriesList');"
-puts "        seriesList.innerHTML = '';"
-puts "        seriesArray.forEach(function(series) {"
-puts "          let li = document.createElement('li');"
-puts "          li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');"
-puts "          li.innerHTML = series.name + \" <button class='removeFromList btn btn-danger btn-sm' data-series-id='\" + series.id + \"'>X</button>\";"
-puts "          seriesList.appendChild(li);"
-puts "        });"
-puts "      }"
-puts "      updateSeriesList();"
 puts "    });"
 puts "  </script>"
 puts "</body>"
