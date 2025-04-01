@@ -1,6 +1,6 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 $stdout.sync = true
-$stderr.reopen $stdout
+$stderr.reopen($stdout)
 
 require 'mysql2'
 require 'cgi'
@@ -8,40 +8,56 @@ require 'cgi/session'
 require 'json'
 
 cgi = CGI.new
-session = CGI::Session.new(cgi)
+begin
+  session = CGI::Session.new(cgi)
+  username = session['username'] || ''
+rescue => e
+  puts "Content-Type: text/html\n\n"
+  puts "<p>Session error: #{e.message}</p>"
+  exit
+end
 
-username = session['username']
+# Ensure CGI header is only printed when needed
+def print_header
+  puts "Content-Type: text/html\n\n"
+end
 
-print cgi.header(
-  'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
-)
-
-search = cgi['mediaEntered'] || ''  # Make sure it's a string
-type = cgi['typeSearch'] || ''      # Make sure it's a string
-
-listName = cgi['listName']
-description = cgi['description']
-privacy = cgi['views'] == "Public" ? 1 : 0  
-
-# Parse seriesArray safely
+# Parse `seriesArray` safely
 begin
   seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
 rescue JSON::ParserError
   seriesArray = []
 end
 
-db = Mysql2::Client.new(
-  host: '10.20.3.4', 
-  username: 'seniorproject25', 
-  password: 'TV_Group123!', 
-  database: 'televised_w25'
-)
+# Console debug message (visible in logs)
+puts "<script>console.log('Series Array:', #{seriesArray.to_json});</script>"
 
-#  Handle AJAX search requests correctly (Original search function)
-if type == "Series" && !search.empty?  # Ensure we only search when the input isn't empty
+# Database connection with error handling
+begin
+  db = Mysql2::Client.new(
+    host: '10.20.3.4', 
+    username: 'seniorproject25', 
+    password: 'TV_Group123!', 
+    database: 'televised_w25'
+  )
+rescue Mysql2::Error => e
+  print_header
+  puts "<p>Database Connection Failed: #{e.message}</p>"
+  exit
+end
+
+search = cgi['mediaEntered'] || ''
+type = cgi['typeSearch'] || ''
+listName = cgi['listName'] || ''
+description = cgi['description'] || ''
+privacy = cgi['views'] == "Public" ? 1 : 0  
+
+# **AJAX Search Functionality**
+if type == "Series" && !search.strip.empty?
+  print_header  # Ensure proper CGI header for AJAX response
+  
   results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-
-  # Output only the search results for AJAX (no Content-Type here)
+  
   if results.count > 0
     results.each do |row|
       puts "<div class='search-result'>"
@@ -52,14 +68,15 @@ if type == "Series" && !search.empty?  # Ensure we only search when the input is
   else
     puts "<p>No results found.</p>"
   end
-  exit  # Prevent the rest of the page from loading when handling search
+  exit  # Stop further execution for AJAX requests
 end
 
-# Handle list creation when "saveList" is clicked
-if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.empty?
+# **Handle list creation**
+if cgi['saveList'] && !listName.strip.empty? && !description.strip.empty? && !seriesArray.empty?
   existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
 
   if existing_list.count > 0
+    print_header
     puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
     exit
   end
@@ -67,18 +84,19 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
   db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
   list_id = db.last_id  
 
-  # Ensure we are only inserting the series ID
   seriesArray.each do |series|
-    series_id = series["id"] # Extract only the ID
+    series_id = series["id"]
     db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
               VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
   end
 
+  print_header
   puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_List.cgi';</script>"
   exit
 end
 
-# Start HTML Output
+# **Start HTML Output**
+print_header
 puts "<!DOCTYPE html>"
 puts "<html lang='en'>"
 puts "<head>"
@@ -147,27 +165,6 @@ puts "        .then(data => {"
 puts "          document.getElementById('searchResults').innerHTML = data;"
 puts "        });"
 puts "      });"
-puts "    });"
-
-puts "    // Handle adding series to the list"
-puts "    document.addEventListener('click', function (event) {"
-puts "      if (event.target && event.target.classList.contains('addToList')) {"
-puts "        const seriesId = event.target.getAttribute('data-series-id');"
-puts "        const seriesName = event.target.getAttribute('data-series-name');"
-puts "        const seriesItem = {id: seriesId, name: seriesName};"
-puts "        // Add to the seriesArray (stored in local storage for persistence)"
-puts "        let seriesArray = JSON.parse(localStorage.getItem('seriesArray')) || [];"
-puts "        seriesArray.push(seriesItem);"
-puts "        localStorage.setItem('seriesArray', JSON.stringify(seriesArray));"
-puts "        console.log('Series Array:', seriesArray);"  // ✅ Log the series array to console"
-
-puts "        // Update the UI"
-puts "        const seriesList = document.getElementById('seriesList');"
-puts "        const newSeries = document.createElement('li');"
-puts "        newSeries.className = 'list-group-item';"
-puts "        newSeries.innerHTML = seriesName;"
-puts "        seriesList.appendChild(newSeries);"
-puts "      }"
 puts "    });"
 puts "  </script>"
 puts "</body>"
