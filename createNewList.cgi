@@ -1,4 +1,11 @@
-#test and check if add and remove still exist
+Internal Server Error
+
+The server encountered an internal error or misconfiguration and was unable to complete your request.
+
+Please contact the server administrator at root@localhost to inform them of the time this error occurred, and the actions you performed just before this error.
+
+More information about this error may be available in the server error log.
+
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
