@@ -38,7 +38,7 @@ db = Mysql2::Client.new(
   database: 'televised_w25'
 )
 
-# Handle AJAX search functionality (restore original behavior)
+# Handle AJAX search functionality
 if type && search != ""
   results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
 
@@ -135,54 +135,35 @@ puts "    </div>"
 puts "  </div>"
 puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
 puts "  <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'></script>"
-puts "  <script src='Televised.js'></script>"
 puts "  <script>"
 puts "    document.addEventListener('DOMContentLoaded', function () {"
-puts "      document.getElementById('searchForm').addEventListener('submit', function (event) {"
-puts "        event.preventDefault();"
-puts "        let searchInput = document.querySelector('input[name=\"mediaEntered\"]').value;"
-puts "        let type = document.querySelector('select[name=\"typeSearch\"]').value;"
-puts "        fetch('createNewList.cgi?mediaEntered=' + encodeURIComponent(searchInput) + '&typeSearch=' + encodeURIComponent(type), {"
-puts "          method: 'GET',"
-puts "        })"
-puts "        .then(response => response.text())"
-puts "        .then(data => {"
-puts "          document.getElementById('searchResults').innerHTML = data;"
-puts "        });"
+puts "      document.addEventListener('click', function (event) {"
+puts "        if (event.target.classList.contains('addToList')) {"
+puts "          event.preventDefault();"
+puts "          let seriesId = event.target.dataset.seriesId;"
+puts "          let seriesName = event.target.dataset.seriesName;"
+puts "          let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
+puts "          if (!seriesArray.some(s => s.id === seriesId)) {"
+puts "            seriesArray.push({ id: seriesId, name: seriesName });"
+puts "            sessionStorage.setItem('seriesArray', JSON.stringify(seriesArray));"
+puts "            updateSeriesList();"
+puts "          }"
+puts "        }"
+puts "        if (event.target.classList.contains('removeFromList')) {"
+puts "          event.preventDefault();"
+puts "          let seriesId = event.target.dataset.seriesId;"
+puts "          let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
+puts "          seriesArray = seriesArray.filter(s => s.id !== seriesId);"
+puts "          sessionStorage.setItem('seriesArray', JSON.stringify(seriesArray));"
+puts "          updateSeriesList();"
+puts "        }"
 puts "      });"
-puts "    });"
-
-# Add & Remove Series Handling
-puts '    document.addEventListener("click", function (event) {' 
-puts '        if (event.target.classList.contains("addToList")) {' 
-puts '            event.preventDefault();'
-puts '            let seriesId = event.target.dataset.seriesId;'
-puts '            let seriesName = event.target.dataset.seriesName;'
-puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '            if (!seriesArray.some(s => s.id === seriesId)) {' 
-puts '                seriesArray.push({ id: seriesId, name: seriesName });' 
-puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
-puts '                updateSeriesList();'
-puts '            }'
-puts '        }'
-puts '        if (event.target.classList.contains("removeFromList")) {' 
-puts '            event.preventDefault();'
-puts '            let seriesId = event.target.dataset.seriesId;'
-puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '            seriesArray = seriesArray.filter(s => s.id !== seriesId);' 
-puts '            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
-puts '            updateSeriesList();'
-puts '        }'
-puts '    });'
 puts "      function updateSeriesList() {"
-puts "        let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
-puts "        document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
 puts "        let seriesList = document.getElementById('seriesList');"
 puts "        seriesList.innerHTML = '';"
-puts "        seriesArray.forEach(function(series) {"
+puts "        JSON.parse(sessionStorage.getItem('seriesArray') || '[]').forEach(series => {"
 puts "          let li = document.createElement('li');"
-puts "          li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');"
-puts "          li.innerHTML = series.name + \" <button class='removeFromList btn btn-danger btn-sm' data-series-id='\" + series.id + \"'>X</button>\";"
+puts "          li.innerHTML = `${series.name} <button class='removeFromList btn btn-danger btn-sm' data-series-id='${series.id}'>X</button>`;"
 puts "          seriesList.appendChild(li);"
 puts "        });"
 puts "      }"
