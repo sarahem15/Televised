@@ -141,6 +141,28 @@ puts "        })"
 puts "        .then(response => response.text())"
 puts "        .then(data => { document.getElementById('searchResults').innerHTML = data; });"
 puts "      });"
+# Add & Remove Series Handling
+puts '    document.addEventListener("click", function (event) {' 
+puts '        if (event.target.classList.contains("addToList")) {' 
+puts '            event.preventDefault();'
+puts '            let seriesId = event.target.dataset.seriesId;'
+puts '            let seriesName = event.target.dataset.seriesName;'
+puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
+puts '            if (!seriesArray.some(s => s.id === seriesId)) {' 
+puts '                seriesArray.push({ id: seriesId, name: seriesName });' 
+puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
+puts '                updateSeriesList();'
+puts '            }'
+puts '        }'
+puts '        if (event.target.classList.contains("removeFromList")) {' 
+puts '            event.preventDefault();'
+puts '            let seriesId = event.target.dataset.seriesId;'
+puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
+puts '            seriesArray = seriesArray.filter(s => s.id !== seriesId);' 
+puts '            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
+puts '            updateSeriesList();'
+puts '        }'
+puts '    });'
 puts "      function updateSeriesList() {"
 puts "        let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
 puts "        document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
