@@ -1,3 +1,7 @@
+/usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `_query': Incorrect integer value: '{"id"=>"29", "name"=>"Smiling Friends"}' for column 'seriesId' at row 1 (Mysql2::Error) from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `block in query' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `handle_interrupt' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `query' from /mnt/web/www/Televised/createNewList.cgi:67:in `block in
+' from /mnt/web/www/Televised/createNewList.cgi:66:in `each' from /mnt/web/www/Televised/createNewList.cgi:66:in `
+' 
+
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
