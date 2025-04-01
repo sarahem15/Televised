@@ -37,11 +37,11 @@ db = Mysql2::Client.new(
   database: 'televised_w25'
 )
 
-# ✅ Handle AJAX search requests correctly (Original search function)
+#  Handle AJAX search requests correctly (Original search function)
 if type == "Series" && !search.empty?  # Ensure we only search when the input isn't empty
   results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
 
-  print "Content-type: text/html\n\n"  # ✅ Ensure proper content-type header for AJAX
+  print "Content-type: text/html\n\n"  # Ensure proper content-type header for AJAX
 
   if results.count > 0
     results.each do |row|
@@ -53,10 +53,10 @@ if type == "Series" && !search.empty?  # Ensure we only search when the input is
   else
     puts "<p>No results found.</p>"
   end
-  exit  # ✅ Prevent the rest of the page from loading when handling search
+  exit  # Prevent the rest of the page from loading when handling search
 end
 
-# ✅ Handle list creation when "saveList" is clicked
+# Handle list creation when "saveList" is clicked
 if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.empty?
   existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
 
@@ -79,7 +79,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
   exit
 end
 
-# ✅ Start HTML Output
+# Start HTML Output
 puts "<!DOCTYPE html>"
 puts "<html lang='en'>"
 puts "<head>"
