@@ -30,6 +30,9 @@ day = cgi['day']
 rateId = cgi['ratingId']
 review = cgi['review']
 
+reviewEpName = cgi['epName']
+puts reviewEpName
+
 fromIndivEp = cgi['fromIndivEp']
 epNum = cgi['epNum']
 likedList = cgi['likedList']
@@ -69,7 +72,7 @@ elsif otherList == "TRUE"
 elsif profileLikedList != ""
     print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/Likes_Lists.cgi'>\n"
 else
-    print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
+    print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
 end
 puts "</head>"
 puts "<body>"
@@ -222,7 +225,8 @@ if review != ""
             rateId = rateId.first['id'].to_s
             db.query("INSERT INTO seriesReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seriesId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
         end
-    elsif seasonRating != ""
+    end
+    if seasonRating != ""
         if rateId != ""
             date = year + "-" + month + "-" + day
             db.query("INSERT INTO seasonReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seasonId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
@@ -239,6 +243,25 @@ if review != ""
             db.query("INSERT INTO seasonReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seasonId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
         end
     end
+
+    if episodeRating != ""
+        if rateId != ""
+            date = year + "-" + month + "-" + day
+            db.query("INSERT INTO episodeReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + epId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+        else
+            date = year + "-" + month + "-" + day
+            #puts seasonRating.to_s + " split "
+            puts seasonId.to_s
+            db.query("INSERT INTO episodeRating (rating, username, epId) VALUES ('" + seasonRating.to_s + "', '" + username.to_s + "', '" + epId.to_s + "');")
+            rateId = db.query("SELECT id from epRating WHERE username = '" + username.to_s + "' AND epId = '" + epId.to_s + "';")
+            rateId = rateId.first['id'].to_s
+            puts reviewText
+            puts epId.to_s
+            puts " split " + rateId.to_s
+            db.query("INSERT INTO episodeReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + epId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+        end
+    end
+
 end
 
 if (likedList == "TRUE") || (otherList == "TRUE")

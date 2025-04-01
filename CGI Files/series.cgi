@@ -603,6 +603,7 @@ puts "  </div>"
 puts "</div>"
 
 # Episode Review Modal
+=begin
 puts "<div id='reviewEpisodeModal'>"
 puts "  <div class='modal fade' id='CreateEpisodeReview' tabindex='-1' aria-labelledby='createReviewLabel' aria-hidden='true'>"
 puts "    <div class='modal-dialog'>"
@@ -632,30 +633,47 @@ puts "            </div>"
 puts "            <div class='row'>"
 puts "              <div class='col'>"
 
-puts "            <section class='Rating'>"
+#puts "            <section class='Rating'>"
 
+
+if episodeRating == 0
+   puts '<label for="Rating">You must provide a rating: </label><br>'
+                    puts '<select id="rating" name="episodeRating" class="form-control">'
+
+                    puts '<option value="1">1</option>'
+                    puts '<option value="2">2</option>'
+                    puts '<option value="3">3</option>'
+                    puts '<option value="4">4</option>'
+                    puts '<option value="5">5</option>'
+  puts '</select>'
+
+
+else 
+ratingId = db.query("SELECT id from episodeRating WHERE username = '" + username.to_s + "' AND epId = '" + epId.to_s + "';")
+ratingId = ratingId.first['id'].to_s
 (0...5).each do |i|
- # puts "              <form action='threebuttons.cgi' method='POST'>"
   if (i < episodeRating)
-            puts '<button class="fa fa-star" style="color: yellow;"></button>'
+            puts '<i class="fa fa-star" style="font-size:24px;color:yellow"></i>'
           else
-            puts '<button class="fa fa-star"></button>'
+            puts '<i class="fa fa-star" style="font-size:24px;color:white"></i>'
           end
-  puts "                <input type='hidden' name='seriesRating' value='#{i}'>"
-  puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
-  puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
-  puts "                <input type='hidden' name='rated' value='TRUE'>"
-  puts "                <input type='hidden' name='review' value='true'>"
 
-  #puts "              </form>"
 end
-puts "            </section>"
+end
+
 puts "              </div>"
 
 
 puts "                <input type='hidden' name='year' value='#{time.year}'>"
 puts "                <input type='hidden' name='month' value='#{time.month}'>"
 puts "                <input type='hidden' name='day' value='#{time.day}'>"
+
+puts "                <input type='hidden' name='seasonRating' value='#{seasonRating}'>"
+puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
+puts "                <input type='hidden' name='seasonId' value='#{seasonId}'>"
+puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
+puts "                <input type='hidden' name='rated' value='TRUE'>"
+puts "                <input type='hidden' name='review' value='true'>"
 
 puts '<br>'
 puts "            <div class='modal-footer'>"
@@ -669,6 +687,7 @@ puts "      </div>"
 puts "    </div>"
 puts "  </div>"
 puts "</div>"
+=end
 
 puts "  <script>"
 puts "  document.addEventListener('DOMContentLoaded', function () {"

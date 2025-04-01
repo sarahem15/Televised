@@ -89,13 +89,13 @@ puts '<br>'
 (0...seriesReviews.size).each do |i|
 puts '<div class="originalReview">'
 	if seriesTab == "SERIES"
-    seriesImage = db.query("SELECT imageName, showName, year FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id= '" + seriesReviews[i]['id'].to_s + "';")
+    seriesImage = db.query("SELECT imageName, showName, series.year FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id= '" + seriesReviews[i]['id'].to_s + "';")
     reviewRating = db.query("SELECT rating FROM seriesRating JOIN seriesReview ON seriesRating.id = seriesReview.ratingId WHERE seriesReview.id = '" + seriesReviews[i]['id'].to_s + "';")
   elsif seriesTab == "SEASON"
-    seriesImage = db.query("SELECT imageName, showName, year FROM series JOIN season ON season.seriesId = series.showId JOIN seasonReview ON seasonReview.seasonId = season.seasonId WHERE seasonReview.id = '" + seriesReviews[i]['id'].to_s + "';")
+    seriesImage = db.query("SELECT imageName, showName, series.year FROM series JOIN season ON season.seriesId = series.showId JOIN seasonReview ON seasonReview.seasonId = season.seasonId WHERE seasonReview.id = '" + seriesReviews[i]['id'].to_s + "';")
     reviewRating = db.query("SELECT rating FROM seasonRating JOIN seasonReview ON seasonRating.id = seasonReview.ratingId WHERE seasonReview.id = '" + seriesReviews[i]['id'].to_s + "';")
   else
-     seriesImage = db.query("SELECT imageName, showName, year FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN episodeReview ON episodeReview.epId = episode.epId WHERE episodeReview.id = '" + seriesReviews[i]['id'].to_s + "';")
+     seriesImage = db.query("SELECT imageName, showName, series.year FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN episodeReview ON episodeReview.epId = episode.epId WHERE episodeReview.id = '" + seriesReviews[i]['id'].to_s + "';")
      reviewRating = db.query("SELECT rating FROM episodeRating JOIN episodeReview ON episodeRating.id = episodeReview.ratingId WHERE episodeReview.id = '" + seriesReviews[i]['id'].to_s + "';") 
   end
 	puts "<img src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\">" 

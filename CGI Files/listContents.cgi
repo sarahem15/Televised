@@ -21,14 +21,19 @@ db = Mysql2::Client.new(
     database: 'televised_w25'
   )
 
-haveWatched = db.query("SELECT seriesId FROM haveWatchedSeries WHERE username = '" + username.to_s + "';")
-haveWatched = haveWatched.to_a
+
 if type == 'SERIES'
   listContent = db.query("SELECT series.imageName, series.showId, series.showName, curatedListSeries.username FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE name = '" + listTitle + "';")
+  haveWatched = db.query("SELECT seriesId FROM haveWatchedSeries WHERE username = '" + username.to_s + "';")
+  haveWatched = haveWatched.to_a
 elsif type == 'SEASON'
   listContent = db.query("SELECT series.imageName, series.showId, series.showName, curatedListSeason.username FROM series JOIN season ON series.showId = season.seriesId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE name = '" + listTitle + "';")
+  haveWatched = db.query("SELECT seasonId FROM haveWatchedSeason WHERE username = '" + username.to_s + "';")
+  haveWatched = haveWatched.to_a
 else
-  listContent = db.query("SELECT series.imageName, series.showId, series.showName, curatedListEpisode.username FROM series JOIN season ON series.showId = season.seriesId JOIN episode ON episode.seasonId = season.seasonId JOIN curatedListEpisode ON episode.epId = curatedListEpisode.epId WHERE name = '" + listTitle + "';")
+  listContent = db.query("SELECT series.imageName, series.showId, series.showName, episode.epName, season.seasonNum, curatedListEpisode.username FROM series JOIN season ON series.showId = season.seriesId JOIN episode ON episode.seasonId = season.seasonId JOIN curatedListEpisode ON episode.epId = curatedListEpisode.epId WHERE name = '" + listTitle + "';")
+  haveWatched = db.query("SELECT epId FROM haveWatchedEpisode WHERE username = '" + username.to_s + "';")
+  haveWatched = haveWatched.to_a
 end
 listContent = listContent.to_a
 
@@ -59,11 +64,14 @@ puts '<body id="listContent">'
   puts '<div class="listContents">'
   (0...listContent.size).each do |i|
     puts '<div class="listItem">'
-        puts '<form action="series.cgi" method="POST">'
-          puts '<input type="image" src="' + listContent[i]['imageName'] + '" alt="' + listContent[i]['imageName'] + '">'
+        puts '<form action="series.cgi" method="POST" style="height: 300px;">'
+          puts '<input type="image" src="' + listContent[i]['imageName'] + '" alt="' + listContent[i]['imageName'] + '" style="height: 80%; width: 170px; object-fit: cover;">'
           puts '<input type="hidden" name="clicked_image" value="' + listContent[i]['imageName'] + '">'
           puts '<input type="hidden" name="seasonNumber" value="1">'
           puts '<h6 style="text-align: center">' + listContent[i]['showName'] + '</h6>'
+          if type != "SERIES" && type != "SEASON"
+            puts '<h6 style="text-align: center">S' + listContent[i]['seasonNum'].to_s + ' ' + listContent[i]['epName'] + '</h6>'
+          end
        puts ' </form>'
    puts '</div>'
  end
@@ -74,8 +82,19 @@ puts '<body id="listContent">'
   if (haveWatched.size > 0)
   (0...listContent.size).each do |i|
     (0...haveWatched.size).each do |h|
-      if (haveWatched[h]['seriesId'] == listContent[i]['showId'])
-          tempCount = tempCount + 1
+
+      if type == "SERIES"
+        if (haveWatched[h]['seriesId'] == listContent[i]['showId'])
+            tempCount = tempCount + 1
+        end
+      elsif type == "SEASON"
+        if (haveWatched[h]['seasonId'] == listContent[i]['showId'])
+            tempCount = tempCount + 1
+        end
+      else
+        if (haveWatched[h]['epId'] == listContent[i]['showId'])
+            tempCount = tempCount + 1
+        end
       end
     end
   end

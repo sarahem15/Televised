@@ -14,7 +14,7 @@ $stderr.reopen $stdout
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
-search = cgi['top5search']
+search = cgi['top5search'].gsub("'", "\\\\'")
 type = cgi['typeSearch']
 topSeries = cgi['topSeries']
 topSeason = cgi['topSeason']
@@ -79,13 +79,13 @@ puts '<body id="profileSettings">'
                     #puts '<span>Username</span>'
                     puts '<input type="hidden" id="userName" name="userNameX" class="form-control" readonly>'
                     #puts '<br>'
-                    puts '<span>Display Name</span>'
+                    puts '<span>Display Name &#9998;</span>'
                     puts '<input type="text" id="displayName" value="' + displayName.first['displayName'].to_s + '" name="displayName" class="form-control" >'
                     puts '<br>'
-                    puts '<span>Bio</span>'
+                    puts '<span>Bio &#9998;</span>'
                     puts '<textarea id="bio" name="bio" class="form-control" rows="5">' + bio.first['bio'].to_s + '</textarea>'
                     puts '<br>'
-                    puts '<label for="pronouns">Pronouns</label>'
+                    puts '<label for="pronouns">Pronouns &#9998;</label>'
                     puts '<select id="pronouns" name="pronouns" class="form-control">'
                     if pronouns.first['pronouns'].to_s == 'She/Her'
                         puts '<option value="She/Her" selected>She/Her</option>'
@@ -132,7 +132,7 @@ puts '<body id="profileSettings">'
                     end
                     puts '</select>'
                     puts '<br>'
-                    puts '<label for="replies">Who can reply to your reviews</label>'
+                    puts '<label for="replies">Who can reply to your reviews &#9998;</label>'
                     puts '<select id="replies" name="replies" class="form-control">'
 
                     if replies.first['replies'].to_i == 1
@@ -144,7 +144,7 @@ puts '<body id="profileSettings">'
                     end
                     puts '</select>'
                     puts '<br>'
-                    puts '<span>Avatar: Upload a JPEG or PNG</span>'
+                    puts '<span>Avatar <i>(JPEG or PNG)</i> &#9998;</span>'
                     puts '<input type="File" name="fileName" accept="image/png, image/jpeg, image/jpg">'
                     puts '<br>'
                     puts '<br>'
@@ -158,24 +158,34 @@ puts '<body id="profileSettings">'
             puts '<form method="post" action="Profile_Settings.cgi">'
             puts '<select id="type" name="typeSearch" class="form-control">'
             if type == "Series"
-                puts '<option value="Series" selected>Series</option>'
+                puts '<option value="Series" selected>Series &#9660</option>'
                 puts '<option value="Season">Season</option>'
                 puts '<option value="Episodes">Episodes</option>'
             elsif type == "Season"
                 puts '<option value="Series">Series</option>'
-                puts '<option value="Season" selected>Season</option>'
+                puts '<option value="Season" selected>Season &#9660</option>'
                 puts '<option value="Episodes">Episodes</option>'
             else
                 puts '<option value="Series">Series</option>'
                 puts '<option value="Season">Season</option>'
-                puts '<option value="Episodes" selected>Episodes</option>'
+                puts '<option value="Episodes" selected>Episodes &#9660</option>'
             end
             puts '</select>'
             if type == "Episodes"
                 puts '<select id="type" name="seasonNum" class="form-control">'
-                puts '<option value="1" selected>1</option>'
-                puts '<option value="2">2</option>'
-                puts '<option value="3">3</option>'
+                if seasonNum == '1'
+                    puts '<option value="1" selected>1</option>'
+                    puts '<option value="2">2</option>'
+                    puts '<option value="3">3</option>'
+                elsif seasonNum == '2'
+                    puts '<option value="1">1</option>'
+                    puts '<option value="2" selected>2</option>'
+                    puts '<option value="3">3</option>'
+                else
+                    puts '<option value="1">1</option>'
+                    puts '<option value="2">2</option>'
+                    puts '<option value="3" selected>3</option>'
+                end
                 puts '</select>'
             end
                 puts '<input type="text" name="top5search" class="top5search">'
@@ -205,6 +215,7 @@ puts '<body id="profileSettings">'
                             puts '<option value="5">5</option>'
                         puts '</select>'
                         puts '<input type="submit" value="SELECT">'
+                        #puts '<input type="hidden" name="top5search" value="' + search + '">'
                         puts '</form>'
                         puts '<br>'
                         images[i]['imageName'] = ""
@@ -242,6 +253,7 @@ puts '<body id="profileSettings">'
                             puts '<option value="4">4</option>'
                             puts '<option value="5">5</option>'
                         puts '</select>'
+                        #puts '<input type="hidden" name="top5search" value="' + search + '">'
                         puts '<input type="submit" value="SELECT">'
                         puts '</form>'
                         puts '<br>'
@@ -283,6 +295,7 @@ puts '<body id="profileSettings">'
                             puts '<option value="5">5</option>'
                         puts '</select>'
                         puts '<input type="submit" value="select" style="width: 60px;">'
+                        #puts '<input type="hidden" name="top5search" value="' + search + '">'
                         puts '</form>'
                         puts '<br>'
                         images[i]['imageName'] = ""
@@ -322,7 +335,7 @@ puts '<body id="profileSettings">'
             #seasons = db.query("SELECT season.* FROM season JOIN series ON season.seriesId = series.showId WHERE series.imageName = '" + seriesImage + "';")
             topSeriesImage = db.query("SELECT series.imageName, series.showName, series.showId, topFiveSeries.ranking FROM series JOIN topFiveSeries ON series.showId = topFiveSeries.seriesId WHERE username = '" + username.to_s + "' ORDER BY ranking ASC;")
             topSeriesImage = topSeriesImage.to_a
-            puts '<h3>My Top Five Favs</h3>'
+            puts '<h3>My Top Five Favs <span class="infoQuestion"> ? <p class="info"> To add to your top five favorite series, seasons, and episodes, use the search bar above and rank them! </p></span></h3>'
             puts '<h5>Shows</h5>'
             puts '<div class="TopFiveSeries">'
                 puts '<div class="wrapper">'
@@ -375,6 +388,7 @@ puts '<body id="profileSettings">'
                                 if (topSeasonImage[tempCount]['ranking'].to_i == (i + 1))
                                     puts '<input type="image" src="' + topSeasonImage[tempCount]['imageName'] + '" alt="" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="' + topSeasonImage[tempCount]['imageName'] + '">'
+                                    puts '<input type="hidden" name="seasonNumber" value="' + topSeasonImage[tempCount]['seasonNum'].to_s + '">'
                                 else
                                     puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="">'
@@ -383,7 +397,7 @@ puts '<body id="profileSettings">'
                                 puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
                                 puts '<input type="hidden" name="clicked_image" value="">'
                             end
-                                puts '<input type="hidden" name="seasonNumber" value="1">'
+                                
                             puts '</form>'
                             if topSeasonImage[tempCount] && (topSeasonImage[tempCount]['ranking'].to_i == (i + 1))
                                 puts '<h6 style="text-align: center;">' + topSeasonImage[tempCount]['showName'].to_s + '</h6>'
@@ -411,6 +425,7 @@ puts '<body id="profileSettings">'
                                 if (topEpImage[tempCount]['ranking'].to_i == (i + 1))
                                     puts '<input type="image" src="' + topEpImage[tempCount]['imageName'] + '" alt="' + topEpImage[tempCount]['imageName'] + '" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="' + topEpImage[tempCount]['imageName'] + '">'
+                                    puts '<input type="hidden" name="seasonNumber" value="' + topEpImage[tempCount]['seasonNum'].to_s + '">'
                                 else
                                     puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="">'
@@ -419,7 +434,7 @@ puts '<body id="profileSettings">'
                                 puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
                                 puts '<input type="hidden" name="clicked_image" value="">'
                             end
-                                puts '<input type="hidden" name="seasonNumber" value="1">'
+                                
                             puts '</form>'
                             if topEpImage[tempCount] && (topEpImage[tempCount]['ranking'].to_i == (i + 1))
                                 puts '<h6 style="text-align: center;">' + topEpImage[tempCount]['showName'].to_s + '</h6>'
