@@ -1,5 +1,3 @@
-# this is the best version of this code at the moment, everything but adding to curated series works
-
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
@@ -37,6 +35,8 @@ db = Mysql2::Client.new(
   password: 'TV_Group123!', 
   database: 'televised_w25'
 )
+
+# this is the best version of this code at the moment, everything but adding to curated series works
 
 # Handle AJAX search functionality
 if type == "Series" && search != ""
@@ -186,11 +186,3 @@ puts "</body>"
 puts "</html>"
 
 session.close
-
-Internal Server Error
-
-The server encountered an internal error or misconfiguration and was unable to complete your request.
-
-Please contact the server administrator at root@localhost to inform them of the time this error occurred, and the actions you performed just before this error.
-
-More information about this error may be available in the server error log.
