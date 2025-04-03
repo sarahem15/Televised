@@ -36,8 +36,6 @@ db = Mysql2::Client.new(
   database: 'televised_w25'
 )
 
-# this is the best version of this code at the moment, everything but adding to curated series works
-
 # Handle AJAX search functionality
 if type == "Series" && search != ""
   results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
@@ -72,7 +70,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
               VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
   end
 
-  puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_List.cgi';</script>"
+  puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_Lists.cgi';</script>"
   exit
 end
 
@@ -133,6 +131,10 @@ puts "  <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootst
 puts "  <script src='Televised.js'></script>"
 puts "  <script>"
 puts "    document.addEventListener('DOMContentLoaded', function () {"
+puts "      // Clear the series list and reset seriesArray on page load"
+puts "      sessionStorage.removeItem('seriesArray'); // Clear the session storage array"
+puts "      updateSeriesList(); // Clear the displayed list"
+
 puts "      document.getElementById('searchForm').addEventListener('submit', function (event) {"
 puts "        event.preventDefault();"
 puts "        let searchInput = document.querySelector('input[name=\"mediaEntered\"]').value;"
@@ -145,6 +147,7 @@ puts "        })"
 puts "        .then(response => response.text())"
 puts "        .then(data => { document.getElementById('searchResults').innerHTML = data; });"
 puts "      });"
+
 # Add & Remove Series Handling
 puts '    document.addEventListener("click", function (event) {' 
 puts '        if (event.target.classList.contains("addToList")) {' 
@@ -171,7 +174,7 @@ puts "      function updateSeriesList() {"
 puts "        let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
 puts "        document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
 puts "        let seriesList = document.getElementById('seriesList');"
-puts "        seriesList.innerHTML = '';"
+puts "        seriesList.innerHTML = ''; // Clear the list in the middle column"
 puts "        seriesArray.forEach(function(series) {"
 puts "          let li = document.createElement('li');"
 puts "          li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');"
