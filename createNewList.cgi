@@ -12,19 +12,17 @@ session = CGI::Session.new(cgi)
 
 username = session['username']
 
-# Print the necessary headers
 print cgi.header(
   'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
 )
 
-search = cgi['mediaEntered'] || ''
-type = cgi['typeSearch'] || ''
+search = cgi['mediaEntered']
+type = cgi['typeSearch']
 
 listName = cgi['listName']
 description = cgi['description']
 privacy = cgi['views'] == "Public" ? 1 : 0  
 
-# Parse seriesArray safely
 begin
   seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
 rescue JSON::ParserError
@@ -39,20 +37,16 @@ db = Mysql2::Client.new(
 )
 
 # Handle AJAX search functionality
-if type && search != ""
+if type == "Series" && search != ""
   results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-
-  print "Content-type: text/html\n\n"
-
+  
   if results.count > 0
     results.each do |row|
-      puts "<div class='search-result'>"
-      puts "  <p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-      puts "  <button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
-      puts "</div>"
+      puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+      puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
     end
   else
-    puts "<p>No results found.</p>"
+    puts "<p>We can't seem to find this title!</p>"
   end
   exit
 end
@@ -69,8 +63,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
   db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
   list_id = db.last_id  
 
-  seriesArray.each do |series|
-    series_id = series["id"]
+  seriesArray.each do |series_id|
     db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
               VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
   end
@@ -122,8 +115,6 @@ puts "        <h3 class='text-center'>Search for a Series</h3>"
 puts "        <form id='searchForm'>"
 puts "          <select id='type' name='typeSearch' class='form-control'>"
 puts "            <option value='Series' selected>Series</option>"
-puts "            <option value='Seasons'>Seasons</option>"
-puts "            <option value='Episodes'>Episodes</option>"
 puts "          </select>"
 puts "          <br>"
 puts "          <input type='text' name='mediaEntered' class='form-control'>"
@@ -135,34 +126,59 @@ puts "    </div>"
 puts "  </div>"
 puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
 puts "  <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'></script>"
-puts "  <script src='Televised.js' defer></script>"
-
-# JavaScript for add/remove/update
-puts "<script>"
-puts "document.addEventListener('DOMContentLoaded', function () {"
-puts "    let seriesArray = [];"
-puts "    const seriesList = document.getElementById('seriesList');"
-puts "    function updateSeriesArray() { document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray); }"
-puts "    function addSeries(seriesId, seriesName) {"
-puts "        if (seriesArray.some(series => series.id === seriesId)) { alert('Already added!'); return; }"
-puts "        seriesArray.push({ id: seriesId, name: seriesName }); updateSeriesList();"
-puts "    }"
-puts "    function removeSeries(seriesId) { seriesArray = seriesArray.filter(series => series.id !== seriesId); updateSeriesList(); }"
-puts "    function updateSeriesList() {"
+puts "  <script src='Televised.js'></script>"
+puts "  <script>"
+puts "    document.addEventListener('DOMContentLoaded', function () {"
+puts "      document.getElementById('searchForm').addEventListener('submit', function (event) {"
+puts "        event.preventDefault();"
+puts "        let searchInput = document.querySelector('input[name=\"mediaEntered\"]').value;"
+puts "        let type = document.querySelector('select[name=\"typeSearch\"]').value;"
+puts "        fetch('createNewList.cgi', {"
+puts "          method: 'POST',"
+puts "          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },"
+puts "          body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })"
+puts "        })"
+puts "        .then(response => response.text())"
+puts "        .then(data => { document.getElementById('searchResults').innerHTML = data; });"
+puts "      });"
+# Add & Remove Series Handling
+puts '    document.addEventListener("click", function (event) {' 
+puts '        if (event.target.classList.contains("addToList")) {' 
+puts '            event.preventDefault();'
+puts '            let seriesId = event.target.dataset.seriesId;'
+puts '            let seriesName = event.target.dataset.seriesName;'
+puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
+puts '            if (!seriesArray.some(s => s.id === seriesId)) {' 
+puts '                seriesArray.push({ id: seriesId, name: seriesName });' 
+puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
+puts '                updateSeriesList();'
+puts '            }'
+puts '        }'
+puts '        if (event.target.classList.contains("removeFromList")) {' 
+puts '            event.preventDefault();'
+puts '            let seriesId = event.target.dataset.seriesId;'
+puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
+puts '            seriesArray = seriesArray.filter(s => s.id !== seriesId);' 
+puts '            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
+puts '            updateSeriesList();'
+puts '        }'
+puts '    });'
+puts "      function updateSeriesList() {"
+puts "        let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
+puts "        document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
+puts "        let seriesList = document.getElementById('seriesList');"
 puts "        seriesList.innerHTML = '';"
-puts "        seriesArray.forEach(series => {"
-puts "            let listItem = `<li class='list-group-item'>${series.name} <button class='removeSeries btn btn-danger btn-sm' data-series-id='${series.id}'>REMOVE</button></li>`;"
-puts "            seriesList.innerHTML += listItem;"
-puts "        }); updateSeriesArray();"
-puts "    }"
-puts "    document.getElementById('searchResults').addEventListener('click', event => {"
-puts "        if (event.target.classList.contains('addToList')) addSeries(event.target.dataset.seriesId, event.target.dataset.seriesName);"
+puts "        seriesArray.forEach(function(series) {"
+puts "          let li = document.createElement('li');"
+puts "          li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');"
+puts "          li.innerHTML = series.name + \" <button class='removeFromList btn btn-danger btn-sm' data-series-id='\" + series.id + \"'>X</button>\";"
+puts "          seriesList.appendChild(li);"
+puts "        });"
+puts "      }"
+puts "      updateSeriesList();"
 puts "    });"
-puts "    seriesList.addEventListener('click', event => {"
-puts "        if (event.target.classList.contains('removeSeries')) removeSeries(event.target.dataset.seriesId);"
-puts "    });"
-puts "});"
-puts "</script>"
+puts "  </script>"
+puts "</body>"
+puts "</html>"
 
-puts "</body></html>"
 session.close
