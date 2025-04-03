@@ -60,6 +60,10 @@ if seriesRatings.size != 0
   avgSeriesRating = sumRating/seriesRatings.size
 end
 
+seriesReviews = db.query("SELECT * FROM seriesReview WHERE seriesId ='" + seriesId + "';")
+seriesReviews = seriesReviews.to_a
+
+seasonReviews = db.query("SELECT * FROM seasonReview WHERE seriesId = '" + seriesId + "';")
 
 #puts username.to_s
 puts "<!DOCTYPE html>"
@@ -368,11 +372,11 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
 
-
+=begin
         puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" 
         data-epName=\"" + episode['epName'] + "\"
         data-bs-target=\"#CreateEpisodeReview\">&#128488</button>"
-
+=end
         alreadyRatedEpisode = db.query("SELECT * FROM episodeRating WHERE username = '" + username + "' AND epId = '" + episode['epId'].to_s + "';")
           if (alreadyRatedEpisode.to_a.to_s != "[]")
             episodeRating = alreadyRatedEpisode.first['rating'].to_i

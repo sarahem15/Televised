@@ -1,7 +1,3 @@
-/usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `_query': Cannot delete or update a parent row: a foreign key constraint fails (Mysql2::Error) from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `block in query' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `handle_interrupt' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `query' from /mnt/web/www/Televised/Profile_Lists.cgi:43:in `
-' 
-
-
 #!/usr/bin/ruby
 # Switch images to queries from the database
 # Enable debugging
@@ -135,7 +131,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '</div>'
   puts '<div class="createdLists">'
   puts '<section class="titleDate">'
-  puts '<a href="listContents.cgi?title=' + lists[i]['name'] + '">' + lists[i]['name'] + '</a>'
+  puts '<a href="listContents.cgi?title=' + lists[i]['name'] + '&contentType=' + seriesTab + '">' + lists[i]['name'] + '</a>'
   puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
   puts '</section>'
   puts '<h3>' + lists[i]['description'] +'</h3>'
@@ -169,6 +165,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '</form>'
   puts '</div>'
   puts '</div>'
+  puts '<br>'
   puts '<hr style="margin-left: 80px; margin-right: 80px">'
   likeCount = 0
 end
