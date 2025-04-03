@@ -32,6 +32,21 @@ if seriesTab == ""
   seriesTab = "SERIES"
 end
 
+# Handle delete request
+if cgi['deleteListId']
+  delete_list_id = cgi['deleteListId'].to_i
+
+  # Delete from curatedListSeries
+  db.query("DELETE FROM curatedListSeries WHERE listId = #{delete_list_id};")
+
+  # Delete from listOwnership
+  db.query("DELETE FROM listOwnership WHERE id = #{delete_list_id};")
+
+  # Redirect back to Profile_Lists.cgi after deletion
+  puts "<html><body><script>window.location.href='Profile_Lists.cgi';</script></body></html>"
+  exit
+end
+
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
 
@@ -124,8 +139,8 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   listId = listId.first['id']
 
   # Delete Button
-  puts '<form action="deleteList.cgi" method="post">'
-  puts '<input type="hidden" name="listId" value="' + listId.to_s + '">'
+  puts '<form action="Profile_Lists.cgi" method="post">'
+  puts '<input type="hidden" name="deleteListId" value="' + listId.to_s + '">'
   puts '<button type="submit" class="btn btn-danger">Delete List</button>'
   puts '</form>'
 
