@@ -1,3 +1,7 @@
+/usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `_query': Cannot delete or update a parent row: a foreign key constraint fails (Mysql2::Error) from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `block in query' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `handle_interrupt' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `query' from /mnt/web/www/Televised/Profile_Lists.cgi:43:in `
+' 
+
+
 #!/usr/bin/ruby
 # Switch images to queries from the database
 # Enable debugging
