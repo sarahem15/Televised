@@ -1,9 +1,3 @@
-/usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `_query': Incorrect integer value: '{"id"=>"38", "name"=>"The Great"}' for column 'seriesId' at row 1 (Mysql2::Error) from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `block in query' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `handle_interrupt' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `query' from /mnt/web/www/Televised/createNewList.cgi:67:in `block in
-' from /mnt/web/www/Televised/createNewList.cgi:66:in `each' from /mnt/web/www/Televised/createNewList.cgi:66:in `
-' 
-
-
-
 # this is the best version of this code at the moment, everything but adding to curated series works
 
 #!/usr/bin/ruby
@@ -71,9 +65,11 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
   db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
   list_id = db.last_id  
 
-  seriesArray.each do |series_id|
+  #  FIXED: Properly extract series ID as an integer before inserting
+  seriesArray.each do |series|
+    series_id = series["id"].to_i  
     db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
-              VALUES ('#{username}', '#{series_id}', '#{db.escape(listName)}', '#{db.escape(description)}', '#{privacy}', NOW(), '#{list_id}')")
+              VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
   end
 
   puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_List.cgi';</script>"
