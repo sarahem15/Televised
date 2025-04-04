@@ -70,7 +70,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
               VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
   end
 
-  puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_Lists.cgi';</script>"
+  puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_List.cgi';</script>"
   exit
 end
 

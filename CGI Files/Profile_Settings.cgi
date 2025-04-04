@@ -155,7 +155,7 @@ puts '<body id="profileSettings">'
                 puts '</div>'
 
         puts '<div class="TopFiveProfile">'
-            puts '<form method="post" action="Profile_Settings.cgi">'
+            puts '<form id="imageSearch" method="post" action="Profile_Settings.cgi">'
             puts '<select id="type" name="typeSearch" class="form-control">'
             if type == "Series"
                 puts '<option value="Series" selected>Series &#9660</option>'
@@ -368,8 +368,8 @@ puts '<body id="profileSettings">'
                         puts '<div class="item">'
                             #puts topSeriesImage.size
                             if (tempCount < topSeriesImage.size)
-                                puts '<form action="series.cgi" method="POST">'
                                 if (topSeriesImage[tempCount]['ranking'].to_i == (i + 1))
+                                    puts '<form action="series.cgi" method="POST">'
                                     puts '<input type="image" src="' + topSeriesImage[tempCount]['imageName'] + '" alt="' + topSeriesImage[tempCount]['imageName'] + '" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="' + topSeriesImage[tempCount]['imageName'] + '">'
                                 else
@@ -408,8 +408,8 @@ puts '<body id="profileSettings">'
                     (0...5).each do |i|
                         puts '<div class="item">'
                             if (tempCount < topSeasonImage.size)
-                                puts '<form action="series.cgi" method="POST">'
                                 if (topSeasonImage[tempCount]['ranking'].to_i == (i + 1))
+                                    puts '<form action="series.cgi" method="POST">'
                                     puts '<input type="image" src="' + topSeasonImage[tempCount]['imageName'] + '" alt="" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="' + topSeasonImage[tempCount]['imageName'] + '">'
                                     puts '<input type="hidden" name="seasonNumber" value="' + topSeasonImage[tempCount]['seasonNum'].to_s + '">'
@@ -445,8 +445,8 @@ puts '<body id="profileSettings">'
                     (0...5).each do |i|
                         puts '<div class="item">'
                             if (tempCount < topEpImage.size)
-                                puts '<form action="series.cgi" method="POST">'
                                 if (topEpImage[tempCount]['ranking'].to_i == (i + 1))
+                                    puts '<form action="series.cgi" method="POST">'
                                     puts '<input type="image" src="' + topEpImage[tempCount]['imageName'] + '" alt="' + topEpImage[tempCount]['imageName'] + '" style=" height: 100px; width: 80px">'
                                     puts '<input type="hidden" name="clicked_image" value="' + topEpImage[tempCount]['imageName'] + '">'
                                     puts '<input type="hidden" name="seasonNumber" value="' + topEpImage[tempCount]['seasonNum'].to_s + '">'
@@ -479,7 +479,27 @@ puts '<body id="profileSettings">'
     puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
     puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
     puts '<script src="Televised.js"></script>'
-puts '</body>'
+    puts '<script>'
+    puts "      document.getElementById('imageSearch').addEventListener('submit', function (event) {"
+    puts "        event.preventDefault();}"
+    puts '    document.addEventListener("click", function (event) {' 
+    puts '        if (event.target.classList.contains("top5search")) {' 
+    puts '            event.preventDefault();'
+    puts '    let top5search = event.target.dataset.top5search;'
+
+=begin
+    puts '            let seriesName = event.target.dataset.seriesName;'
+    puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
+    puts '            if (!seriesArray.some(s => s.id === seriesId)) {' 
+    puts '                seriesArray.push({ id: seriesId, name: seriesName });' 
+    puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
+    puts '                updateSeriesList();'
+    puts '            }'
+=end
+
+    puts '}'
+    puts "</script>"
+    puts '</body>'
 
 puts '</html>'
 session.close

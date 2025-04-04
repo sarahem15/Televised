@@ -15,6 +15,11 @@ username = session['username']
 seriesImage = cgi['clicked_image']
 seasonNumber = cgi['seasonNumber'].to_i
 trueWatched = cgi['trueWatched']
+likeSeasonReview = cgi['likeSeasonReview']
+likeSeriesReview = cgi['likeSeriesReview']
+reviewId = cgi['reviewId']
+reviewCreator = cgi['reviewCreator']
+
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -60,10 +65,27 @@ if seriesRatings.size != 0
   avgSeriesRating = sumRating/seriesRatings.size
 end
 
-seriesReviews = db.query("SELECT * FROM seriesReview WHERE seriesId ='" + seriesId + "';")
+seriesReviews = db.query("SELECT * FROM seriesReview WHERE seriesId ='" + seriesId.to_s + "';")
 seriesReviews = seriesReviews.to_a
+likedReview = false
+seasonReviews = db.query("SELECT * FROM seasonReview WHERE seasonId = '" + seasonId.to_s + "';")
+seasonReviews = seasonReviews.to_a
 
-seasonReviews = db.query("SELECT * FROM seasonReview WHERE seriesId = '" + seriesId + "';")
+if likeSeriesReview == "TRUE"
+  begin
+    db.query("INSERT INTO likedSeriesReview VALUES ('" + username.to_s + "', '" + reviewCreator.to_s + "', '" + reviewId.to_s + "');")
+  rescue => e
+    db.query("DELETE FROM likedSeriesReview WHERE userWhoLiked = '" + username.to_s + "' AND reviewId = '" + reviewId.to_s + "';")
+  end
+elsif likeSeasonReview == "TRUE"
+  begin
+    db.query("INSERT INTO likedSeasonReview VALUES ('" + username.to_s + "', '" + reviewCreator.to_s + "', '" + reviewId.to_s + "');")
+  rescue => e
+    db.query("DELETE FROM likedSeasonReview WHERE userWhoLiked = '" + username.to_s + "' AND reviewId = '" + reviewId.to_s + "';")
+  end
+end
+
+
 
 #puts username.to_s
 puts "<!DOCTYPE html>"
@@ -442,6 +464,101 @@ puts "<body id=\"showsPage\">"
   puts "<br>"
 puts "</div>"
 
+
+#######REVIEWS############
+likeCount = 0
+if seriesReviews.size == 0 && seasonReviews.size == 0
+  puts '<h5 style="text-align: center;"> Reviews for this episode will appear here! </h5>'
+  puts '<br>'
+else
+  puts '<section class="epReviews">'
+  (0...seriesReviews.size).each do |i|
+    puts '<div class="ReviewIndiv">'
+    puts '<div class="ReviewContent">'
+    reviewDisplayName = db.query("SELECT displayName FROM account WHERE username = '" + seriesReviews[i]['username'] + "';")
+        puts '<section class="UserDisplay">'
+            puts '<img src="./ProfileImages/' + seriesReviews[i]['username'] + '.jpg" alt="" style="height: 50px; width: 50px; corner-rounding: 100%; background-color: gray;">'
+            puts '<h3>' + reviewDisplayName.first['displayName'] + '</h3>'
+            #RATING!
+        puts '</section>'
+        puts '<br>'
+        puts '<br>'
+        puts '<a href="reviewIndiv.cgi?reviewId=' + seriesReviews[i]['id'].to_s + '"><h4>' + seriesReviews[i]['review'] + '</h4></a>'
+
+        likes = db.query("SELECT * FROM likedSeriesReview WHERE reviewId = '" + seriesReviews[i]['id'].to_s + "';")
+        likes = likes.to_a
+        (0...likes.size).each do |i|
+          likeCount = likeCount + 1
+          if likes[i]['userWhoLiked'] == username.to_s
+            likedReview = true
+          end
+        end
+
+        puts '<form action="series.cgi" method="post">'
+        if likedReview
+          puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+        else
+          puts '<button class="LIKES">&#10084</button>'
+        end
+        puts '<input type="hidden" name="likeSeriesReview" value="TRUE">'
+        puts '<a href="whoHasLiked.cgi?reviewId=' + seriesReviews[i]['id'].to_s + '&type=EP">' + likeCount.to_s + '</a>'
+        puts '<input type="hidden" name="clicked_image" value="' + seriesImage.to_s + '">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        puts '<input type="hidden" name="reviewId" value="' + seriesReviews[i]['id'].to_s + '">'
+        puts '<input type="hidden" name="reviewCreator" value="' + seriesReviews[i]['username'].to_s + '">'
+        puts '</form>'
+    puts '</div>'
+  puts '</div>'
+  likeCount = 0
+  likedReview = false
+end
+(0...seasonReviews.size).each do |i|
+    puts '<div class="ReviewIndiv">'
+    puts '<div class="ReviewContent">'
+    reviewDisplayName = db.query("SELECT displayName FROM account WHERE username = '" + seasonReviews[i]['username'] + "';")
+        puts '<section class="UserDisplay">'
+            puts '<img src="./ProfileImages/' + seasonReviews[i]['username'] + '.jpg" alt="" style="height: 50px; width: 50px; corner-rounding: 100%; background-color: gray;">'
+            puts '<h3>' + reviewDisplayName.first['displayName'] + '</h3>'
+            #RATING!
+        puts '</section>'
+        puts '<br>'
+        puts '<i><h4>Season ' + seasonNumber.to_s + '</h4></i>'
+        puts '<br>'
+        puts '<a href="reviewIndiv.cgi?reviewId=' + seasonReviews[i]['id'].to_s + '&contentType=SEASON"><h4>' + seasonReviews[i]['review'] + '</h4></a>'
+
+        likes = db.query("SELECT * FROM likedSeasonReview WHERE reviewId = '" + seasonReviews[i]['id'].to_s + "';")
+        likes = likes.to_a
+        (0...likes.size).each do |i|
+          likeCount = likeCount + 1
+          if likes[i]['userWhoLiked'] == username.to_s
+            likedReview = true
+          end
+        end
+
+        puts '<form action="series.cgi" method="post">'
+        if likedReview
+          puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+        else
+          puts '<button class="LIKES">&#10084</button>'
+        end
+        puts '<input type="hidden" name="likeSeasonReview" value="TRUE">'
+        puts '<a href="whoHasLiked.cgi?reviewId=' + seasonReviews[i]['id'].to_s + '&type=EP">' + likeCount.to_s + '</a>'
+        puts '<input type="hidden" name="clicked_image" value="' + seriesImage.to_s + '">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        puts '<input type="hidden" name="reviewId" value="' + seasonReviews[i]['id'].to_s + '">'
+        puts '<input type="hidden" name="reviewCreator" value="' + seasonReviews[i]['username'].to_s + '">'
+        puts '</form>'
+    puts '</div>'
+  puts '</div>'
+  likeCount = 0
+  likedReview = false
+end
+puts '</section>'
+puts '<br>'
+puts "</div>"
+end
+
+#######MODALS############
 
 # Series Review Modal
 puts "<div id='reviewSeriesModal'>"

@@ -10,8 +10,11 @@ require 'cgi/session'
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
+time = Time.new
 
 reviewId = cgi['reviewId']
+type = cgi['contentType']
+# SEASON AND EP TYPES
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -38,7 +41,7 @@ puts'<body id="reviewIndiv">'
   puts'<br>'
   puts '<br>'
 puts '<div class="originalReview">'
-	seriesImage = db.query("SELECT imageName, showName, year FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id= '" + reviewId + "';")
+	seriesImage = db.query("SELECT showId, imageName, showName, year FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id= '" + reviewId + "';")
 	reviewRating = db.query("SELECT rating FROM seriesRating JOIN seriesReview ON seriesRating.id = seriesReview.ratingId WHERE seriesReview.id = '" + reviewId + "';")
 	puts "<img src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\">" 
 	puts '<div class="content-R">'
@@ -66,6 +69,22 @@ puts '<div class="originalReview">'
        puts '<br>'
        puts '<br>'
        puts '<i><h5 style="color: #436eb1">' + reviewContent.first['date'].to_s + '</h5></i>'
+
+       # START DIV FOR TEXT BOX
+       puts '<div class="reply">'
+       puts '<form action="threebuttons.cgi" method="POST">'
+       puts '<span>Type your reply here:</span>'
+       puts '<textarea id="reply" name="reply" class="form-control" rows="10"></textarea><br>'
+       puts '<input type="hidden" name="seriesID" value="' + seriesImage.first['showId'].to_s + '">'
+       puts '<input type="hidden" name="reviewID" value="' + reviewId.to_s + '">'
+       puts '<input type="hidden" name="username" value="' + username + '">'
+       puts "<input type='hidden' name='year' value='" + time.year.to_s + "'>"
+       puts "<input type='hidden' name='month' value='" + time.month.to_s + "'>"
+       puts "<input type='hidden' name='day' value='" + time.day.to_s + "'>"
+       puts '<button id="saveReply" class="btn" style="background-color: #9daef6;" type="submit">Reply</button>'
+      puts '</form>'
+      puts '</div>'
+
 	puts '</div>'
 puts '</div>'
 

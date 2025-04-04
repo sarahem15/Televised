@@ -77,7 +77,7 @@ puts "<body id=\"episodePage\">"
     if valid
       (1...4).each do |i|
       puts "<img src=\"Episodes/" + showName.gsub(" ", "").gsub("'", "") + seasonNumber.to_s + "." + epNum.to_s + "." + i.to_s + ".jpg\" alt=\"\">" 
-    end
+      end
 
       #puts "<img src=\"./Episodes/" + seriesImage.split('.')[0] + seasonNumber.to_s + "." + epNum.to_s + ".1.jpg\" alt=\"" + seriesImage + "\" width=\"300\" height=\"225\">"
     else
@@ -224,19 +224,20 @@ else
             #RATING!
         puts '</section>'
         puts '<br>'
+        puts '<a href="reviewIndiv.cgi?reviewId=' +  epReviews[i]['id'].to_s + '&contentType=EP"><h4>' + epReviews[i]['review'] + '</h4></a>'
         puts '<br>'
-        puts '<h4>' + epReviews[i]['review'] + '</h4>'
         puts '<section class="Likes">'
           puts '<h5 id="Heart">&#9829</h5>'
           puts '<h4>12</h4>' #db query to get likes
         puts '</section>'
+        puts '<br>'
     puts '</div>'
   puts '</div>'
 end
 puts '</section>'
 puts "</div>"
 end
-=begin
+
 puts "<div id='reviewEpisodeModal'>"
 puts "  <div class='modal fade' id='CreateEpisodeReview' tabindex='-1' aria-labelledby='createReviewLabel' aria-hidden='true'>"
 puts "    <div class='modal-dialog'>"
@@ -277,7 +278,7 @@ puts "              <div class='col'>"
 
 if episodeRating == 0
    puts '<label for="Rating">You must provide a rating: </label><br>'
-                    puts '<select id="rating" name="episodeRating" class="form-control">'
+                    puts '<select id="rating" name="epRating" class="form-control">'
 
                     puts '<option value="1">1</option>'
                     puts '<option value="2">2</option>'
@@ -307,7 +308,7 @@ puts "                <input type='hidden' name='year' value='#{time.year}'>"
 puts "                <input type='hidden' name='month' value='#{time.month}'>"
 puts "                <input type='hidden' name='day' value='#{time.day}'>"
 
-puts "                <input type='hidden' name='seasonRating' value='#{episodeRating}'>"
+puts "                <input type='hidden' name='epRating' value='#{episodeRating}'>"
 puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
 #puts "                <input type='hidden' name='seasonId' value='#{seasonId}'>"
 puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
@@ -315,6 +316,8 @@ puts "                <input type='hidden' name='epname' value='" + episode.firs
 puts "                <input type='hidden' name='rated' value='TRUE'>"
 puts "                <input type='hidden' name='review' value='true'>"
 puts '                <input type="hidden" name="fromIndivEp" value="TRUE">'
+puts "                <input type='hidden' name='epNum' value='" + epNum.to_s + "'>"
+puts "                <input type='hidden' name='epID' value='" + episode.first['epId'].to_s + "'>"
 
 puts '<br>'
 puts "            <div class='modal-footer'>"
@@ -328,7 +331,7 @@ puts "      </div>"
 puts "    </div>"
 puts "  </div>"
 puts "</div>"
-=end
+
 puts "  <script>"
 puts "  document.addEventListener('DOMContentLoaded', function () {"
 puts "    document.querySelectorAll('.reviewButton').forEach(button => {"
