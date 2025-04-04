@@ -79,13 +79,13 @@ puts '<body id="profileSettings">'
                     #puts '<span>Username</span>'
                     puts '<input type="hidden" id="userName" name="userNameX" class="form-control" readonly>'
                     #puts '<br>'
-                    puts '<span>Display Name &#9998;</span>'
+                    puts '<span>Display Name &#128397;</span>'
                     puts '<input type="text" id="displayName" value="' + displayName.first['displayName'].to_s + '" name="displayName" class="form-control" >'
                     puts '<br>'
-                    puts '<span>Bio &#9998;</span>'
+                    puts '<span>Bio &#128397;</span>'
                     puts '<textarea id="bio" name="bio" class="form-control" rows="5">' + bio.first['bio'].to_s + '</textarea>'
                     puts '<br>'
-                    puts '<label for="pronouns">Pronouns &#9998;</label>'
+                    puts '<label for="pronouns">Pronouns &#128397;</label>'
                     puts '<select id="pronouns" name="pronouns" class="form-control">'
                     if pronouns.first['pronouns'].to_s == 'She/Her'
                         puts '<option value="She/Her" selected>She/Her</option>'
@@ -132,7 +132,7 @@ puts '<body id="profileSettings">'
                     end
                     puts '</select>'
                     puts '<br>'
-                    puts '<label for="replies">Who can reply to your reviews &#9998;</label>'
+                    puts '<label for="replies">Who can reply to your reviews &#128397;</label>'
                     puts '<select id="replies" name="replies" class="form-control">'
 
                     if replies.first['replies'].to_i == 1
@@ -144,7 +144,7 @@ puts '<body id="profileSettings">'
                     end
                     puts '</select>'
                     puts '<br>'
-                    puts '<span>Avatar <i>(JPEG or PNG)</i> &#9998;</span>'
+                    puts '<span>Avatar <i>(JPEG or PNG)</i> &#128397;</span>'
                     puts '<input type="File" name="fileName" accept="image/png, image/jpeg, image/jpg">'
                     puts '<br>'
                     puts '<br>'
@@ -306,24 +306,48 @@ puts '<body id="profileSettings">'
             end
             if (type == "Series" && ranking != "" && ranking != "SELECT")
                 alreadyRated = db.query("SELECT * FROM topFiveSeries WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
-                if (alreadyRated.to_a.to_s != '[]')
+                alreadyAdded = db.query("SELECT * FROM topFiveSeries WHERE username = '" + username.to_s + "' AND seriesId = '" + topSeries + "';")
+                if (alreadyRated.to_a.to_s != '[]' && alreadyAdded.to_a.to_s != '[]')
                     db.query("DELETE FROM topFiveSeries WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
+                    db.query("DELETE FROM topFiveSeries WHERE username = '" + username.to_s + "' AND seriesId = '" + topSeries + "';")
+                    db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
+                elsif (alreadyRated.to_a.to_s != '[]')
+                    db.query("DELETE FROM topFiveSeries WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
+                    db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
+                elsif (alreadyAdded.to_a.to_s != '[]')
+                    db.query("DELETE FROM topFiveSeries WHERE username = '" + username.to_s + "' AND seriesId = '" + topSeries + "';")
                     db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
                 else
                     db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
                 end
             elsif (type == "Season" && ranking != "" && ranking != "SELECT" && seasonNum != "")
                 alreadyRated = db.query("SELECT * FROM topFiveSeason WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
-                if (alreadyRated.to_a.to_s != '[]')
+                alreadyAdded = db.query("SELECT * FROM topFiveSeason WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonNum + "';")
+                if (alreadyRated.to_a.to_s != '[]' && alreadyAdded.to_a.to_s != '[]')
                     db.query("DELETE FROM topFiveSeason WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
+                    db.query("DELETE FROM topFiveSeason WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonNum + "';")
+                    db.query("INSERT INTO topFiveSeason VALUES('" + username.to_s + "', '" + seasonNum + "', '" + ranking + "');")
+                elsif (alreadyRated.to_a.to_s != '[]')
+                    db.query("DELETE FROM topFiveSeason WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
+                    db.query("INSERT INTO topFiveSeason VALUES('" + username.to_s + "', '" + seasonNum + "', '" + ranking + "');")
+                elsif (alreadyAdded.to_a.to_s != '[]')
+                    db.query("DELETE FROM topFiveSeason WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonNum + "';")
                     db.query("INSERT INTO topFiveSeason VALUES('" + username.to_s + "', '" + seasonNum + "', '" + ranking + "');")
                 else
                     db.query("INSERT INTO topFiveSeason VALUES('" + username.to_s + "', '" + seasonNum + "', '" + ranking + "');")
                 end
             elsif (type == "Episodes" && ranking != "" && ranking != "SELECT" && seasonNum != "" && epNum != "")
                 alreadyRated = db.query("SELECT * FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
-                if (alreadyRated.to_a.to_s != '[]')
+                alreadyAdded = db.query("SELECT * FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND epId = '" + epNum + "';")
+                if (alreadyRated.to_a.to_s != '[]' && alreadyAdded.to_a.to_s != '[]')
                     db.query("DELETE FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
+                    db.query("DELETE FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND epId = '" + epNum + "';")
+                    db.query("INSERT INTO topFiveEpisode VALUES('" + username.to_s + "', '" + epNum + "', '" + ranking + "');")
+                elsif (alreadyRated.to_a.to_s != '[]')
+                    db.query("DELETE FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
+                    db.query("INSERT INTO topFiveEpisode VALUES('" + username.to_s + "', '" + epNum + "', '" + ranking + "');")
+                elsif (alreadyAdded.to_a.to_s != '[]')
+                    db.query("DELETE FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND epId = '" + epNum + "';")
                     db.query("INSERT INTO topFiveEpisode VALUES('" + username.to_s + "', '" + epNum + "', '" + ranking + "');")
                 else
                     db.query("INSERT INTO topFiveEpisode VALUES('" + username.to_s + "', '" + epNum + "', '" + ranking + "');")
