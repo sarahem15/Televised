@@ -1,8 +1,3 @@
- /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `_query': Unknown column 'seriesId' in 'where clause' (Mysql2::Error) from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `block in query' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `handle_interrupt' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `query' from /mnt/web/www/Televised/createNewList.cgi:75:in `block (2 levels) in
-' from /mnt/web/www/Televised/createNewList.cgi:74:in `each' from /mnt/web/www/Televised/createNewList.cgi:74:in `each_with_index' from /mnt/web/www/Televised/createNewList.cgi:74:in `block in
-' from /mnt/web/www/Televised/createNewList.cgi:70:in `each' from /mnt/web/www/Televised/createNewList.cgi:70:in `
-' 
-
 #!/usr/bin/ruby 
 $stdout.sync = true
 $stderr.reopen $stdout
@@ -69,27 +64,28 @@ if search != ""
     else
       puts "<p>We can't seem to find this title!</p>"
     end
-  elsif type == "Episodes"
-    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-    if results.count > 0
-      results.each do |row|
-        seasons = db.query("SELECT seasonId FROM season WHERE showId = '#{row['showId']}'").to_a
-        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
-        seasons.each_with_index do |season, index|
-          episodes = db.query("SELECT epId, epName FROM episode WHERE seasonId = '#{season['seasonId']}' AND showId = '#{row['showId']}'").to_a
-          puts "<select class='episodeSelect' data-series-id='#{row['showId']}' data-season-id='#{season['seasonId']}'>"
-          puts "<option disabled selected>Season #{index + 1}</option>"
-          episodes.each do |episode|
-            puts "<option value='#{episode['epId']}'>#{episode['epName']}</option>"
-          end
-          puts "</select>"
+elsif type == "Episodes"
+  results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+  if results.count > 0
+    results.each do |row|
+      seasons = db.query("SELECT seasonId FROM season WHERE showId = '#{row['showId']}'").to_a
+      puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+      puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
+      seasons.each_with_index do |season, index|
+        episodes = db.query("SELECT epId, epName FROM episode WHERE seasonId = '#{season['seasonId']}'").to_a
+        puts "<select class='episodeSelect' data-series-id='#{row['showId']}' data-season-id='#{season['seasonId']}'>"
+        puts "<option disabled selected>Season #{index + 1}</option>"
+        episodes.each do |episode|
+          puts "<option value='#{episode['epId']}'>#{episode['epName']}</option>"
         end
-        puts "</p>"
+        puts "</select>"
       end
-    else
-      puts "<p>We can't seem to find this title!</p>"
+      puts "</p>"
     end
+  else
+    puts "<p>We can't seem to find this title!</p>"
+  end
+
   end
   exit
 end
