@@ -35,6 +35,10 @@ rescue JSON::ParserError
   seasonArray = []
 end
 
+# DEBUG: Print received series and season arrays
+puts "<!-- DEBUG: seriesArray = #{seriesArray.inspect} -->"
+puts "<!-- DEBUG: seasonArray = #{seasonArray.inspect} -->"
+
 db = Mysql2::Client.new(
   host: '10.20.3.4', 
   username: 'seniorproject25', 
@@ -133,7 +137,6 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
   puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_Lists.cgi';</script>"
   exit
 end
-
 
 # Start HTML Output
 puts "<!DOCTYPE html>"
