@@ -99,7 +99,7 @@ puts '<div class="originalReview">'
        if type == 'SEASON'
         puts '<input type="hidden" name="seasonId" value="' + reviewContent.first['seasonId'].to_s + '">'
       elsif type == 'EP'
-        puts '<input type="hidden" name="epID" value="' + reviewContent.first['seasonId'].to_s + '">'
+        puts '<input type="hidden" name="epID" value="' + reviewContent.first['epId'].to_s + '">'
       end
 
        puts '<input type="hidden" name="reviewId" value="' + reviewId.to_s + '">'
