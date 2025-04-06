@@ -29,6 +29,12 @@ rescue JSON::ParserError
   seriesArray = []
 end
 
+begin
+  seasonArray = cgi['seasonArray'] && !cgi['seasonArray'].empty? ? JSON.parse(cgi['seasonArray']) : []
+rescue JSON::ParserError
+  seasonArray = []
+end
+
 db = Mysql2::Client.new(
   host: '10.20.3.4', 
   username: 'seniorproject25', 
@@ -90,7 +96,7 @@ if search != ""
 end
 
 # Handle list creation when "saveList" is clicked
-if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.empty?
+if cgi['saveList'] && !listName.empty? && !description.empty?
   existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
 
   if existing_list.count > 0
@@ -101,15 +107,33 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
   db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
   list_id = db.last_id  
 
-  seriesArray.each do |series|
-    series_id = series["id"].to_i  
-    db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
-              VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
+  if !seriesArray.empty?
+    seriesArray.each do |series|
+      series_id = series["id"].to_i  
+      db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
+                VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
+    end
+  elsif !seasonArray.empty?
+    seasonArray.each do |season|
+      show_id = season["seriesId"].to_i
+      season_num = season["season"].to_i
+
+      result = db.query("SELECT seasonId FROM season WHERE seriesId = #{show_id} ORDER BY seasonId ASC LIMIT 1 OFFSET #{season_num - 1}")
+      if result.count > 0
+        season_id = result.first["seasonId"].to_i
+        db.query("INSERT INTO curatedListSeason (username, seasonId, name, description, privacy, date, listId)
+                  VALUES ('#{username}', #{season_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
+      end
+    end
+  else
+    puts "<script>alert('Please select at least one series or season before saving.');</script>"
+    exit
   end
 
   puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_Lists.cgi';</script>"
   exit
 end
+
 
 # Start HTML Output
 puts "<!DOCTYPE html>"
