@@ -1,3 +1,8 @@
+ /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `_query': Unknown column 'seriesId' in 'where clause' (Mysql2::Error) from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `block in query' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `handle_interrupt' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `query' from /mnt/web/www/Televised/createNewList.cgi:75:in `block (2 levels) in
+' from /mnt/web/www/Televised/createNewList.cgi:74:in `each' from /mnt/web/www/Televised/createNewList.cgi:74:in `each_with_index' from /mnt/web/www/Televised/createNewList.cgi:74:in `block in
+' from /mnt/web/www/Televised/createNewList.cgi:70:in `each' from /mnt/web/www/Televised/createNewList.cgi:70:in `
+' 
+
 #!/usr/bin/ruby 
 $stdout.sync = true
 $stderr.reopen $stdout
