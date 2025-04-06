@@ -110,7 +110,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
   # Insert Series
   if !seriesArray.empty?
     seriesArray.each do |series|
-      puts "Adding Series to list: #{series}"  # Debugging output
+      puts "Adding Series to list: #{series}"  # Debugging output for seriesArray
       series_id = series["id"].to_i  
       db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
                 VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
@@ -120,7 +120,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
   # Insert Seasons
   if !seasonArray.empty?
     seasonArray.each do |season|
-      puts "Adding Season to list: #{season}"  # Debugging output
+      puts "Adding Season to list: #{season}"  # Debugging output for seasonArray
       show_id = season["seriesId"].to_i
       season_num = season["season"].to_i
 
@@ -134,8 +134,8 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
   end
 
   # Debugging output for arrays before proceeding
-  puts "Current seriesArray: #{seriesArray}"
-  puts "Current seasonArray: #{seasonArray}"
+  puts "Current seriesArray: #{seriesArray.inspect}"
+  puts "Current seasonArray: #{seasonArray.inspect}"
 
   # Check if both series and seasons are empty
   if seriesArray.empty? && seasonArray.empty?
