@@ -63,7 +63,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
   db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
   list_id = db.last_id  
 
-  #  FIXED: Properly extract series ID as an integer before inserting
+  # FIXED: Properly extract series ID as an integer before inserting
   seriesArray.each do |series|
     series_id = series["id"].to_i  
     db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
