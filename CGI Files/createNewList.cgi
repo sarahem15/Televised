@@ -272,6 +272,7 @@ puts <<~JAVASCRIPT
   </script>
 JAVASCRIPT
 
+
 puts "</body>"
 puts "</html>"
 
