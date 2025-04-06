@@ -13,11 +13,15 @@ cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
 
-episodeName = cgi['ep_name']
+episodeName = cgi['ep_name'].gsub("'", "\\\\'")
 showName = cgi['show_name']
 epNum = cgi['ep_num']
 seasonNumber = cgi['seasonNumber']
 seriesId = cgi['seriesID']
+likedReview = cgi['likedReview']
+reviewId = cgi['reviewId']
+reviewCreator = cgi['reviewCreator']
+
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
@@ -39,8 +43,16 @@ end
 if ratings.size != 0
   avgRating = sumRating/ratings.size
 end
+alreadyLiked = false
 
-#puts "<img src=\"./Episodes/" + seriesImage.split('.')[0] + seasonNumber.to_s + "." + epNum.to_s + ".1.jpg\" alt=\"" + seriesImage[0] + "\" width=\"300\" height=\"225\">"
+if likedReview == "TRUE"
+    begin
+        db.query("INSERT INTO likedEpisodeReview VALUES ('" + username.to_s + "', '" + reviewCreator + "', '" + reviewId + "');")
+    rescue => e
+        db.query("DELETE FROM likedEpisodeReview WHERE userWhoLiked = '" + username.to_s + "' AND reviewId = '" + reviewId + "';")
+    end
+end
+
 
 puts "<!DOCTYPE html>"
 puts "<html lang=\"en\">"
@@ -226,10 +238,31 @@ else
         puts '<br>'
         puts '<a href="reviewIndiv.cgi?reviewId=' +  epReviews[i]['id'].to_s + '&contentType=EP"><h4>' + epReviews[i]['review'] + '</h4></a>'
         puts '<br>'
-        puts '<section class="Likes">'
-          puts '<h5 id="Heart">&#9829</h5>'
-          puts '<h4>12</h4>' #db query to get likes
-        puts '</section>'
+
+
+        likes = db.query("SELECT * FROM likedEpisodeReview WHERE reviewId = '" + epReviews[i]['id'].to_s + "';")
+        likes = likes.to_a
+        (0...likes.size).each do |j|
+          if likes[j]['userWhoLiked'] == username.to_s
+            alreadyLiked = true
+          end
+        end
+        puts '<form action="indivEp.cgi" method="post">'
+        if alreadyLiked == true
+          puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+        else
+            puts '<button class="LIKES">&#10084</button>'
+        end
+        puts '<input type="hidden" name="likedReview" value="TRUE">'
+        puts '<a href="whoHasLiked.cgi?reviewId=' + epReviews[i]['id'].to_s + '&type=EP">' + likes.size.to_s + '</a>'
+        puts '<input type="hidden" name="reviewId" value="' + epReviews[i]['id'].to_s + '">'
+        puts '<input type="hidden" name="reviewCreator" value="' + epReviews[i]['username'].to_s + '">'
+        puts '<input type="hidden" name="ep_name" value="' + episodeName + '">'
+        puts '<input type="hidden" name="show_name" value="' + showName + '">'
+        puts '<input type="hidden" name="seriesID" value="' + seriesId + '">'
+        puts '<input type="hidden" name="ep_num" value="' + epNum + '">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber + '">'
+        puts '</form>'
         puts '<br>'
     puts '</div>'
   puts '</div>'
@@ -238,6 +271,8 @@ puts '</section>'
 puts "</div>"
 end
 
+
+##########MODAL###############
 puts "<div id='reviewEpisodeModal'>"
 puts "  <div class='modal fade' id='CreateEpisodeReview' tabindex='-1' aria-labelledby='createReviewLabel' aria-hidden='true'>"
 puts "    <div class='modal-dialog'>"
