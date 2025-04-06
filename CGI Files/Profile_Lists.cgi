@@ -36,15 +36,27 @@ end
 if cgi.request_method == 'POST' && cgi['deleteListId']
   delete_list_id = cgi['deleteListId'].to_i
 
-  # Delete from curatedListSeries first
-  db.query("DELETE FROM curatedListSeries WHERE listId = #{delete_list_id};")
+  begin
+    # Start a transaction to ensure atomicity
+    db.query("START TRANSACTION")
 
-  # Then delete from listOwnership
-  db.query("DELETE FROM listOwnership WHERE id = #{delete_list_id};")
+    # Delete from likedList, curatedListSeries, and listOwnership
+    db.query("DELETE FROM likedList WHERE listId = #{delete_list_id}")
+    db.query("DELETE FROM curatedListSeries WHERE listId = #{delete_list_id}")
+    db.query("DELETE FROM listOwnership WHERE id = #{delete_list_id}")
 
-  # Redirect back to Profile_Lists.cgi after deletion
-  puts "<html><body><script>window.location.href='Profile_Lists.cgi';</script></body></html>"
-  exit
+    # Commit the transaction
+    db.query("COMMIT")
+    
+    # Redirect back to Profile_Lists.cgi after deletion
+    puts "<html><body><script>window.location.href='Profile_Lists.cgi';</script></body></html>"
+    exit
+  rescue Mysql2::Error => e
+    # If there's an error, rollback the transaction
+    db.query("ROLLBACK")
+    puts "<html><body><script>alert('Error deleting list: #{e.message}'); window.location.href='Profile_Lists.cgi';</script></body></html>"
+    exit
+  end
 end
 
 puts '<!DOCTYPE html>'
