@@ -169,62 +169,108 @@ puts "  </div>"
 puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
 puts "  <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'></script>"
 puts "  <script src='Televised.js'></script>"
-puts "  <script>"
-puts "    document.addEventListener('DOMContentLoaded', function () {"
-puts "      // Clear the series list and reset seriesArray on page load"
-puts "      sessionStorage.removeItem('seriesArray'); // Clear the session storage array"
-puts "      updateSeriesList(); // Clear the displayed list"
+puts <<~JAVASCRIPT
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      sessionStorage.removeItem('seriesArray');
+      sessionStorage.removeItem('seasonArray');
+      sessionStorage.removeItem('episodeArray');
+      updateAllLists();
 
-puts "      document.getElementById('searchForm').addEventListener('submit', function (event) {"
-puts "        event.preventDefault();"
-puts "        let searchInput = document.querySelector('input[name=\"mediaEntered\"]').value;"
-puts "        let type = document.querySelector('select[name=\"typeSearch\"]').value;"
-puts "        fetch('createNewList.cgi', {"
-puts "          method: 'POST',"
-puts "          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },"
-puts "          body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })"
-puts "        })"
-puts "        .then(response => response.text())"
-puts "        .then(data => { document.getElementById('searchResults').innerHTML = data; });"
-puts "      });"
+      document.getElementById('searchForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        let searchInput = document.querySelector('input[name="mediaEntered"]').value;
+        let type = document.querySelector('select[name="typeSearch"]').value;
+        fetch('createNewList.cgi', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })
+        })
+        .then(response => response.text())
+        .then(data => { document.getElementById('searchResults').innerHTML = data; });
+      });
 
-puts '    document.addEventListener("click", function (event) {' 
-puts '        if (event.target.classList.contains("addToList")) {' 
-puts '            event.preventDefault();'
-puts '            let seriesId = event.target.dataset.seriesId;'
-puts '            let seriesName = event.target.dataset.seriesName;'
-puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '            if (!seriesArray.some(s => s.id === seriesId)) {' 
-puts '                seriesArray.push({ id: seriesId, name: seriesName });' 
-puts '                sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
-puts '                updateSeriesList();'
-puts '            }'
-puts '        }'
-puts '        if (event.target.classList.contains("removeFromList")) {' 
-puts '            event.preventDefault();'
-puts '            let seriesId = event.target.dataset.seriesId;'
-puts '            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];'
-puts '            seriesArray = seriesArray.filter(s => s.id !== seriesId);' 
-puts '            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));'
-puts '            updateSeriesList();'
-puts '        }'
-puts '    });'
+      document.addEventListener("click", function (event) {
+        if (event.target.classList.contains("addToList")) {
+          event.preventDefault();
+          let seriesId = event.target.dataset.seriesId;
+          let seriesName = event.target.dataset.seriesName;
+          let parent = event.target.closest("p");
 
-puts "      function updateSeriesList() {"
-puts "        let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
-puts "        document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
-puts "        let seriesList = document.getElementById('seriesList');"
-puts "        seriesList.innerHTML = ''; // Clear the list in the middle column"
-puts "        seriesArray.forEach(function(series) {"
-puts "          let li = document.createElement('li');"
-puts "          li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');"
-puts "          li.innerHTML = series.name + \" <button class='removeFromList btn btn-danger btn-sm' data-series-id='\" + series.id + \"'>X</button>\";"
-puts "          seriesList.appendChild(li);"
-puts "        });"
-puts "      }"
-puts "      updateSeriesList();"
-puts "    });"
-puts "  </script>"
+          if (document.querySelector("select.seasonSelect", parent)) {
+            // Season
+            let seasonNum = parent.querySelector("select.seasonSelect").selectedIndex + 1;
+            let seasonArray = JSON.parse(sessionStorage.getItem("seasonArray")) || [];
+            if (!seasonArray.some(s => s.seriesId === seriesId && s.season === seasonNum)) {
+              seasonArray.push({ seriesId: seriesId, name: seriesName, season: seasonNum });
+              sessionStorage.setItem("seasonArray", JSON.stringify(seasonArray));
+              updateAllLists();
+            }
+          } else if (document.querySelector("select.episodeSelect", parent)) {
+            // Episode
+            let episodeSelect = parent.querySelector("select.episodeSelect");
+            let epName = episodeSelect.options[episodeSelect.selectedIndex].text;
+            let seasonId = episodeSelect.dataset.seasonId;
+            let episodeArray = JSON.parse(sessionStorage.getItem("episodeArray")) || [];
+            if (!episodeArray.some(e => e.name === epName && e.season === seasonId)) {
+              episodeArray.push({ name: epName, season: seasonId });
+              sessionStorage.setItem("episodeArray", JSON.stringify(episodeArray));
+              updateAllLists();
+            }
+          } else {
+            // Series
+            let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
+            if (!seriesArray.some(s => s.id === seriesId)) {
+              seriesArray.push({ id: seriesId, name: seriesName });
+              sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));
+              updateAllLists();
+            }
+          }
+        }
+
+        if (event.target.classList.contains("removeFromList")) {
+          event.preventDefault();
+          const type = event.target.dataset.type;
+          const index = parseInt(event.target.dataset.index, 10);
+
+          let key = \`\${type}Array\`;
+          let arr = JSON.parse(sessionStorage.getItem(key)) || [];
+          arr.splice(index, 1);
+          sessionStorage.setItem(key, JSON.stringify(arr));
+          updateAllLists();
+        }
+      });
+
+      function updateAllLists() {
+        document.getElementById('seriesArrayInput').value = JSON.stringify(JSON.parse(sessionStorage.getItem("seriesArray")) || []);
+        let container = document.getElementById("seriesList");
+        container.innerHTML = "";
+
+        let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
+        seriesArray.forEach((s, i) => {
+          container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>
+            \${s.name} <button class='removeFromList btn btn-danger btn-sm' data-type='series' data-index='\${i}'>X</button>
+          </li>`;
+        });
+
+        let seasonArray = JSON.parse(sessionStorage.getItem("seasonArray")) || [];
+        seasonArray.forEach((s, i) => {
+          container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>
+            \${s.name} Season \${s.season} <button class='removeFromList btn btn-danger btn-sm' data-type='season' data-index='\${i}'>X</button>
+          </li>`;
+        });
+
+        let episodeArray = JSON.parse(sessionStorage.getItem("episodeArray")) || [];
+        episodeArray.forEach((e, i) => {
+          container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>
+            \${e.name} (Season \${e.season}) <button class='removeFromList btn btn-danger btn-sm' data-type='episode' data-index='\${i}'>X</button>
+          </li>`;
+        });
+      }
+    });
+  </script>
+JAVASCRIPT
+
 puts "</body>"
 puts "</html>"
 
