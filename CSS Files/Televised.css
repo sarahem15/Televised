@@ -811,6 +811,7 @@ button:hover {
 }
 
 #homePage .ReviewIndiv .ReviewContent a :hover {color: lightpink; text-decoration: underline;}
+#homePage .ReviewIndiv .ReviewContent form a :hover {color: lightpink; text-decoration: underline;}
 #ListsPage a:hover {color: lightpink; text-decoration: underline;}
 #reviewIndiv a:hover {color: lightpink; text-decoration: underline;}
 #viewOnOtherLists a:hover {color: lightpink; text-decoration: underline;} 
@@ -1043,3 +1044,9 @@ button:hover {
 }
 
 .infoQuestion:hover .info{visibility: visible;}
+
+
+#reviewIndiv .content-R {
+    display:  grid;
+    grid-template-columns: auto auto;
+}
