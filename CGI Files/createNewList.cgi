@@ -52,7 +52,7 @@ if search != ""
     results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
     if results.count > 0
       results.each do |row|
-        seasons = db.query("SELECT seasonId FROM season WHERE showId = '#{row['showId']}'").to_a
+        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'").to_a
         puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
         puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
         puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
@@ -64,28 +64,27 @@ if search != ""
     else
       puts "<p>We can't seem to find this title!</p>"
     end
-elsif type == "Episodes"
-  results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-  if results.count > 0
-    results.each do |row|
-      seasons = db.query("SELECT seasonId FROM season WHERE showId = '#{row['showId']}'").to_a
-      puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-      puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
-      seasons.each_with_index do |season, index|
-        episodes = db.query("SELECT epId, epName FROM episode WHERE seasonId = '#{season['seasonId']}'").to_a
-        puts "<select class='episodeSelect' data-series-id='#{row['showId']}' data-season-id='#{season['seasonId']}'>"
-        puts "<option disabled selected>Season #{index + 1}</option>"
-        episodes.each do |episode|
-          puts "<option value='#{episode['epId']}'>#{episode['epName']}</option>"
+  elsif type == "Episodes"
+    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+    if results.count > 0
+      results.each do |row|
+        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'").to_a
+        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
+        seasons.each_with_index do |season, index|
+          episodes = db.query("SELECT epId, epName FROM episode WHERE seasonId = '#{season['seasonId']}' AND seriesId = '#{row['showId']}'").to_a
+          puts "<select class='episodeSelect' data-series-id='#{row['showId']}' data-season-id='#{season['seasonId']}'>"
+          puts "<option disabled selected>Season #{index + 1}</option>"
+          episodes.each do |episode|
+            puts "<option value='#{episode['epId']}'>#{episode['epName']}</option>"
+          end
+          puts "</select>"
         end
-        puts "</select>"
+        puts "</p>"
       end
-      puts "</p>"
+    else
+      puts "<p>We can't seem to find this title!</p>"
     end
-  else
-    puts "<p>We can't seem to find this title!</p>"
-  end
-
   end
   exit
 end
@@ -104,7 +103,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
 
   seriesArray.each do |series|
     series_id = series["id"].to_i  
-    db.query("INSERT INTO curatedListSeries (username, showId, name, description, privacy, date, listId)
+    db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
               VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
   end
 
@@ -194,7 +193,7 @@ puts <<~JAVASCRIPT
       document.addEventListener("click", function (event) {
         if (event.target.classList.contains("addToList")) {
           event.preventDefault();
-          let showId = event.target.dataset.showId;
+          let seriesId = event.target.dataset.seriesId;
           let seriesName = event.target.dataset.seriesName;
           let parent = event.target.closest("p");
 
@@ -202,8 +201,8 @@ puts <<~JAVASCRIPT
             // Season
             let seasonNum = parent.querySelector("select.seasonSelect").selectedIndex + 1;
             let seasonArray = JSON.parse(sessionStorage.getItem("seasonArray")) || [];
-            if (!seasonArray.some(s => s.showId === showId && s.season === seasonNum)) {
-              seasonArray.push({ showId: showId, name: seriesName, season: seasonNum });
+            if (!seasonArray.some(s => s.seriesId === seriesId && s.season === seasonNum)) {
+              seasonArray.push({ seriesId: seriesId, name: seriesName, season: seasonNum });
               sessionStorage.setItem("seasonArray", JSON.stringify(seasonArray));
               updateAllLists();
             }
@@ -221,8 +220,8 @@ puts <<~JAVASCRIPT
           } else {
             // Series
             let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
-            if (!seriesArray.some(s => s.id === showId)) {
-              seriesArray.push({ id: showId, name: seriesName });
+            if (!seriesArray.some(s => s.id === seriesId)) {
+              seriesArray.push({ id: seriesId, name: seriesName });
               sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));
               updateAllLists();
             }
@@ -271,7 +270,6 @@ puts <<~JAVASCRIPT
     });
   </script>
 JAVASCRIPT
-
 
 puts "</body>"
 puts "</html>"
