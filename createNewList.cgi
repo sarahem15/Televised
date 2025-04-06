@@ -1,140 +1,170 @@
- puts '<div class="TopFiveProfile">'
-            puts '<form id="imageSearch" method="post" action="Profile_Settings.cgi">'
-            puts '<select id="type" name="typeSearch" class="form-control">'
-            if type == "Series"
-                puts '<option value="Series" selected>Series &#9660</option>'
-                puts '<option value="Season">Season</option>'
-                puts '<option value="Episodes">Episodes</option>'
-            elsif type == "Season"
-                puts '<option value="Series">Series</option>'
-                puts '<option value="Season" selected>Season &#9660</option>'
-                puts '<option value="Episodes">Episodes</option>'
-            else
-                puts '<option value="Series">Series</option>'
-                puts '<option value="Season">Season</option>'
-                puts '<option value="Episodes" selected>Episodes &#9660</option>'
-            end
-            puts '</select>'
-            if type == "Episodes"
-                puts '<select id="type" name="seasonNum" class="form-control">'
-                if seasonNum == '1'
-                    puts '<option value="1" selected>1</option>'
-                    puts '<option value="2">2</option>'
-                    puts '<option value="3">3</option>'
-                elsif seasonNum == '2'
-                    puts '<option value="1">1</option>'
-                    puts '<option value="2" selected>2</option>'
-                    puts '<option value="3">3</option>'
-                else
-                    puts '<option value="1">1</option>'
-                    puts '<option value="2">2</option>'
-                    puts '<option value="3" selected>3</option>'
-                end
-                puts '</select>'
-            end
-                puts '<input type="text" name="top5search" class="top5search">'
-                puts '<input type="submit" value="Search">'
-            puts '</form>'
+#!/usr/bin/ruby
+$stdout.sync = true
+$stderr.reopen $stdout
 
-            puts '<br>'
-            if (type == "Series" && search != "")
-                images = db.query("SELECT showName, imageName, showId FROM series WHERE showName like '" + search + "%';")
-                images = images.to_a
-                if (images.first.to_s != "")
-                    puts 'Is this the title you\'re looking for?'
-                    puts '<br>'
-                    arraySize = images.size
-                    (0...arraySize).each do |i|
-                        puts '<form method="get" action="Profile_Settings.cgi">'
-                        puts images[i]['showName']
-                        puts '<img src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '" style=" height: 50px; width: 35px; object-fit: cover;">'
-                        puts '<input type="hidden" name="topSeries" value="' + images[i]['showId'].to_s + '">'
-                        puts '<input type="hidden" name="typeSearch" value="Series">'
-                        puts '<input type="submit" value="SELECT">'
-                        #puts '<input type="hidden" name="top5search" value="' + search + '">'
-                        puts '</form>'
-                        puts '<br>'
-                        images[i]['imageName'] = ""
-                    end 
-                else
-                    puts 'We can\'t seem to find this title!'
-                end
-            elsif (type == "Season" && search != "")
-                images = db.query("SELECT showName, imageName, showId FROM series WHERE showName like '" + search + "%';")
-                images = images.to_a
-                if (images.first.to_s != "")
-                    puts 'Is this the title you\'re looking for?'
-                    puts '<br>'
-                    arraySize = images.size
-                    (0...arraySize).each do |i|
-                        seasons = db.query("SELECT seasonId from season WHERE seriesId = '" + images[i]['showId'].to_s + "';")
-                        seasons = seasons.to_a
-                        #puts seasons.first['seasonId'].to_s
-                        puts '<form method="get" action="Profile_Settings.cgi">'
-                        puts images[i]['showName']
-                        puts '<img src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '" style=" height: 50px; width: 35px; object-fit: cover;">'
-                        puts '<input type="hidden" name="topSeason" value="' + images[i]['showId'].to_s + '">'
-                        puts '<input type="hidden" name="typeSearch" value="Season">'
-                         puts '<select id="typeSeason" name="seasonNum" class="form-control">'
-                         puts '<option value="" selected>Season</option>'
-                            (0...seasons.size).each do |h|
-                                puts '<option value="' + seasons[h]['seasonId'].to_s + '">' + (h+1).to_s + '</option>'
-                            end
-                        puts '</select>'
-                        #puts '<input type="hidden" name="top5search" value="' + search + '">'
-                        puts '</form>'
-                        puts '<br>'
-                        images[i]['imageName'] = ""
-                    end 
-                else
-                    puts 'We can\'t seem to find this title!'
-                end
-            elsif (type == "Episodes" && search != "")
-                images = db.query("SELECT showName, imageName, showId FROM series WHERE showName like '" + search + "%';")
-                images = images.to_a
-                if (images.first.to_s != "")
-                    puts 'Is this the title you\'re looking for?'
-                    puts '<br>'
-                    arraySize = images.size
-                    (0...arraySize).each do |i|
-                        seasons = db.query("SELECT seasonId from season WHERE seriesId = '" + images[i]['showId'].to_s + "';")
-                        seasons = seasons.to_a
-                        #puts seasons.first['seasonId'].to_s
-                        puts '<form method="get" action="Profile_Settings.cgi">'
-                        puts images[i]['showName']
-                        puts '<img src="' + images[i]['imageName'] + '" alt="' + images[i]['imageName'] + '" style=" height: 50px; width: 35px; object-fit: cover;">'
-                        puts '<input type="hidden" name="topSeason" value="' + images[i]['showId'].to_s + '">'
-                        puts '<input type="hidden" name="typeSearch" value="Episodes">'
-                        episodes = db.query("SELECT * FROM episode JOIN season ON season.seasonId = episode.seasonId WHERE seasonNum = '" + seasonNum + "' AND seriesId = '" + images[i]['showId'].to_s + "';")
-                        episodes = episodes.to_a
-                        puts '<select id="typeSeason" name="epNum" class="form-control">'
-                         puts '<option value="" selected>Episode</option>'
-                            (0...episodes.size).each do |h|
-                                puts '<option value="' + episodes[h]['epId'].to_s + '">' + episodes[h]['epName'] + '</option>'
-                            end
-                        puts '</select>'
-                        #puts '<input type="hidden" name="top5search" value="' + search + '">'
-                        puts '</form>'
-                        puts '<br>'
-                        images[i]['imageName'] = ""
-                    end 
-                else
-                    puts 'We can\'t seem to find this title!'
-                end
-            end
-    # <!-- Scripts -->
-    puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-    puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-    puts '<script src="Televised.js"></script>'
-    puts '<script>'
-    puts "      document.getElementById('imageSearch').addEventListener('submit', function (event) {"
-    puts "        }"
-    puts '    document.addEventListener("click", function (event) {' 
-    puts '        if (event.target.classList.contains("top5search")) {' 
-    puts '    let top5search = event.target.dataset.top5search;'
-    puts '}'
-    puts "</script>"
-    puts '</body>'
+require 'mysql2'
+require 'cgi'
+require 'cgi/session'
+require 'json'
 
-puts '</html>'
-session.close
+cgi = CGI.new
+session = CGI::Session.new(cgi)
+
+username = session['username']
+
+print cgi.header(
+  'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
+)
+
+search = cgi['mediaEntered']
+type = cgi['typeSearch']
+
+listName = cgi['listName']
+description = cgi['description']
+privacy = cgi['views'] == "Public" ? 1 : 0  
+
+begin
+  seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
+rescue JSON::ParserError
+  seriesArray = []
+end
+
+db = Mysql2::Client.new(
+  host: '10.20.3.4', 
+  username: 'seniorproject25', 
+  password: 'TV_Group123!', 
+  database: 'televised_w25'
+)
+
+# Handle AJAX search functionality
+if search != ""
+  if type == "Series"
+    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+    if results.count > 0
+      results.each do |row|
+        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
+      end
+    else
+      puts "<p>We can't seem to find this title!</p>"
+    end
+  elsif type == "Season"
+    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+    if results.count > 0
+      results.each do |row|
+        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'")
+        seasons = seasons.to_a
+        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
+        puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
+        seasons.each do |season|
+          puts "<option value='#{season['seasonId']}'>Season #{season['seasonId']}</option>"
+        end
+        puts "</select></p>"
+      end
+    else
+      puts "<p>We can't seem to find this title!</p>"
+    end
+  elsif type == "Episodes"
+    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+    if results.count > 0
+      results.each do |row|
+        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'")
+        seasons = seasons.to_a
+        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
+        seasons.each do |season|
+          episodes = db.query("SELECT epId, epName FROM episode WHERE seasonId = '#{season['seasonId']}' AND seriesId = '#{row['showId']}'")
+          episodes = episodes.to_a
+          puts "<select class='episodeSelect' data-series-id='#{row['showId']}' data-season-id='#{season['seasonId']}'>"
+          episodes.each do |episode|
+            puts "<option value='#{episode['epId']}'>#{episode['epName']}</option>"
+          end
+          puts "</select>"
+        end
+        puts "</p>"
+      end
+    else
+      puts "<p>We can't seem to find this title!</p>"
+    end
+  end
+  exit
+end
+
+# Handle list creation when "saveList" is clicked
+if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.empty?
+  existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
+
+  if existing_list.count > 0
+    puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
+    exit
+  end
+
+  db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
+  list_id = db.last_id  
+
+  seriesArray.each do |series|
+    series_id = series["id"].to_i  
+    db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
+              VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
+  end
+
+  puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_List.cgi';</script>"
+  exit
+end
+
+# Start HTML Output
+puts "<!DOCTYPE html>"
+puts "<html lang='en'>"
+puts "<head>"
+puts "  <meta charset='UTF-8'>"
+puts "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+puts "  <title>Televised</title>"
+puts "  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
+puts "  <link rel='stylesheet' href='Televised.css'>"
+puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
+puts "</head>"
+puts "<body id='createNewList'>"
+puts "  <nav id='changingNav' class='navbar navbar-expand-lg navbar-light bg-light'></nav>"
+puts "  <h2 class='text-center mt-3'>Create a New List</h2>"
+puts "  <div class='container-fluid'>"
+puts "    <div class='row'>"
+puts "      <div class='col-12 col-md-4' id='listRow'>"
+puts "        <h3 class='text-center'>List Details</h3>"
+puts "        <form id='newListForm' method='post'>"
+puts "          <label>Name</label>"
+puts "          <input type='text' name='listName' class='form-control' placeholder='Name' required>"
+puts "          <br>"
+puts "          <label>Who Can View</label>"
+puts "          <select name='views' class='form-control'>"
+puts "            <option value='Public'>Public - anyone can view</option>"
+puts "            <option value='Private'>Private - no one can view</option>"
+puts "          </select>"
+puts "          <br>"
+puts "          <label>Description</label>"
+puts "          <textarea name='description' class='form-control' rows='5'></textarea>"
+puts "          <br>"
+puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray'>"
+puts "          <button id='saveList' class='btn btn-primary'>CREATE LIST</button>"
+puts "        </form>"
+puts "      </div>"
+puts "      <div class='col-12 col-md-4' id='listColumn'>"
+puts "        <h3 class='text-center'>Selected Series</h3>"
+puts "        <ul id='seriesList' class='list-group'></ul>"
+puts "      </div>"
+puts "      <div class='col-12 col-md-4' id='searchColumn'>"
+puts "        <h3 class='text-center'>Search for a Series</h3>"
+puts "        <form id='searchForm'>"
+puts "          <select id='type' name='typeSearch' class='form-control'>"
+puts "            <option value='Series' selected>Series</option>"
+puts "            <option value='Season'>Season</option>"
+puts "            <option value='Episodes'>Episodes</option>"
+puts "          </select>"
+puts "          <br>"
+puts "          <input type='text' name='mediaEntered' class='form-control'>"
+puts "          <input type='submit' value='Search' class='btn btn-secondary mt-2'>"
+puts "        </form>"
+puts "        <div id='searchResults'></div>"
+puts "      </div>"
+puts "    </div>"
+puts "  </div>"
