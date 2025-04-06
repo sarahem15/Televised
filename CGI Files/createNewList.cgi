@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/ruby 
 $stdout.sync = true
 $stderr.reopen $stdout
 
@@ -190,7 +190,6 @@ puts "        .then(response => response.text())"
 puts "        .then(data => { document.getElementById('searchResults').innerHTML = data; });"
 puts "      });"
 
-# Add & Remove Series Handling
 puts '    document.addEventListener("click", function (event) {' 
 puts '        if (event.target.classList.contains("addToList")) {' 
 puts '            event.preventDefault();'
@@ -212,6 +211,7 @@ puts '            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArr
 puts '            updateSeriesList();'
 puts '        }'
 puts '    });'
+
 puts "      function updateSeriesList() {"
 puts "        let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
 puts "        document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
