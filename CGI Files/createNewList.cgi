@@ -1,4 +1,4 @@
-#!/usr/bin/ruby 
+#!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
 
@@ -34,10 +34,6 @@ begin
 rescue JSON::ParserError
   seasonArray = []
 end
-
-# DEBUG: Print received series and season arrays
-puts "<!-- DEBUG: seriesArray = #{seriesArray.inspect} -->"
-puts "<!-- DEBUG: seasonArray = #{seasonArray.inspect} -->"
 
 db = Mysql2::Client.new(
   host: '10.20.3.4', 
@@ -111,13 +107,17 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
   db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
   list_id = db.last_id  
 
+  # Insert Series
   if !seriesArray.empty?
     seriesArray.each do |series|
       series_id = series["id"].to_i  
       db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
                 VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
     end
-  elsif !seasonArray.empty?
+  end
+
+  # Insert Seasons
+  if !seasonArray.empty?
     seasonArray.each do |season|
       show_id = season["seriesId"].to_i
       season_num = season["season"].to_i
@@ -129,7 +129,10 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
                   VALUES ('#{username}', #{season_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
       end
     end
-  else
+  end
+
+  # Check if both series and seasons are empty
+  if seriesArray.empty? && seasonArray.empty?
     puts "<script>alert('Please select at least one series or season before saving.');</script>"
     exit
   end
