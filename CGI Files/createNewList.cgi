@@ -37,16 +37,56 @@ db = Mysql2::Client.new(
 )
 
 # Handle AJAX search functionality
-if type == "Series" && search != ""
-  results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-  
-  if results.count > 0
-    results.each do |row|
-      puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-      puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
+if search != ""
+  if type == "Series"
+    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+    if results.count > 0
+      results.each do |row|
+        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
+      end
+    else
+      puts "<p>We can't seem to find this title!</p>"
     end
-  else
-    puts "<p>We can't seem to find this title!</p>"
+  elsif type == "Season"
+    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+    if results.count > 0
+      results.each do |row|
+        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'")
+        seasons = seasons.to_a
+        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
+        puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
+        seasons.each do |season|
+          puts "<option value='#{season['seasonId']}'>Season #{season['seasonId']}</option>"
+        end
+        puts "</select></p>"
+      end
+    else
+      puts "<p>We can't seem to find this title!</p>"
+    end
+  elsif type == "Episodes"
+    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+    if results.count > 0
+      results.each do |row|
+        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'")
+        seasons = seasons.to_a
+        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
+        seasons.each do |season|
+          episodes = db.query("SELECT epId, epName FROM episode WHERE seasonId = '#{season['seasonId']}' AND seriesId = '#{row['showId']}'")
+          episodes = episodes.to_a
+          puts "<select class='episodeSelect' data-series-id='#{row['showId']}' data-season-id='#{season['seasonId']}'>"
+          episodes.each do |episode|
+            puts "<option value='#{episode['epId']}'>#{episode['epName']}</option>"
+          end
+          puts "</select>"
+        end
+        puts "</p>"
+      end
+    else
+      puts "<p>We can't seem to find this title!</p>"
+    end
   end
   exit
 end
@@ -63,7 +103,6 @@ if cgi['saveList'] && !listName.empty? && !description.empty? && !seriesArray.em
   db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
   list_id = db.last_id  
 
-  # FIXED: Properly extract series ID as an integer before inserting
   seriesArray.each do |series|
     series_id = series["id"].to_i  
     db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
@@ -83,36 +122,10 @@ puts "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
 puts "  <title>Televised</title>"
 puts "  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
 puts "  <link rel='stylesheet' href='Televised.css'>"
-puts "  <style>"
-puts "    body {"
-puts "      margin: 0;"
-puts "      padding: 0;"
-puts "      overflow-x: hidden;"  # Prevent horizontal overflow
-puts "    }"
-puts "    .navbar {"
-puts "      width: 100%;"
-puts "    }"
-puts "    .container-fluid {"
-puts "      padding-left: 0;"
-puts "      padding-right: 0;"
-puts "      margin: 0;"  # Remove any padding or margin around the container
-puts "    }"
-puts "    #listRow, #listColumn, #searchColumn {"
-puts "      padding: 15px;"
-puts "    }"
-puts "    .col {"
-puts "      padding-left: 15px;"
-puts "      padding-right: 15px;"
-puts "    }"
-puts "    @media (max-width: 768px) {"
-puts "      .col {"
-puts "        margin-bottom: 20px;"
-puts "      }"
-puts "    }"
-puts "  </style>"
+puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
 puts "</head>"
 puts "<body id='createNewList'>"
-puts "  <nav id='changingNav' class='navbar navbar-expand-lg navbar-light bg-light'></nav>"
+puts "  <nav id='changingNav'></nav>"
 puts "  <h2 class='text-center mt-3'>Create a New List</h2>"
 puts "  <div class='container-fluid'>"
 puts "    <div class='row'>"
@@ -144,6 +157,8 @@ puts "        <h3 class='text-center'>Search for a Series</h3>"
 puts "        <form id='searchForm'>"
 puts "          <select id='type' name='typeSearch' class='form-control'>"
 puts "            <option value='Series' selected>Series</option>"
+puts "            <option value='Season'>Season</option>"
+puts "            <option value='Episodes'>Episodes</option>"
 puts "          </select>"
 puts "          <br>"
 puts "          <input type='text' name='mediaEntered' class='form-control'>"
