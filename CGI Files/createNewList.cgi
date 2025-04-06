@@ -52,13 +52,12 @@ if search != ""
     results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
     if results.count > 0
       results.each do |row|
-        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'")
-        seasons = seasons.to_a
+        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'").to_a
         puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
         puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
         puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
-        seasons.each do |season|
-          puts "<option value='#{season['seasonId']}'>Season #{season['seasonId']}</option>"
+        seasons.each_with_index do |season, index|
+          puts "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
         end
         puts "</select></p>"
       end
@@ -69,14 +68,13 @@ if search != ""
     results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
     if results.count > 0
       results.each do |row|
-        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'")
-        seasons = seasons.to_a
+        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'").to_a
         puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
         puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
-        seasons.each do |season|
-          episodes = db.query("SELECT epId, epName FROM episode WHERE seasonId = '#{season['seasonId']}' AND seriesId = '#{row['showId']}'")
-          episodes = episodes.to_a
+        seasons.each_with_index do |season, index|
+          episodes = db.query("SELECT epId, epName FROM episode WHERE seasonId = '#{season['seasonId']}' AND seriesId = '#{row['showId']}'").to_a
           puts "<select class='episodeSelect' data-series-id='#{row['showId']}' data-season-id='#{season['seasonId']}'>"
+          puts "<option disabled selected>Season #{index + 1}</option>"
           episodes.each do |episode|
             puts "<option value='#{episode['epId']}'>#{episode['epName']}</option>"
           end
