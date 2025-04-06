@@ -14,7 +14,6 @@ time = Time.new
 
 reviewId = cgi['reviewId']
 type = cgi['contentType']
-# SEASON AND EP TYPES
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -22,7 +21,28 @@ db = Mysql2::Client.new(
     password: 'TV_Group123!', 
     database: 'televised_w25'
   )
-reviewContent = db.query("SELECT * FROM seriesReview WHERE id ='" + reviewId + "';")
+
+
+if type == 'SEASON'
+  reviewContent = db.query("SELECT * FROM seasonReview WHERE id ='" + reviewId + "';")
+  seriesImage = db.query("SELECT showId, imageName, showName, series.year FROM series 
+    JOIN season ON season.seriesId = series.showID
+    JOIN seasonReview ON season.seasonId = seasonReview.seasonId 
+    WHERE seasonReview.id= '" + reviewId + "';")
+  reviewRating = db.query("SELECT rating FROM seasonRating JOIN seasonReview ON seasonRating.id = seasonReview.ratingId WHERE seasonReview.id = '" + reviewId + "';")
+elsif type == 'EP'
+  reviewContent = db.query("SELECT * FROM episodeReview WHERE id ='" + reviewId + "';")
+  seriesImage = db.query("SELECT showId, imageName, showName, series.year FROM series 
+    JOIN season ON season.seriesId = series.showID
+    JOIN episode ON episode.seasonId = season.seasonId
+    JOIN episodeReview ON episode.epId = episodeReview.epId 
+    WHERE episodeReview.id= '" + reviewId + "';")
+  reviewRating = db.query("SELECT rating FROM episodeRating JOIN episodeReview ON episodeRating.id = episodeReview.ratingId WHERE episodeReview.id = '" + reviewId + "';")
+else
+  reviewContent = db.query("SELECT * FROM seriesReview WHERE id ='" + reviewId + "';")
+  seriesImage = db.query("SELECT showId, imageName, showName, year FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id= '" + reviewId + "';")
+  reviewRating = db.query("SELECT rating FROM seriesRating JOIN seriesReview ON seriesRating.id = seriesReview.ratingId WHERE seriesReview.id = '" + reviewId + "';")
+end
 puts'<!DOCTYPE html>'
 puts'<html lang="en">'
 
@@ -41,8 +61,6 @@ puts'<body id="reviewIndiv">'
   puts'<br>'
   puts '<br>'
 puts '<div class="originalReview">'
-	seriesImage = db.query("SELECT showId, imageName, showName, year FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id= '" + reviewId + "';")
-	reviewRating = db.query("SELECT rating FROM seriesRating JOIN seriesReview ON seriesRating.id = seriesReview.ratingId WHERE seriesReview.id = '" + reviewId + "';")
 	puts "<img src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\">" 
 	puts '<div class="content-R">'
 	puts '<section class="UserDisplay">'
@@ -70,22 +88,30 @@ puts '<div class="originalReview">'
        puts '<br>'
        puts '<i><h5 style="color: #436eb1">' + reviewContent.first['date'].to_s + '</h5></i>'
 
-       # START DIV FOR TEXT BOX
+	puts '</div>'
+  # START DIV FOR TEXT BOX
        puts '<div class="reply">'
        puts '<form action="threebuttons.cgi" method="POST">'
-       puts '<span>Type your reply here:</span>'
+       puts '<h4>Type your reply here:</h4>'
        puts '<textarea id="reply" name="reply" class="form-control" rows="10"></textarea><br>'
        puts '<input type="hidden" name="seriesID" value="' + seriesImage.first['showId'].to_s + '">'
-       puts '<input type="hidden" name="reviewID" value="' + reviewId.to_s + '">'
+
+       if type == 'SEASON'
+        puts '<input type="hidden" name="seasonId" value="' + reviewContent.first['seasonId'].to_s + '">'
+      elsif type == 'EP'
+        puts '<input type="hidden" name="epID" value="' + reviewContent.first['seasonId'].to_s + '">'
+      end
+
+       puts '<input type="hidden" name="reviewId" value="' + reviewId.to_s + '">'
        puts '<input type="hidden" name="username" value="' + username + '">'
        puts "<input type='hidden' name='year' value='" + time.year.to_s + "'>"
        puts "<input type='hidden' name='month' value='" + time.month.to_s + "'>"
        puts "<input type='hidden' name='day' value='" + time.day.to_s + "'>"
+       puts "<input type='hidden' name='type' value='" + type + "'>"
+       puts "<input type='hidden' name='fromReviewIndiv' value='TRUE'>"
        puts '<button id="saveReply" class="btn" style="background-color: #9daef6;" type="submit">Reply</button>'
       puts '</form>'
       puts '</div>'
-
-	puts '</div>'
 puts '</div>'
 
 puts '<br>'
@@ -95,7 +121,14 @@ puts '<hr style="margin-left: 50px; margin-right: 50px;">'
 puts '<h2 style="margin-left: 80px;"> Replies </h2>'
 puts '<hr style="margin-left: 80px; margin-right: 1150px;">'
 puts '<br>'
-replies = db.query("SELECT * FROM seriesReply WHERE reviewId ='" + reviewId + "';")
+if type == 'SEASON'
+  replies = db.query("SELECT * FROM seasonReply WHERE reviewId ='" + reviewId + "';")
+elsif type == 'EP'
+  replies = db.query("SELECT * FROM episodeReply WHERE reviewId ='" + reviewId + "';")
+else
+  replies = db.query("SELECT * FROM seriesReply WHERE reviewId ='" + reviewId + "';")
+end
+#replies = db.query("SELECT * FROM seriesReply WHERE reviewId ='" + reviewId + "';")
 replies = replies.to_a
 (0...replies.size).each do |i|
 puts '<div class="content-Reply">'
