@@ -134,8 +134,8 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
   end
 
   # Debugging output for arrays before proceeding
-  puts "Current seriesArray: #{seriesArray.inspect}"
-  puts "Current seasonArray: #{seasonArray.inspect}"
+  puts "<script>document.body.innerHTML += '<div>Current seriesArray: #{seriesArray.inspect}</div>';</script>"
+  puts "<script>document.body.innerHTML += '<div>Current seasonArray: #{seasonArray.inspect}</div>';</script>"
 
   # Check if both series and seasons are empty
   if seriesArray.empty? && seasonArray.empty?
