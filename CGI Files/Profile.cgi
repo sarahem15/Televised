@@ -26,9 +26,11 @@ topFiveSeries = db.query("SELECT imageName, showName, ranking FROM series JOIN t
 topFiveSeries = topFiveSeries.to_a
 topFiveSeason = db.query("SELECT imageName, showName, seasonNum, ranking FROM series JOIN season ON season.seriesId = series.showId JOIN topFiveSeason ON topFiveSeason.seasonId = season.seasonId WHERE username = '" + username.to_s + "' ORDER BY topFiveSeason.ranking ASC;")
 topFiveSeason = topFiveSeason.to_a
-topFiveEpisode = db.query("SELECT imageName, showName, seasonNum, epName, ranking FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN topFiveEpisode ON topFiveEpisode.epId = episode.epId WHERE username = '" + username.to_s + "'  ORDER BY topFiveEpisode.ranking ASC;")
+topFiveEpisode = db.query("SELECT imageName, showName, series.showId, season.seasonNum, episode.epName, ranking FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN topFiveEpisode ON topFiveEpisode.epId = episode.epId WHERE username = '" + username.to_s + "'  ORDER BY topFiveEpisode.ranking ASC;")
 topFiveEpisode = topFiveEpisode.to_a
 count = 0
+epNum = 0
+
 puts "Content-type: text/html\n\n"
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
@@ -78,7 +80,6 @@ puts '<body id="profile">'
             puts '<input type="image" src="' + topFiveSeries[count]['imageName'] + '" alt="">'
             puts '<input type="hidden" name="clicked_image" value="' + topFiveSeries[count]['imageName'] + '">'
             puts '<input type="hidden" name="seasonNumber" value="1">'
-            puts '<input type="hidden" name="clicked_image" value="">'
             puts '</form>'
             puts '<h6 style="text-align: center;">' + topFiveSeries[count]['showName'].to_s + '</h6>'
             count = count + 1
@@ -104,7 +105,6 @@ puts '<body id="profile">'
             puts '<input type="image" src="' + topFiveSeason[count]['imageName'] + '" alt="">'
             puts '<input type="hidden" name="clicked_image" value="' + topFiveSeason[count]['imageName'] + '">'
             puts '<input type="hidden" name="seasonNumber" value="' + topFiveSeason[count]['seasonNum'].to_s + '">'
-            puts '<input type="hidden" name="clicked_image" value="">'
           puts '</form>'
           puts '<h6 style="text-align: center;">' + topFiveSeason[count]['showName'].to_s + '</h6>'
             puts '<h6 style="text-align: center;">Season ' + topFiveSeason[count]['seasonNum'].to_s + '</h6>'
@@ -125,11 +125,22 @@ puts '<body id="profile">'
     puts '<div class="wrapper">'
       puts '<section class="carousel-section" id="topFiveEpisodes">'
         (0...5).each do |i|
+          
         puts '<div class="item">'
-          if count < topFiveEpisode.size && topFiveEpisode[count]['ranking'] == (i+1) 
-            puts '<form action="series.cgi" method="POST">'
+          if count < topFiveEpisode.size && topFiveEpisode[count]['ranking'] == (i+1)
+          allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + topFiveEpisode[count]['showName'] + "';")
+          allEps = allEps.to_a
+          (0...allEps.size).each do |j|
+            if allEps[j]['epName'] == topFiveEpisode[count]['epName']
+              epNum = j + 1
+            end
+          end 
+            puts '<form action="indivEp.cgi" method="POST">'
             puts '<input type="image" src="' + topFiveEpisode[count]['imageName'] + '" alt="">'
-            puts '<input type="hidden" name="clicked_image" value="' + topFiveEpisode[count]['imageName'] + '">'
+            puts '<input type="hidden" name="ep_name" value="' + topFiveEpisode[count]['epName'] + '">'
+            puts '<input type="hidden" name="show_name" value="' + topFiveEpisode[count]['showName'] + '">'
+            puts '<input type="hidden" name="seriesId" value="' + topFiveEpisode[count]['showId'].to_s + '">'
+            puts '<input type="hidden" name="ep_num" value="' + epNum.to_s + '">'
             puts '<input type="hidden" name="seasonNumber" value="' + topFiveEpisode[count]['seasonNum'].to_s + '">'
           puts '</form>'
           puts '<h6 style="text-align: center;">' + topFiveEpisode[count]['showName'].to_s + '</h6>'

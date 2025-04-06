@@ -94,7 +94,7 @@ puts '<body id="userRatings">'
   end
     puts '</div>'
 puts '</div>'
-
+epNum = 0
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
 (0...ratings.size).each do |i|
     puts '<div class="listWrapper">'
@@ -103,10 +103,31 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
     elsif seriesTab == "SEASON"
       rateImages = db.query("SELECT series.imageName, series.showName, series.year, season.seasonNum FROM series JOIN season ON season.seriesId = series.showId JOIN seasonRating ON seasonRating.seasonId = season.seasonId WHERE username = '" + username.to_s + "';")
     elsif seriesTab == "EP"
-      rateImages = db.query("SELECT series.imageName, series.showName, series.year, season.seasonNum, episode.epName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN episodeRating ON episodeRating.epId = episode.epId WHERE username = '" + username.to_s + "';")
+      rateImages = db.query("SELECT series.imageName, series.showName, series.year, series.showId, season.seasonNum, episode.epName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN episodeRating ON episodeRating.epId = episode.epId WHERE username = '" + username.to_s + "';")
     end
         rateImages = rateImages.to_a
-        puts "<img src=\"" + rateImages[i]['imageName'] + "\"alt=\"" + rateImages[i]['imageName'] + "\" style='width: 150px; height: 220px; object-fit: cover;'>" 
+        if seriesTab != 'EP'
+          puts '<form action="series.cgi">'
+          puts '<input type="hidden" name="clicked_image" value="' + rateImages[i]['imageName'] + '">'
+        else 
+          allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + rateImages[i]['showName'] + "';")
+              allEps = allEps.to_a
+              (0...allEps.size).each do |j|
+                if allEps[j]['epName'] == rateImages[i]['epName']
+                  epNum = j + 1
+                end
+              end 
+              puts '<form action="indivEp.cgi" method="POST">'
+              puts '<input type="hidden" name="ep_name" value="' + rateImages[i]['epName'] + '">'
+              puts '<input type="hidden" name="show_name" value="' + rateImages[i]['showName'] + '">'
+              puts '<input type="hidden" name="seriesId" value="' + rateImages[i]['showId'].to_s + '">'
+              puts '<input type="hidden" name="ep_num" value="' + epNum.to_s + '">'
+        end
+        puts '<input type="hidden" name="seasonNumber" value="' + rateImages[i]['seasonNum'].to_s + '">'
+        puts "<input type='image' src=\"" + rateImages[i]['imageName'] + "\"alt=\"" + rateImages[i]['imageName'] + "\" style='width: 150px; height: 220px; object-fit: cover;'>" 
+        puts '</form>'
+
+
   puts '<div class="content-R">'
       puts '<br>'
       puts '<section class="NameAndYear">'

@@ -82,11 +82,11 @@ puts '<body id="profile">'
       puts '<a href="Want_to_Watch.cgi?seriesTab=SERIES">Series</a>'
       puts '<a href="Want_to_Watch.cgi?seriesTab=SEASON">Seasons</a>'
       puts '<a href="#" class="active">Episodes</a>'
-      images = db.query("SELECT series.imageName, series.showName, season.seasonNum, episode.epName FROM wantToWatchEpisode JOIN episode ON wantToWatchEpisode.epId = episode.epId JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE wantToWatchEpisode.username = '" + username.to_s + "';")
+      images = db.query("SELECT series.imageName, series.showName, series.showId, season.seasonNum, episode.epName FROM wantToWatchEpisode JOIN episode ON wantToWatchEpisode.epId = episode.epId JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE wantToWatchEpisode.username = '" + username.to_s + "';")
       images = images.to_a
   end
     puts '</div>'
-
+    epNum = 0
   puts '<section class="topFiveFavs">'
     puts '<hr style="margin-left: 80px; margin-right: 80px">'
      (0...images.size).each do |h|
@@ -98,9 +98,24 @@ puts '<body id="profile">'
       (0...5).each do |i|
         if (images[size])
         puts '<div class="item">'
+        if seriesTab != 'EP'
           puts '<form action="series.cgi" method="POST">'
+          puts '<input type="hidden" name="clicked_image" value="' + images[size]['imageName'] + '">'
+        else
+          allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + images[size]['showName'] + "';")
+              allEps = allEps.to_a
+              (0...allEps.size).each do |j|
+                if allEps[j]['epName'] == images[size]['epName']
+                  epNum = j + 1
+                end
+              end 
+              puts '<form action="indivEp.cgi" method="POST">'
+              puts '<input type="hidden" name="ep_name" value="' + images[size]['epName'] + '">'
+              puts '<input type="hidden" name="show_name" value="' + images[size]['showName'] + '">'
+              puts '<input type="hidden" name="seriesId" value="' + images[size]['showId'].to_s + '">'
+              puts '<input type="hidden" name="ep_num" value="' + epNum.to_s + '">'
+        end
             puts '<input type="image" src="' + images[size]['imageName'] + '" alt="' + images[size]['imageName'] + '">'
-            puts '<input type="hidden" name="clicked_image" value="' + images[size]['imageName'] + '">'
             puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
             puts '<h6 style="text-align: center;">' + images[size]['showName'] + '</h6>'
             if seriesTab == "SEASON"

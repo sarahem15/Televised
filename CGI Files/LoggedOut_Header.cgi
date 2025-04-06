@@ -28,7 +28,7 @@ puts
 puts '<body>'
 puts '  <nav class="navbar navbar-expand-lg" id="navBar">'
 puts '    <div class="container-fluid">'
-puts '      <a class="navbar-brand" href="#">'
+puts '      <a class="navbar-brand" href="Home.cgi">'
 puts '        <h2>Televised</h2>'
 puts '      </a>'
 puts '      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"'

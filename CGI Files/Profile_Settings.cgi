@@ -435,6 +435,7 @@ puts '<body id="profileSettings">'
                 puts '</div>'
 
                 tempCount = 0
+                episodeNum = 0
                 #Episode
                 topEpImage = db.query("SELECT series.imageName, series.showName, season.seasonNum, episode.epName, topFiveEpisode.ranking FROM series JOIN season ON series.showId = season.seriesId JOIN episode ON season.seasonId = episode.seasonId JOIN topFiveEpisode ON episode.epId = topFiveEpisode.epId WHERE username = '" + username.to_s + "' ORDER BY topFiveEpisode.ranking ASC;")
                 topEpImage = topEpImage.to_a
@@ -446,9 +447,19 @@ puts '<body id="profileSettings">'
                         puts '<div class="item">'
                             if (tempCount < topEpImage.size)
                                 if (topEpImage[tempCount]['ranking'].to_i == (i + 1))
-                                    puts '<form action="series.cgi" method="POST">'
+                                    allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + topEpImage[tempCount]['showName'] + "';")
+                                    allEps = allEps.to_a
+                                    (0...allEps.size).each do |j|
+                                        if allEps[j]['epName'] == topEpImage[tempCount]['epName']
+                                          episodeNum = j + 1
+                                        end
+                                    end 
+                                    puts '<form action="indivEp.cgi" method="POST">'
                                     puts '<input type="image" src="' + topEpImage[tempCount]['imageName'] + '" alt="' + topEpImage[tempCount]['imageName'] + '" style=" height: 100px; width: 80px">'
-                                    puts '<input type="hidden" name="clicked_image" value="' + topEpImage[tempCount]['imageName'] + '">'
+                                    puts '<input type="hidden" name="ep_name" value="' + topEpImage[tempCount]['epName'] + '">'
+                                    puts '<input type="hidden" name="show_name" value="' + topEpImage[tempCount]['showName'] + '">'
+                                    puts '<input type="hidden" name="seriesId" value="' + topEpImage[tempCount]['showId'].to_s + '">'
+                                    puts '<input type="hidden" name="ep_num" value="' + episodeNum.to_s + '">'
                                     puts '<input type="hidden" name="seasonNumber" value="' + topEpImage[tempCount]['seasonNum'].to_s + '">'
                                 else
                                     puts '<input type="image" src="" alt="" style=" height: 100px; width: 80px">'
@@ -481,10 +492,11 @@ puts '<body id="profileSettings">'
     puts '<script src="Televised.js"></script>'
     puts '<script>'
     puts "      document.getElementById('imageSearch').addEventListener('submit', function (event) {"
-    puts "        event.preventDefault();}"
+    puts "        event.preventDefault();"
+    puts "        }"
     puts '    document.addEventListener("click", function (event) {' 
+    puts "        event.preventDefault();"
     puts '        if (event.target.classList.contains("top5search")) {' 
-    puts '            event.preventDefault();'
     puts '    let top5search = event.target.dataset.top5search;'
 
 =begin

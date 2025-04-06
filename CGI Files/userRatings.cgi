@@ -94,13 +94,32 @@ puts '<body id="userProfile">'
     puts '</div>'
 puts '</div>'
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
-
+epNum = 0
 (0...ratings.size).each do |i|
   puts '<br>'
 
-    puts '<div class="listWrapper" style="width: 40%;">'
-        
-        puts "<img src=\"" + rateImages[i]['imageName'] + "\"alt=\"" + rateImages[i]['imageName'] + "\" style='width: 150px; height: 220px; object-fit:cover;'>" 
+    puts '<div class="listWrapper" style="width: 30%;">'
+        if seriesTab != "EP"
+          puts '<form action="series.cgi">'
+            puts '<input type="hidden" name="clicked_image" value="' + rateImages[i]['imageName'] + '">'
+            puts '<input type="hidden" name="seasonNumber" value="' + rateImages[i]['seasonNum'].to_s + '">'
+        else
+          allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + rateImages[i]['showName'] + "';")
+          allEps = allEps.to_a
+          (0...allEps.size).each do |j|
+            if allEps[j]['epName'] == rateImages[i]['epName']
+              epNum = j + 1
+            end
+          end 
+          puts '<form action="indivEp.cgi" method="POST">'
+            puts '<input type="hidden" name="ep_name" value="' + rateImages[i]['epName'] + '">'
+            puts '<input type="hidden" name="show_name" value="' + rateImages[i]['showName'] + '">'
+            puts '<input type="hidden" name="seriesId" value="' + rateImages[i]['showId'].to_s + '">'
+            puts '<input type="hidden" name="ep_num" value="' + epNum.to_s + '">'
+            puts '<input type="hidden" name="seasonNumber" value="' + rateImages[i]['seasonNum'].to_s + '">'
+        end  
+        puts "<input type='image' src=\"" + rateImages[i]['imageName'] + "\"alt=\"" + rateImages[i]['imageName'] + "\" style='width: 150px; height: 220px; object-fit:cover;'>" 
+        puts '</form>'
   puts '<div class="content-R">'
       puts '<br>'
       puts '<section class="NameAndYear">'

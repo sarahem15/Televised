@@ -25,6 +25,7 @@ seriesTab = cgi['seriesTab']
 if seriesTab == ""
   seriesTab = "SERIES"
 end
+contentType = ""
 
 puts'<head>'
   puts'<meta charset="UTF-8">'
@@ -82,23 +83,50 @@ puts '<hr>'
 puts '<br>'
 (0...seriesReviews.size).each do |i|
   if seriesTab == "SERIES"
-    seriesImage = db.query("SELECT imageName, showName, year FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id= '" + seriesReviews[i]['id'].to_s + "';")
+    seriesImage = db.query("SELECT imageName, showName, showId, year FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id= '" + seriesReviews[i]['id'].to_s + "';")
     reviewRating = db.query("SELECT rating FROM seriesRating JOIN seriesReview ON seriesRating.id = seriesReview.ratingId WHERE seriesReview.id = '" + seriesReviews[i]['id'].to_s + "';")
   elsif seriesTab == "SEASON"
-    seriesImage = db.query("SELECT imageName, showName, year FROM series JOIN season ON season.seriesId = series.showId JOIN seasonReview ON seasonReview.seasonId = season.seasonId WHERE seasonReview.id = '" + seriesReviews[i]['id'].to_s + "';")
+    seriesImage = db.query("SELECT imageName, showName, showId, series.year, season.seasonNum FROM series JOIN season ON season.seriesId = series.showId JOIN seasonReview ON seasonReview.seasonId = season.seasonId WHERE seasonReview.id = '" + seriesReviews[i]['id'].to_s + "';")
     reviewRating = db.query("SELECT rating FROM seasonRating JOIN seasonReview ON seasonRating.id = seasonReview.ratingId WHERE seasonReview.id = '" + seriesReviews[i]['id'].to_s + "';")
+    contentType = "SEASON"
   else
-     seriesImage = db.query("SELECT imageName, showName, year FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN episodeReview ON episodeReview.epId = episode.epId WHERE episodeReview.id = '" + seriesReviews[i]['id'].to_s + "';")
+     seriesImage = db.query("SELECT imageName, showName, showId, series.year, season.seasonNum, episode.epName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN episodeReview ON episodeReview.epId = episode.epId WHERE episodeReview.id = '" + seriesReviews[i]['id'].to_s + "';")
      reviewRating = db.query("SELECT rating FROM episodeRating JOIN episodeReview ON episodeRating.id = episodeReview.ratingId WHERE episodeReview.id = '" + seriesReviews[i]['id'].to_s + "';") 
+    contentType = "EP"
   end
 
-
+epNum = 0
 puts '<div class="originalReview">'
-	puts "<img src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\">" 
+  if seriesTab != "EP"
+    puts '<form action="series.cgi" method="POST">'
+      puts '<input type="hidden" name="clicked_image" value="' + seriesImage.first['imageName'] + '">'
+      puts '<input type="hidden" name="seasonNumber" value="' + seriesImage.first['seasonNum'].to_s + '">'
+  else
+    allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + seriesImage.first['showName'] + "';")
+          allEps = allEps.to_a
+          (0...allEps.size).each do |j|
+            if allEps[j]['epName'] == seriesImage.first['epName']
+              epNum = j + 1
+            end
+          end 
+    puts '<form action="indivEp.cgi" method="POST">'
+      puts '<input type="hidden" name="ep_name" value="' + seriesImage.first['epName'] + '">'
+      puts '<input type="hidden" name="show_name" value="' + seriesImage.first['showName'] + '">'
+      puts '<input type="hidden" name="seriesId" value="' + seriesImage.first['showId'].to_s + '">'
+      puts '<input type="hidden" name="ep_num" value="' + epNum.to_s + '">'
+      puts '<input type="hidden" name="seasonNumber" value="' + seriesImage.first['seasonNum'].to_s + '">'
+  end  
+	puts "<input type='image' src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\" style='width: 250px; height: 300px; object-fit: cover;'>" 
+  puts '</form>'
 	puts '<div class="content-R">'
       puts '<section class="NameAndYear">'
-      puts '<a href="reviewIndiv.cgi?reviewId=' + seriesReviews[i]['id'].to_s + '">'
+      puts '<a href="reviewIndiv.cgi?reviewId=' + seriesReviews[i]['id'].to_s + '&contentType=' + contentType + '">'
       puts '<h3>' + seriesImage.first['showName'] + '</h3>'
+      if seriesTab == "SEASON"
+        puts '<h3>Season ' + seriesImage.first['seasonNum'].to_s + '</h3>'
+      elsif seriesTab != "SERIES"
+        puts '<h3>S' + seriesImage.first['seasonNum'].to_s + ' ' + seriesImage.first['epName'] + '</h3>'
+      end
       puts '<a>'
       puts '<h3 style="color: #436eb1;">' + seriesImage.first['year'].to_s + '</h3>'
       puts '</section>'

@@ -1,5 +1,3 @@
-#season search works, but adding to the curatedListSeason does not. all episode stuff does not work. im going insane
-
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout

@@ -86,7 +86,7 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
       puts '<a href="Have_Watched.cgi?seriesTab=SERIES">Series</a>'
       puts '<a href="Have_Watched.cgi?seriesTab=SEASON">Seasons</a>'
       puts '<a href="#" class="active">Episodes</a>'
-      images = db.query("SELECT series.imageName, series.showName, season.seasonNum, episode.epName FROM haveWatchedEpisode JOIN episode ON haveWatchedEpisode.epId = episode.epId JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE haveWatchedEpisode.username = '" + username.to_s + "';")
+      images = db.query("SELECT series.imageName, series.showName, series.showId, season.seasonNum, episode.epName FROM haveWatchedEpisode JOIN episode ON haveWatchedEpisode.epId = episode.epId JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE haveWatchedEpisode.username = '" + username.to_s + "';")
       images = images.to_a
   end
 
@@ -94,7 +94,7 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
   puts '<section class="topFiveFavs">'
     puts '<hr style="margin-left: 80px; margin-right: 80px">'
 
-
+    epNum = 0
     (0...images.size).each do |h|
       if (images[size] && printPage == true)
         puts '<div class="wrapper">'
@@ -104,10 +104,25 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
         (0...5).each do |i|
           if (images[size])
             puts '<div class="item">'
-            puts '<form action="series.cgi" method="POST">'
-            puts '<input type="image" src="' + images[size]['imageName'] + '" alt="' + images[size]['imageName'] + '">'
-            puts '<input type="hidden" name="clicked_image" value="' + images[size]['imageName'] + '">'
-            puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
+            if seriesTab != 'EP'
+              puts '<form action="series.cgi" method="POST">'
+              puts '<input type="hidden" name="clicked_image" value="' + images[size]['imageName'] + '">'
+            else
+              allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + images[size]['showName'] + "';")
+              allEps = allEps.to_a
+              (0...allEps.size).each do |j|
+                if allEps[j]['epName'] == images[size]['epName']
+                  epNum = j + 1
+                end
+              end 
+              puts '<form action="indivEp.cgi" method="POST">'
+              puts '<input type="hidden" name="ep_name" value="' + images[size]['epName'] + '">'
+              puts '<input type="hidden" name="show_name" value="' + images[size]['showName'] + '">'
+              puts '<input type="hidden" name="seriesId" value="' + images[size]['showId'].to_s + '">'
+              puts '<input type="hidden" name="ep_num" value="' + epNum.to_s + '">'
+            end
+            puts '<input type="image" src="' + images[size]['imageName'] + '" alt="' + images[size]['imageName'] + '">' 
+            puts '<input type="hidden" name="seasonNumber" value="' + images[size]['seasonNum'].to_s + '">'
               puts '<h6 style="text-align: center;">' + images[size]['showName'] + '</h6>'
             if seriesTab == "SEASON"
               puts '<h6 style="text-align: center;">Season ' + images[size]['seasonNum'].to_s + '</h6>'
