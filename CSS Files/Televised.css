@@ -843,7 +843,7 @@ button:hover {
 
 .originalReview, #userRatings .listWrapper {
     display: grid;
-    grid-template-columns: 20% 70%;
+    grid-template-columns: 20% 40% 35%;
     width: 80%;
     margin: auto;
 }
@@ -865,7 +865,7 @@ button:hover {
 #reviewIndiv .NameAndYear, #profile .NameAndYear {
     display: grid;
     grid-template-columns: auto auto;
-    width: 50%;
+    width: 65%;
 }
 
 #reviewIndiv .UserDisplay h3 {
@@ -1044,9 +1044,3 @@ button:hover {
 }
 
 .infoQuestion:hover .info{visibility: visible;}
-
-
-#reviewIndiv .content-R {
-    display:  grid;
-    grid-template-columns: auto auto;
-}
