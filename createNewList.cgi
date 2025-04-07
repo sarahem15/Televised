@@ -171,6 +171,10 @@ puts "        <div id='searchResults'></div>"
 puts "      </div>"
 puts "    </div>"
 puts "  </div>"
+puts '<!-- Scripts -->'
+puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
+puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
+puts '<script src="Televised.js"></script>'
 puts <<~JAVASCRIPT
 <script>
   document.addEventListener('DOMContentLoaded', function () {
