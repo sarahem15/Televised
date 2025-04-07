@@ -31,6 +31,8 @@ rateId = cgi['ratingId']
 review = cgi['review']
 
 alreadyReviewedSeries = cgi['alreadyReviewedSeries']
+alreadyReviewedSeason = cgi['alreadyReviewedSeason']
+alreadyReviewedEp = cgi['alreadyReviewedEp']
 
 reply = cgi['reply']
 reviewId = cgi['reviewId']
@@ -82,14 +84,14 @@ elsif profileLikedList != ""
     print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/Likes_Lists.cgi'>\n"
 elsif fromReviewIndiv == 'TRUE'
     if type == 'SEASON'
-        print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/reviewIndiv.cgi?reviewId=" + reviewId.to_s + "&contentType=SEASON'>\n"
+        print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/reviewIndiv.cgi?reviewId=" + reviewId.to_s + "&contentType=SEASON'>\n"
     elsif type == 'EP'
-        print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/reviewIndiv.cgi?reviewId=" + reviewId.to_s + "&contentType=EP'>\n"
+        print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/reviewIndiv.cgi?reviewId=" + reviewId.to_s + "&contentType=EP'>\n"
     else
-        print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/reviewIndiv.cgi?reviewId=" + reviewId.to_s + "'>\n"
+        print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/reviewIndiv.cgi?reviewId=" + reviewId.to_s + "'>\n"
     end
 else
-    print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
+    print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
 end
 puts "</head>"
 puts "<body>"
@@ -252,17 +254,18 @@ if review != ""
     if seasonRating != ""
         if rateId != ""
             date = year + "-" + month + "-" + day
-            db.query("INSERT INTO seasonReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seasonId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+            #db.query("INSERT INTO seasonReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seasonId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+            if alreadyReviewedSeason == 'TRUE'
+                db.query("UPDATE seasonReview SET review = '" + reviewText.gsub("'", "\\\\'") + "', date = '" + date + "' WHERE ratingId = '" + rateId.to_s + "' AND username = '" + username.to_s + "';")
+                #puts "updated"
+            else
+               db.query("INSERT INTO seasonReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seasonId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+            end
         else
             date = year + "-" + month + "-" + day
-            #puts seasonRating.to_s + " split "
-            puts seasonId.to_s
             db.query("INSERT INTO seasonRating (rating, username, seasonId) VALUES ('" + seasonRating.to_s + "', '" + username.to_s + "', '" + seasonId.to_s + "');")
             rateId = db.query("SELECT id from seasonRating WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonId.to_s + "';")
             rateId = rateId.first['id'].to_s
-            puts reviewText
-            puts seasonId.to_s
-            puts " split " + rateId.to_s
             db.query("INSERT INTO seasonReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seasonId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
         end
     end

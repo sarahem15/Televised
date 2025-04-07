@@ -273,6 +273,7 @@ end
 
 
 ##########MODAL###############
+alreadyReviewedEp = 'FALSE'
 puts "<div id='reviewEpisodeModal'>"
 puts "  <div class='modal fade' id='CreateEpisodeReview' tabindex='-1' aria-labelledby='createReviewLabel' aria-hidden='true'>"
 puts "    <div class='modal-dialog'>"
@@ -303,7 +304,15 @@ puts "              </div>"
   puts "<br>"
 puts "            </div>"
 puts "            <div class='mb-3'>"
-puts "              <textarea name='reviewText' class='form-control' id='userReview' placeholder='Add a review…' required></textarea>"
+#puts "              <textarea name='reviewText' class='form-control' id='userReview' placeholder='Add a review…' required></textarea>"
+currentEpReview = db.query("SELECT review FROM episodeReview WHERE username = '" + username.to_s + "' AND epId = '" + epId.to_s + "';")
+if currentEpReview.size != 0
+  puts '<span>Edit your review:</span>'
+  puts '<input type="text" id="userReview" value="' + currentEpReview.first['review'] + '" name="reviewText" class="form-control" >'
+  alreadyReviewedEp = 'TRUE'
+else
+  puts "<textarea name='reviewText' class='form-control' id='userReview' placeholder='Add a review…' required></textarea>"
+end
 puts "            </div>"
 puts "            <div class='row'>"
 puts "              <div class='col'>"
@@ -347,10 +356,12 @@ puts "                <input type='hidden' name='epRating' value='#{episodeRatin
 puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
 #puts "                <input type='hidden' name='seasonId' value='#{seasonId}'>"
 puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
+puts "                <input type='hidden' name='ratingId' value='#{ratingId}'>"
 puts "                <input type='hidden' name='epname' value='" + episode.first['epName'] + "'>"
 puts "                <input type='hidden' name='rated' value='TRUE'>"
 puts "                <input type='hidden' name='review' value='true'>"
 puts '                <input type="hidden" name="fromIndivEp" value="TRUE">'
+puts "                <input type='hidden' name='alreadyReviewedEp' value='" + alreadyReviewedEp + "'>"
 puts "                <input type='hidden' name='epNum' value='" + epNum.to_s + "'>"
 puts "                <input type='hidden' name='epID' value='" + episode.first['epId'].to_s + "'>"
 
