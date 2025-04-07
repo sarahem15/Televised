@@ -636,6 +636,7 @@ puts "                <input type='hidden' name='day' value='#{time.day}'>"
   puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
   puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
   puts "                <input type='hidden' name='ratingId' value='#{ratingId}'>"
+  puts "                <input type='hidden' name='rated' value='TRUE'>"
   puts "                <input type='hidden' name='alreadyReviewedSeries' value='" + alreadyReviewedSeries + "'>"
   puts "                <input type='hidden' name='review' value='true'>"
 
@@ -680,6 +681,7 @@ currentSeasonReview = db.query("SELECT review FROM seasonReview WHERE username =
 if currentSeasonReview.size != 0
   puts '<span>Edit your review:</span>'
   puts '<input type="text" id="userReview" value="' + currentSeasonReview.first['review'] + '" name="reviewText" class="form-control" >'
+  alreadyReviewedSeason = 'TRUE'
 else
   puts "<textarea name='reviewText' class='form-control' id='userReview' placeholder='Add a review…' required></textarea>"
 end
@@ -725,7 +727,9 @@ puts "                <input type='hidden' name='seasonRating' value='#{seasonRa
 puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
 puts "                <input type='hidden' name='seasonId' value='#{seasonId}'>"
 puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
+puts "                <input type='hidden' name='ratingId' value='#{ratingId}'>"
 puts "                <input type='hidden' name='rated' value='TRUE'>"
+puts "                <input type='hidden' name='alreadyReviewedSeason' value='" + alreadyReviewedSeason + "'>"
 puts "                <input type='hidden' name='review' value='true'>"
 
 puts '<br>'
