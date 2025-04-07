@@ -153,7 +153,13 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
+        
+        doneReview = db.query("SELECT * FROM seriesReview WHERE username = '" + username.to_s + "' AND seriesId = '" + seriesId.to_s + "';").to_a.to_s
+        if doneReview != "[]"
+        puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeriesReview\" style='color: darkgray;'>&#128488</button>"
+      else
         puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeriesReview\">&#128488</button>"
+      end
         #puts "<button class=\"rateButton\">STARS</button>"
 
           alreadyRatedSeries = db.query("SELECT * FROM seriesRating WHERE seriesId = '" + seriesId.to_s + "' AND username = '" + username + "';")
@@ -288,7 +294,12 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
-        puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeasonReview\">&#128488</button>"
+        doneReview = db.query("SELECT * FROM seasonReview WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonId.to_s + "';").to_a.to_s
+        if doneReview != "[]"
+          puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeasonReview\" style='color: darkgray;'>&#128488</button>"
+        else 
+          puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeasonReview\">&#128488</button>"
+        end
         # puts "<button class=\"rateButton\">STARS</button>"
         alreadyRatedSeason = db.query("SELECT * FROM seasonRating WHERE username = '" + username + "' AND seasonId = '" + seasonId.to_s + "';")
           if (alreadyRatedSeason.to_a.to_s != "[]")
