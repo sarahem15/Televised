@@ -128,7 +128,11 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<div class="listImages">'
   puts '<div class="listWrapper">'
   puts '<section class="carousel-section" id="listsPlease">'
-  listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+  if seriesTab == "SERIES"
+    listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+  elsif seriesTab == "SEASON"
+      listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+  end
   listImages = listImages.to_a
   (0...5).each do |j|
     puts '<div class="itemS">'

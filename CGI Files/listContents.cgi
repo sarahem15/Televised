@@ -28,7 +28,7 @@ if type == 'SERIES'
   listContent = db.query("SELECT series.imageName, series.showId, series.showName, curatedListSeries.username FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE name = '" + listTitle + "';")
   haveWatched = db.query("SELECT seriesId FROM haveWatchedSeries WHERE username = '" + username.to_s + "';")
 elsif type == 'SEASON'
-  listContent = db.query("SELECT series.imageName, series.showId, series.showName, curatedListSeason.username FROM series JOIN season ON series.showId = season.seriesId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE name = '" + listTitle + "';")
+  listContent = db.query("SELECT series.imageName, series.showId, series.showName, season.seasonNum, curatedListSeason.username FROM series JOIN season ON series.showId = season.seriesId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE name = '" + listTitle + "';")
   haveWatched = db.query("SELECT seasonId FROM haveWatchedSeason WHERE username = '" + username.to_s + "';")
 else
   listContent = db.query("SELECT series.imageName, series.showId, series.showName, episode.epName, season.seasonNum, curatedListEpisode.username FROM series JOIN season ON series.showId = season.seriesId JOIN episode ON episode.seasonId = season.seasonId JOIN curatedListEpisode ON episode.epId = curatedListEpisode.epId WHERE name = '" + listTitle + "';")
@@ -80,6 +80,8 @@ puts '<body id="listContent">'
           puts '<h6 style="text-align: center;">' + listContent[i]['showName'] + '</h6>'
           if type != "SERIES" && type != "SEASON"
             puts '<h6 style="text-align: center">S' + listContent[i]['seasonNum'].to_s + ' ' + listContent[i]['epName'] + '</h6>'
+          elsif type == "SEASON"
+            puts '<h6 style="text-align: center">Season ' + listContent[i]['seasonNum'].to_s + '</h6>'
           end
        puts ' </form>'
    puts '</div>'

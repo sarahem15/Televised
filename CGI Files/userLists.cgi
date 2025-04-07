@@ -73,19 +73,19 @@ puts '<body id="userProfile">'
       puts '<a href="#"class="active">Series</a>'
       puts '<a href="userLists.cgi?username=' + username + '&seriesTab=SEASON">Seasons</a>'
       puts '<a href="userLists.cgi?username=' + username + '&seriesTab=EP">Episodes</a>'
-      lists = db.query("SELECT DISTINCT name, description, date FROM curatedListSeries WHERE username = '" + username.to_s + "';")
+      lists = db.query("SELECT DISTINCT name, description, date FROM curatedListSeries WHERE username = '" + username.to_s + "' AND privacy = 1;")
       lists = lists.to_a
   elsif seriesTab == "SEASON"
       puts '<a href="userLists.cgi?username=' + username + '&seriesTab=SERIES">Series</a>'
       puts '<a href="#" class="active">Seasons</a>'
       puts '<a href="userLists.cgi?username=' + username + '&seriesTab=EP">Episodes</a>'
-      lists = db.query("SELECT DISTINCT name, description, date FROM curatedListSeason WHERE username = '" + username.to_s + "';")
+      lists = db.query("SELECT DISTINCT name, description, date FROM curatedListSeason WHERE username = '" + username.to_s + "' AND privacy = 1;")
       lists = lists.to_a
   elsif seriesTab == "EP"
       puts '<a href="userLists.cgi?username=' + username + '&seriesTab=SERIES">Series</a>'
       puts '<a href="userLists.cgi?username=' + username + '&seriesTab=SEASON">Seasons</a>'
       puts '<a href="#" class="active">Episodes</a>'
-      lists = db.query("SELECT DISTINCT name, description, date FROM curatedListEpisode WHERE username = '" + username.to_s + "';")
+      lists = db.query("SELECT DISTINCT name, description, date FROM curatedListEpisode WHERE username = '" + username.to_s + "' AND privacy = 1;")
       lists = lists.to_a
   end
     puts '</div>'
@@ -96,13 +96,13 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<div class="listImages">'
     puts '<div class="listWrapper">'
         puts '<section class="carousel-section" id="listsPlease">'
-        listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+        listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'].gsub("'", "\\\\'") + "';")
         listImages = listImages.to_a
         if seriesTab == "SEASON"
-          listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+          listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'].gsub("'", "\\\\'") + "';")
           listImages = listImages.to_a
         elsif seriesTab == "EP"
-          listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN curatedListEpisode ON episode.epId = curatedListEpisode.epId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+          listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN curatedListEpisode ON episode.epId = curatedListEpisode.epId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'].gsub("'", "\\\\'") + "';")
           listImages = listImages.to_a
         end
 
@@ -119,7 +119,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       puts '</div>'
       puts '<div>'
       puts '<section class="titleDate">'
-      puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '&contentType=' + seriesTab + '">' + lists[i]['name'] + '</a>'
+      puts '<a href="listContents.cgi?title='+ lists[i]['name'].gsub("'", "\\\\'") + '&contentType=' + seriesTab + '">' + lists[i]['name'] + '</a>'
       puts '<h4>' + lists[i]['date'].to_s + '</h4>'
       puts '</section>'
 

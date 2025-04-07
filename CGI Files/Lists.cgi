@@ -134,7 +134,7 @@ lists = lists.to_a
       puts '</div>'
       puts '<div>'
       puts '<section class="titleDate">'
-      puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '&contentType=EP">' + lists[i]['name'] + '</a>'
+      puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '&contentType=EPISODE">' + lists[i]['name'] + '</a>'
       puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
       puts '</section>'
       puts '<br>'
@@ -172,6 +172,70 @@ lists = lists.to_a
     puts '<hr style="margin-left: 80px; margin-right: 80px">'
     likeCount = 0
 end
+
+
+likeCount = 0
+lists = db.query("SELECT DISTINCT name, description, username, date FROM curatedListSeason WHERE privacy = 1;")
+lists = lists.to_a
+(0...lists.size).each do |i|
+  puts '<div class="listImages">'
+    puts '<div class="listWrapper">'
+        puts '<section class="carousel-section" id="listsPlease">'
+        listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE name = '" + lists[i]['name'] + "';")
+        listImages = listImages.to_a
+        displayName = db.query("SELECT displayName FROM account WHERE username = '" + lists[i]['username'] + "';")
+        (0...5).each do |j|
+        puts '<div class="itemS">'
+        if (j < listImages.size)
+            puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '" style="height:270px; object-fit: cover;">'
+        else
+            puts '<img src="" alt="">'
+        end
+        puts '</div>'
+        end
+      puts '</section>'
+      puts '</div>'
+      puts '<div>'
+      puts '<section class="titleDate">'
+      puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '&contentType=SEASON">' + lists[i]['name'] + '</a>'
+      puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
+      puts '</section>'
+      puts '<br>'
+      puts '<section class="UserDisplay">'
+          puts '<img src="./ProfileImages/' + lists[i]['username'].to_s + '.jpg" alt="" style="background-color: gray;">'
+          puts '<a href="othersProfiles.cgi?username=' + lists[i]['username'].to_s + '"><h3 id="DisplayName">' + displayName.first['displayName'].to_s + '</h3></a>'
+        puts '</section>'
+        puts '<br>'
+      puts '<h3>' + lists[i]['description'] +'</h3>'
+        
+        listId = db.query("SELECT id FROM listOwnership WHERE username = '" + lists[i]['username'] + "' AND listName = '" + lists[i]['name'] + "';")
+      puts '<form action="threebuttons.cgi" method="post">'
+      alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.first['id'].to_s + "';")
+      
+      if (alreadyLiked.to_a != [])
+        puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+      else
+        puts '<button class="LIKES">&#10084</button>'
+        end
+        currentLikes = db.query("SELECT * FROM likedList WHERE listId = '" + listId.first['id'].to_s + "';")
+      (0...currentLikes.size).each do |i|
+        likeCount = likeCount + 1
+      end
+        puts '<a href="whoHasLiked.cgi?listName=' + lists[i]['name'] + '&listCreator=' + lists[i]['username'] + '&listId=' + listId.first['id'].to_s + '">' + likeCount.to_s + '</a>'
+
+        puts '<input type="hidden" name="likedList" value="TRUE">'
+        puts '<input type="hidden" name="listId" value="' + listId.first['id'].to_s + '">'
+        puts '<input type="hidden" name="likeUser" value="' + username.to_s + '">'
+        puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
+        
+    puts '</form>'
+      puts '</div>'
+    puts '</div>'
+    puts '<br>'
+    puts '<hr style="margin-left: 80px; margin-right: 80px">'
+    likeCount = 0
+end
+
 puts '<br>'
     puts '<!-- Scripts -->'
   puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
