@@ -259,6 +259,7 @@ if review != ""
                 db.query("UPDATE seasonReview SET review = '" + reviewText.gsub("'", "\\\\'") + "', date = '" + date + "' WHERE ratingId = '" + rateId.to_s + "' AND username = '" + username.to_s + "';")
                 #puts "updated"
             else
+                puts "why are you here?????"
                db.query("INSERT INTO seasonReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seasonId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
             end
         else

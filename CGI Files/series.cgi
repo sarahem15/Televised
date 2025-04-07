@@ -724,8 +724,8 @@ if seasonRating == 0
 
 
 else 
-ratingId = db.query("SELECT id from seasonRating WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonId.to_s + "';")
-ratingId = ratingId.first['id'].to_s
+seasonRatingId = db.query("SELECT id from seasonRating WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonId.to_s + "';")
+seasonRatingId = seasonRatingId.first['id'].to_s
 (0...5).each do |i|
   if (i < seasonRating)
             puts '<i class="fa fa-star" style="font-size:24px;color:yellow"></i>'
@@ -747,7 +747,7 @@ puts "                <input type='hidden' name='seasonRating' value='#{seasonRa
 puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
 puts "                <input type='hidden' name='seasonId' value='#{seasonId}'>"
 puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
-puts "                <input type='hidden' name='ratingId' value='#{ratingId}'>"
+puts "                <input type='hidden' name='ratingId' value='" + seasonRatingId.to_s + "'>"
 puts "                <input type='hidden' name='rated' value='TRUE'>"
 puts "                <input type='hidden' name='alreadyReviewedSeason' value='" + alreadyReviewedSeason + "'>"
 puts "                <input type='hidden' name='review' value='true'>"
