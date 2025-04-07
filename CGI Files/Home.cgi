@@ -25,7 +25,7 @@ series = series.to_a
 sortedSeries = db.query("SELECT * FROM series ORDER BY year DESC;")
 sortedSeries = sortedSeries.to_a
 
-reviews = db.query("SELECT * FROM seriesReview")
+reviews = db.query("SELECT * FROM seriesReview ORDER BY date DESC")
 reviews = reviews.to_a
 likeCount = 0
 alreadyLiked = false
@@ -166,7 +166,7 @@ puts'<body id="homePage">'
 
 puts '<br>'
 puts '<!-- reviews -->'
-puts '<p> Popular Reviews </p>'
+puts '<p> Most Recent Reviews </p>'
 puts '<section class="homeReviews">'
     
 
@@ -206,7 +206,7 @@ puts '<div class="ReviewIndiv">'
         puts '<button class="LIKES">&#10084</button>'
     end
     puts '<input type="hidden" name="likedReview" value="TRUE">'
-    puts '<a href="whoHasLiked.cgi?reviewId=' + reviews[i]['id'].to_s + '">' + likeCount.to_s + '</a>'
+    puts '<a href="whoHasLiked.cgi?reviewId=' + reviews[i]['id'].to_s + '&type=EP">' + likeCount.to_s + '</a>'
     puts '<input type="hidden" name="reviewId" value="' + reviews[i]['id'].to_s + '">'
     puts '<input type="hidden" name="reviewCreator" value="' + reviews[i]['username'].to_s + '">'
     puts '</form>'

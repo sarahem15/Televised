@@ -311,14 +311,30 @@ puts '<body id="profileSettings">'
                     db.query("DELETE FROM topFiveSeries WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
                     db.query("DELETE FROM topFiveSeries WHERE username = '" + username.to_s + "' AND seriesId = '" + topSeries + "';")
                     db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
+                    begin
+                        db.query("INSERT INTO haveWatchedSeries VALUES ('" + username.to_s + "', '" + topSeries + "');")
+                    rescue => e
+                    end
                 elsif (alreadyRated.to_a.to_s != '[]')
                     db.query("DELETE FROM topFiveSeries WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
                     db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
+                    begin
+                        db.query("INSERT INTO haveWatchedSeries VALUES ('" + username.to_s + "', '" + topSeries + "');")
+                    rescue => e
+                    end
                 elsif (alreadyAdded.to_a.to_s != '[]')
                     db.query("DELETE FROM topFiveSeries WHERE username = '" + username.to_s + "' AND seriesId = '" + topSeries + "';")
                     db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
+                    begin
+                        db.query("INSERT INTO haveWatchedSeries VALUES ('" + username.to_s + "', '" + topSeries + "');")
+                    rescue => e
+                    end
                 else
                     db.query("INSERT INTO topFiveSeries VALUES('" + username.to_s + "', '" + topSeries + "', '" + ranking + "');")
+                    begin
+                        db.query("INSERT INTO haveWatchedSeries VALUES ('" + username.to_s + "', '" + topSeries + "');")
+                    rescue => e
+                    end
                 end
             elsif (type == "Season" && ranking != "" && ranking != "SELECT" && seasonNum != "")
                 alreadyRated = db.query("SELECT * FROM topFiveSeason WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
@@ -327,14 +343,30 @@ puts '<body id="profileSettings">'
                     db.query("DELETE FROM topFiveSeason WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
                     db.query("DELETE FROM topFiveSeason WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonNum + "';")
                     db.query("INSERT INTO topFiveSeason VALUES('" + username.to_s + "', '" + seasonNum + "', '" + ranking + "');")
+                    begin
+                        db.query("INSERT INTO haveWatchedSeason VALUES ('" + username.to_s + "', '" + seasonNum + "');")
+                    rescue => e
+                    end
                 elsif (alreadyRated.to_a.to_s != '[]')
                     db.query("DELETE FROM topFiveSeason WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
                     db.query("INSERT INTO topFiveSeason VALUES('" + username.to_s + "', '" + seasonNum + "', '" + ranking + "');")
+                    begin
+                        db.query("INSERT INTO haveWatchedSeason VALUES ('" + username.to_s + "', '" + seasonNum + "');")
+                    rescue => e
+                    end
                 elsif (alreadyAdded.to_a.to_s != '[]')
                     db.query("DELETE FROM topFiveSeason WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonNum + "';")
                     db.query("INSERT INTO topFiveSeason VALUES('" + username.to_s + "', '" + seasonNum + "', '" + ranking + "');")
+                    begin
+                        db.query("INSERT INTO haveWatchedSeason VALUES ('" + username.to_s + "', '" + seasonNum + "');")
+                    rescue => e
+                    end
                 else
                     db.query("INSERT INTO topFiveSeason VALUES('" + username.to_s + "', '" + seasonNum + "', '" + ranking + "');")
+                    begin
+                        db.query("INSERT INTO haveWatchedSeason VALUES ('" + username.to_s + "', '" + seasonNum + "');")
+                    rescue => e
+                    end
                 end
             elsif (type == "Episodes" && ranking != "" && ranking != "SELECT" && seasonNum != "" && epNum != "")
                 alreadyRated = db.query("SELECT * FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
@@ -343,14 +375,30 @@ puts '<body id="profileSettings">'
                     db.query("DELETE FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
                     db.query("DELETE FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND epId = '" + epNum + "';")
                     db.query("INSERT INTO topFiveEpisode VALUES('" + username.to_s + "', '" + epNum + "', '" + ranking + "');")
+                    begin
+                        db.query("INSERT INTO haveWatchedEpisode VALUES ('" + username.to_s + "', '" + epNum + "');")
+                    rescue => e
+                    end
                 elsif (alreadyRated.to_a.to_s != '[]')
                     db.query("DELETE FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND ranking = '" + ranking + "';")
                     db.query("INSERT INTO topFiveEpisode VALUES('" + username.to_s + "', '" + epNum + "', '" + ranking + "');")
+                    begin
+                        db.query("INSERT INTO haveWatchedEpisode VALUES ('" + username.to_s + "', '" + epNum + "');")
+                    rescue => e
+                    end
                 elsif (alreadyAdded.to_a.to_s != '[]')
                     db.query("DELETE FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND epId = '" + epNum + "';")
                     db.query("INSERT INTO topFiveEpisode VALUES('" + username.to_s + "', '" + epNum + "', '" + ranking + "');")
+                    begin
+                        db.query("INSERT INTO haveWatchedEpisode VALUES ('" + username.to_s + "', '" + epNum + "');")
+                    rescue => e
+                    end
                 else
                     db.query("INSERT INTO topFiveEpisode VALUES('" + username.to_s + "', '" + epNum + "', '" + ranking + "');")
+                    begin
+                        db.query("INSERT INTO haveWatchedEpisode VALUES ('" + username.to_s + "', '" + epNum + "');")
+                    rescue => e
+                    end
                 end
             end 
 
