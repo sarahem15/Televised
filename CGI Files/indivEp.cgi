@@ -305,7 +305,7 @@ puts "              </div>"
 puts "            </div>"
 puts "            <div class='mb-3'>"
 #puts "              <textarea name='reviewText' class='form-control' id='userReview' placeholder='Add a review…' required></textarea>"
-currentEpReview = db.query("SELECT review FROM episodeReview WHERE username = '" + username.to_s + "' AND epId = '" + epId.to_s + "';")
+currentEpReview = db.query("SELECT review FROM episodeReview WHERE username = '" + username.to_s + "' AND epId = '" + episode.first['epId'].to_s + "';")
 if currentEpReview.size != 0
   puts '<span>Edit your review:</span>'
   puts '<input type="text" id="userReview" value="' + currentEpReview.first['review'] + '" name="reviewText" class="form-control" >'
