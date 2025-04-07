@@ -338,6 +338,8 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
+/*
+// Fills in episode name on review modal
 document.addEventListener("DOMContentLoaded", function () {
   var reviewModal = document.getElementById("CreateEpisodeReview");
  
@@ -352,3 +354,4 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+*/
