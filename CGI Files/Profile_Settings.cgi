@@ -25,6 +25,10 @@ epNum = cgi['epNum']
 seriesQuery = cgi['seriesQuery']
 seriesId = cgi['seriesId']
 removeSeries = cgi['removeSeries']
+removeSeason = cgi['removeSeason']
+removeEp = cgi['removeEp']
+seasonId = cgi['seasonId']
+epId = cgi['epId']
 if seasonNum == ""
     seasonNum = "1"
 end
@@ -49,6 +53,16 @@ end
 if removeSeries != ""
     begin
         db.query("DELETE FROM topFiveSeries WHERE username = '" + username.to_s + "' AND seriesId ='" + seriesId + "';")
+    rescue => e
+    end
+elsif removeSeason != ""
+    begin
+        db.query("DELETE FROM topFiveSeason WHERE username = '" + username.to_s + "' AND seasonId ='" + seasonId + "';")
+    rescue => e
+    end
+elsif removeEp != ""
+    begin
+        db.query("DELETE FROM topFiveEpisode WHERE username = '" + username.to_s + "' AND epId ='" + epId + "';")
     rescue => e
     end
 end
@@ -447,7 +461,7 @@ puts '<body id="profileSettings">'
                 puts '</div>'
                 tempCount = 0
                 #Season
-                topSeasonImage = db.query("SELECT series.imageName, series.showName, season.seasonNum, topFiveSeason.ranking FROM series JOIN season ON series.showId = season.seriesId JOIN topFiveSeason ON season.seasonId = topFiveSeason.seasonId WHERE username = '" + username.to_s + "' ORDER BY topFiveSeason.ranking ASC;")
+                topSeasonImage = db.query("SELECT series.imageName, series.showName, season.seasonNum, season.seasonId, topFiveSeason.ranking FROM series JOIN season ON series.showId = season.seriesId JOIN topFiveSeason ON season.seasonId = topFiveSeason.seasonId WHERE username = '" + username.to_s + "' ORDER BY topFiveSeason.ranking ASC;")
                 topSeasonImage = topSeasonImage.to_a
                 puts '<h5>Seasons</h5>'
                 puts '<div class="TopFiveSeason">'
@@ -474,6 +488,11 @@ puts '<body id="profileSettings">'
                             if topSeasonImage[tempCount] && (topSeasonImage[tempCount]['ranking'].to_i == (i + 1))
                                 puts '<h6 style="text-align: center;">' + topSeasonImage[tempCount]['showName'].to_s + '</h6>'
                                 puts '<h6 style="text-align: center;">Season ' + topSeasonImage[tempCount]['seasonNum'].to_s + '</h6>'
+                                puts '<span class="tooltiptext">'
+                                puts '<form action="Profile_Settings.cgi" method="POST">'
+                                puts' <input type="submit" name="removeSeason" value="X">'
+                                puts '<input type="hidden" name="seasonId" value="' + topSeasonImage[tempCount]['seasonId'].to_s + '">'
+                                puts '</form></span>'
                                 tempCount = tempCount + 1
                             end
                         puts '</div>'
@@ -485,7 +504,7 @@ puts '<body id="profileSettings">'
                 tempCount = 0
                 episodeNum = 0
                 #Episode
-                topEpImage = db.query("SELECT series.imageName, series.showName, season.seasonNum, episode.epName, topFiveEpisode.ranking FROM series JOIN season ON series.showId = season.seriesId JOIN episode ON season.seasonId = episode.seasonId JOIN topFiveEpisode ON episode.epId = topFiveEpisode.epId WHERE username = '" + username.to_s + "' ORDER BY topFiveEpisode.ranking ASC;")
+                topEpImage = db.query("SELECT series.imageName, series.showName, season.seasonNum, episode.epName, episode.epId, topFiveEpisode.ranking FROM series JOIN season ON series.showId = season.seriesId JOIN episode ON season.seasonId = episode.seasonId JOIN topFiveEpisode ON episode.epId = topFiveEpisode.epId WHERE username = '" + username.to_s + "' ORDER BY topFiveEpisode.ranking ASC;")
                 topEpImage = topEpImage.to_a
                 puts '<h5>Episodes</h5>'
                 puts '<div class="TopFiveEpisode">'
@@ -522,6 +541,11 @@ puts '<body id="profileSettings">'
                             if topEpImage[tempCount] && (topEpImage[tempCount]['ranking'].to_i == (i + 1))
                                 puts '<h6 style="text-align: center;">' + topEpImage[tempCount]['showName'].to_s + '</h6>'
                                 puts '<h6 style="text-align: center;">S' + topEpImage[tempCount]['seasonNum'].to_s + ' ' + topEpImage[tempCount]['epName'].to_s + '</h6>'
+                                puts '<span class="tooltiptext">'
+                                puts '<form action="Profile_Settings.cgi" method="POST">'
+                                puts' <input type="submit" name="removeEp" value="X">'
+                                puts '<input type="hidden" name="epId" value="' + topEpImage[tempCount]['epId'].to_s + '">'
+                                puts '</form></span>'
                                 tempCount = tempCount + 1
                             end
                         puts '</div>'

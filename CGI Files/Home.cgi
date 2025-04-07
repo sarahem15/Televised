@@ -25,7 +25,7 @@ series = series.to_a
 sortedSeries = db.query("SELECT * FROM series ORDER BY year DESC;")
 sortedSeries = sortedSeries.to_a
 
-reviews = db.query("SELECT * FROM seriesReview ORDER BY date DESC")
+reviews = db.query("SELECT * FROM seriesReview ORDER BY date DESC;")
 reviews = reviews.to_a
 likeCount = 0
 alreadyLiked = false
@@ -170,7 +170,7 @@ puts '<p> Most Recent Reviews </p>'
 puts '<section class="homeReviews">'
     
 
-(0...4).each do |i|
+(0...6).each do |i|
     seriesImage = db.query("SELECT imageName, showName FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id = '" + reviews[i]['id'].to_s + "';")
     displayName = db.query("SELECT displayName FROM account where username ='" + reviews[i]['username'] + "';")
 puts '<div class="ReviewIndiv">'
@@ -192,9 +192,9 @@ puts '<div class="ReviewIndiv">'
 
       likes = db.query("SELECT * FROM likedSeriesReview WHERE reviewId = '" + reviews[i]['id'].to_s + "';")
       likes = likes.to_a
-      (0...likes.size).each do |i|
-        likeCount = likeCount + 1
-        if likes[i]['userWhoLiked'] == username.to_s
+      (0...likes.size).each do |j|
+        #likeCount = likeCount + 1
+        if likes[j]['userWhoLiked'] == username.to_s
             alreadyLiked = true
         end
     end
@@ -206,7 +206,7 @@ puts '<div class="ReviewIndiv">'
         puts '<button class="LIKES">&#10084</button>'
     end
     puts '<input type="hidden" name="likedReview" value="TRUE">'
-    puts '<a href="whoHasLiked.cgi?reviewId=' + reviews[i]['id'].to_s + '&type=EP">' + likeCount.to_s + '</a>'
+    puts '<a href="whoHasLiked.cgi?reviewId=' + reviews[i]['id'].to_s + '&type=EP">' + likes.size.to_s + '</a>'
     puts '<input type="hidden" name="reviewId" value="' + reviews[i]['id'].to_s + '">'
     puts '<input type="hidden" name="reviewCreator" value="' + reviews[i]['username'].to_s + '">'
     puts '</form>'

@@ -134,9 +134,9 @@ puts "<body id=\"showsPage\">"
         puts '<br>'
       puts "<h2 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + series.first['genre'] + "</h2>"
       puts "<br>"
-      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + series.first['description']+ "</h4>"
+      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + series.first['description']+ "</h3>"
       puts "<br>"
-      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + series.first['year'].to_s + "</h4>"
+      puts "<h3 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + series.first['year'].to_s + "</h3>"
       puts "<br>"
       puts "<br>"
 
@@ -144,9 +144,9 @@ puts "<body id=\"showsPage\">"
       puts '<form action="threebuttons.cgi" method="POST">'
       alreadyWatchedSeries = db.query("SELECT * FROM haveWatchedSeries WHERE username = '" + username + "'AND seriesId = '" + seriesId.to_s + "';")
         if (alreadyWatchedSeries.to_a.to_s != "[]")
-          puts '<button class="watchedButton"><i class="eye-icon fa fa-eye" style="color: #6bdf10;" ></i></button>'
+          puts '<button class="watchedButton"><i class="eye-icon fa fa-eye" style="color: #6bdf10;"></i></button>'
         else
-          puts '<button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button>'
+          puts '<span class="infoQuestion"><button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button><i><h4><p class="info"> To add a series to your Have Watched, click the eye above! </p></h4></i></span>'
         end
         #puts "<button class=\"watchedButton\">EYE</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
@@ -156,7 +156,7 @@ puts "<body id=\"showsPage\">"
         
         doneReview = db.query("SELECT * FROM seriesReview WHERE username = '" + username.to_s + "' AND seriesId = '" + seriesId.to_s + "';").to_a.to_s
         if doneReview != "[]"
-        puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeriesReview\" style='color: darkgray;'>&#128488</button>"
+        puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeriesReview\" style='color: #00156d;'>&#128488</button>"
       else
         puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeriesReview\">&#128488</button>"
       end
@@ -186,13 +186,16 @@ puts "<body id=\"showsPage\">"
         puts '</section>'
 
         puts "<div class=\"seasonDropdown\">"
-        puts '<button class="menuButton"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
-  <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
-</svg></button>'
+        puts '<button class="menuButton">&#10061 &#10061 &#10061</button>'
 
         puts "<div class=\"dropseason-content\">"
         puts '<form action="threebuttons.cgi" method="POST">'
+        alreadyWant = db.query("SELECT * FROM wantToWatchSeries where username = '" + username.to_s + "' AND seriesId = '" + seriesId.to_s + "';").to_a.to_s
+        if alreadyWant != "[]"
+        puts "<button style='color: #50db04;'>&#10004 Added to Want to Watch</button>"
+      else
         puts "<button>Add to Want to Watch</button>"
+      end
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="wantToWatch" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
@@ -287,7 +290,7 @@ puts "<body id=\"showsPage\">"
         if (alreadyWatchedSeason.to_a.to_s != "[]")
           puts '<button class="watchedButton"><i class="eye-icon fa fa-eye" style="color: #6bdf10;"></i></button>'
         else
-          puts '<button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button>'
+          puts '<span class="infoQuestion"><button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button><i><h5><p class="info"> Add a season to Have Watched </p></h5></i></span>'
         end
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
@@ -296,7 +299,7 @@ puts "<body id=\"showsPage\">"
         puts '</form>'
         doneReview = db.query("SELECT * FROM seasonReview WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonId.to_s + "';").to_a.to_s
         if doneReview != "[]"
-          puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeasonReview\" style='color: darkgray;'>&#128488</button>"
+          puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeasonReview\" style='color: #00156d;'>&#128488</button>"
         else 
           puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeasonReview\">&#128488</button>"
         end
@@ -324,12 +327,15 @@ puts "<body id=\"showsPage\">"
         puts '</section>'
 
         puts "<div class=\"seasonDropdown\">"
-        puts '<button class="menuButton"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
-  <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
-</svg></button>'
+        puts '<button class="menuButton">&#10061 &#10061 &#10061</button>'
         puts "<div class=\"dropseason-content\">"
         puts '<form action="threebuttons.cgi" method="POST">'
+        alreadyWant = db.query("SELECT * FROM wantToWatchSeason where username = '" + username.to_s + "' AND seasonId = '" + seasonId.to_s + "';").to_a.to_s
+        if alreadyWant != "[]"
+        puts "<button style='color: #50db04;'>&#10004 Added to Want to Watch</button>"
+      else
         puts "<button>Add to Want to Watch</button>"
+      end
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="wantToWatch" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
@@ -396,7 +402,7 @@ puts "<body id=\"showsPage\">"
         if (alreadyWatchedEpisode.to_a.to_s != "[]")
           puts '<button class="watchedButton"><i class="eye-icon fa fa-eye" style="color: #6bdf10;"></i></button>'
         else
-          puts '<button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button>'
+          puts '<span class="infoQuestion"><button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button><i><h5><p class="info"> Add to Have Watched </p></h5></i></span>'
         end
         #puts "<button class=\"watchedButton\">EYE</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
@@ -432,12 +438,15 @@ puts "<body id=\"showsPage\">"
         puts '</section>'
 
         puts "<div class=\"seasonDropdown\">"
-        puts '<button class="menuButton"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots" viewBox="0 0 16 16">
-  <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3m5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"/>
-</svg></button>'
+        puts '<button class="menuButton">&#10061 &#10061 &#10061</button>'
         puts "<div class=\"dropseason-content\">"
         puts '<form action="threebuttons.cgi" method="POST">'
+        alreadyWant = db.query("SELECT * FROM wantToWatchEpisode where username = '" + username.to_s + "' AND epId = '" + episode['epId'].to_s + "';").to_a.to_s
+        if alreadyWant != "[]"
+        puts "<button style='color: #50db04;'>&#10004 Added to Want to Watch</button>"
+      else
         puts "<button>Add to Want to Watch</button>"
+      end
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="epID" value="' + episode['epId'].to_s + '">'
         puts '<input type="hidden" name="wantToWatch" value="TRUE">'
