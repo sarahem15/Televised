@@ -49,50 +49,55 @@ db = Mysql2::Client.new(
 
 # Handle AJAX search
 if search != ""
+  results_html = ""  # To accumulate results as HTML
+
   if type == "Series"
     results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
     if results.count > 0
       results.each do |row|
-        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
+        results_html += "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        results_html += "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
       end
     else
-      puts "<p>We can't seem to find this title!</p>"
+      results_html += "<p>We can't seem to find this title!</p>"
     end
   elsif type == "Season"
     results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
     if results.count > 0
       results.each do |row|
         seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'").to_a
-        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
-        puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
+        results_html += "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        results_html += "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
+        results_html += "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
         seasons.each_with_index do |season, index|
-          puts "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
+          results_html += "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
         end
-        puts "</select></p>"
+        results_html += "</select></p>"
       end
     else
-      puts "<p>We can't seem to find this title!</p>"
+      results_html += "<p>We can't seem to find this title!</p>"
     end
   elsif type == "Episode"
     results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
     if results.count > 0
       results.each do |row|
         seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'").to_a
-        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-        puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
+        results_html += "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        results_html += "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
         seasons.each_with_index do |season, index|
-          puts "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
+          results_html += "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
         end
-        puts "</select>"
-        puts "<div id='episodeSelect'></div>"
-        puts "</p>"
+        results_html += "</select>"
+        results_html += "<div id='episodeSelect'></div>"
+        results_html += "</p>"
       end
     else
-      puts "<p>We can't seem to find this title!</p>"
+      results_html += "<p>We can't seem to find this title!</p>"
     end
   end
+
+  # Output only the results, not the full page
+  print results_html
   exit
 end
 
@@ -180,21 +185,16 @@ puts "          <button id='saveList' name='saveList' class='btn btn-primary'>CR
 puts "        </form>"
 puts "      </div>"
 
-puts "      <div class='col-12 col-md-4' id='listColumn'>"
-puts "        <h3 class='text-center'>Selected Series/Seasons/Episodes</h3>"
-puts "        <ul id='selectedList' class='list-group'></ul>"
-puts "      </div>"
-
 puts "      <div class='col-12 col-md-4' id='searchColumn'>"
-puts "        <h3 class='text-center'>Search for a Series/Season/Episode</h3>"
+puts "        <h3 class='text-center'>Search</h3>"
 puts "        <form id='searchForm'>"
-puts "          <select id='type' name='typeSearch' class='form-control'>"
-puts "            <option value='Series' selected>Series</option>"
+puts "          <input type='text' name='mediaEntered' class='form-control' placeholder='Search for series, season, or episode' required><br>"
+puts "          <select name='typeSearch' class='form-control'>"
+puts "            <option value='Series'>Series</option>"
 puts "            <option value='Season'>Season</option>"
 puts "            <option value='Episode'>Episode</option>"
 puts "          </select><br>"
-puts "          <input type='text' name='mediaEntered' class='form-control'>"
-puts "          <input type='submit' value='Search' class='btn btn-secondary mt-2'>"
+puts "          <button type='submit' class='btn btn-primary'>Search</button>"
 puts "        </form>"
 puts "        <div id='searchResults'></div>"
 puts "      </div>"
@@ -202,27 +202,30 @@ puts "      </div>"
 puts "    </div>"
 puts "  </div>"
 
-# Embedded JavaScript
-puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-puts '<script src="Televised.js"></script>'
-puts "<script>"
-puts "document.addEventListener('DOMContentLoaded', function () {"
-puts "  sessionStorage.removeItem('seriesArray');"
-puts "  sessionStorage.removeItem('seasonArray');"
-puts "  sessionStorage.removeItem('episodeArray');"
-puts "  updateAllLists();"
-
-puts "  document.getElementById('saveList').addEventListener('click', function() {"
-puts "    var seriesArray = JSON.parse(sessionStorage.getItem('seriesArray') || '[]');"
-puts "    var seasonArray = JSON.parse(sessionStorage.getItem('seasonArray') || '[]');"
-puts "    var episodeArray = JSON.parse(sessionStorage.getItem('episodeArray') || '[]');"
-puts "    document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
-puts "    document.getElementById('seasonArrayInput').value = JSON.stringify(seasonArray);"
-puts "    document.getElementById('episodeArrayInput').value = JSON.stringify(episodeArray);"
-puts "  });"
-puts "});"
-puts "</script>"
-
+puts "  <script>"
+puts "    document.addEventListener('DOMContentLoaded', function () {"
+puts "      sessionStorage.removeItem('seriesArray');"
+puts "      sessionStorage.removeItem('seasonArray');"
+puts "      sessionStorage.removeItem('episodeArray');"
+puts "      updateAllLists();"
+puts "      $('#searchForm').submit(function(event) {"
+puts "        event.preventDefault();"
+puts "        var search = $('input[name=mediaEntered]').val();"
+puts "        var type = $('select[name=typeSearch]').val();"
+puts "        $.ajax({"
+puts "          type: 'GET',"
+puts "          url: '/path/to/your/cgi/script.cgi',"
+puts "          data: { mediaEntered: search, typeSearch: type },"
+puts "          success: function(response) {"
+puts "            $('#searchResults').html(response);"
+puts "          },"
+puts "          error: function(xhr, status, error) {"
+puts "            console.log('Error: ' + error);"
+puts "          }"
+puts "        });"
+puts "      });"
+puts "    });"
+puts "  </script>"
+puts "</body>"
+puts "</html>"
 session.close
-puts "</body></html>"
