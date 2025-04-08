@@ -116,7 +116,11 @@ puts "<body id=\"showsPage\">"
 
     puts "<div class=\"showWords\">"
       puts '<div class="titleRating">'
-      puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + series.first['showName'] + "</h1>"
+      if series.first['showName'] == "The End of the Fucking World"
+        puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">The End of the F***ing World</h1>"
+      else
+        puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + series.first['showName'] + "</h1>"
+      end
       puts '<section class="avgRating" style="height: 10px;">'
         if avgSeriesRating != 0
           (0...5).each do |j|

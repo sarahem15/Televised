@@ -115,7 +115,7 @@ if (pageNumber.to_i == 3)
                 puts '<input type="image" src="' + series[i]['imageName'] + '" alt="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
-                puts '<h5 style="text-align: center;">' + series[i]['showName'] + '</h5>'
+                puts '<h5 style="text-align: center;">' + series[i]['showName'].gsub("Fucking", "F***ing") + '</h5>'
             puts '</form>'
             puts '</div>'
         end
@@ -132,7 +132,7 @@ if (pageNumber.to_i == 3)
                 puts '<input type="image" src="' + series[i]['imageName'] + '" alt="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
-                puts '<h5 style="text-align: center;">' + series[i]['showName'] + '</h5>'
+                puts '<h5 style="text-align: center;">' + series[i]['showName'].gsub("Fucking", "F***ing") + '</h5>'
             puts '</form>'
             puts '</div>'
         end
@@ -149,7 +149,7 @@ if (pageNumber.to_i == 3)
                 puts '<input type="image" src="' + series[i]['imageName'] + '" alt="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + series[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
-                puts '<h5 style="text-align: center;">' + series[i]['showName'] + '</h5>'
+                puts '<h5 style="text-align: center;">' + series[i]['showName'].gsub("Fucking", "F***ing") + '</h5>'
             puts '</form>'
             puts '</div>'
         end
@@ -260,7 +260,7 @@ if (sortBy == 'az')
                         puts '<input type="image" src="' + firstCharacterSort[size]['imageName'] + '" alt="' + firstCharacterSort[size]['imageName'] + '">'
                         puts '<input type="hidden" name="clicked_image" value="' + firstCharacterSort[size]['imageName'] + '">'
                         puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
-                        puts '<h5 style="text-align: center;">' + firstCharacterSort[size]['showName'] + '</h5>'
+                        puts '<h5 style="text-align: center;">' + firstCharacterSort[size]['showName'].gsub("Fucking", "F***ing") + '</h5>'
                         size = size + 1
                     puts '</form>'
                     puts '</div>'
@@ -415,7 +415,7 @@ endArray = 5
                 puts '<input type="image" src="' + streamings[size]['imageName'] + '" alt="' + streamings[size]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + streamings[size]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="1">'
-                puts '<h5 style="text-align: center;">' + streamings[size]['showName'] + '</h5>'
+                puts '<h5 style="text-align: center;">' + streamings[size]['showName'].gsub("Fucking", "F***ing") + '</h5>'
                 size = size + 1
             puts '</form>'
             puts '</div>'

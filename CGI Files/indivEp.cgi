@@ -102,7 +102,7 @@ puts "<body id=\"episodePage\">"
     #end
     puts "<br>"
     puts "<br>"
-      puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: center;\">" + showName + "</h1>"
+      puts "<h1 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: center;\">" + showName.gsub("Fucking", "F***ing") + "</h1>"
       puts "<div class=\"epWords\">"
       puts "<h3> Season 1 </h3>"
       puts "<h3> Episode " + epNum.to_s + "</h3>"
