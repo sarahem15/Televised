@@ -8,32 +8,20 @@ require 'cgi/session'
 require 'json'
 
 cgi = CGI.new
-session = CGI::Session.new(cgi, { "cookie_only" => false })
+session = CGI::Session.new(cgi)
 
-# Get username from session
-username = session["username"]
+username = session['username']
 
-# If not logged in, redirect
-unless username && !username.empty?
-  puts cgi.header
-  puts "<script>alert('You must be logged in to create a list.'); window.location = 'login.cgi';</script>"
-  session.close
-  exit
-end
-
-# Ensure the correct header is sent
 print cgi.header(
   'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
 )
 
-# Gather parameters from the form
 search = cgi['mediaEntered']
 type = cgi['typeSearch']
 listName = cgi['listName']
 description = cgi['description']
 privacy = cgi['views'] == "Public" ? 1 : 0
 
-# Parse the series and season arrays from sessionStorage, if present
 begin
   seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
 rescue JSON::ParserError
@@ -46,7 +34,12 @@ rescue JSON::ParserError
   seasonArray = []
 end
 
-# Initialize MySQL client
+begin
+  episodeArray = cgi['episodeArray'] && !cgi['episodeArray'].empty? ? JSON.parse(cgi['episodeArray']) : []
+rescue JSON::ParserError
+  episodeArray = []
+end
+
 db = Mysql2::Client.new(
   host: '10.20.3.4',
   username: 'seniorproject25',
@@ -78,6 +71,23 @@ if search != ""
           puts "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
         end
         puts "</select></p>"
+      end
+    else
+      puts "<p>We can't seem to find this title!</p>"
+    end
+  elsif type == "Episode"
+    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+    if results.count > 0
+      results.each do |row|
+        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'").to_a
+        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
+        seasons.each_with_index do |season, index|
+          puts "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
+        end
+        puts "</select>"
+        puts "<div id='episodeSelect'></div>"
+        puts "</p>"
       end
     else
       puts "<p>We can't seem to find this title!</p>"
@@ -118,8 +128,16 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
     end
   end
 
-  if seriesArray.empty? && seasonArray.empty?
-    puts "<script>alert('Please select at least one series or season before saving.');</script>"
+  unless episodeArray.empty?
+    episodeArray.each do |episode|
+      ep_id = episode["epId"].to_i
+      db.query("INSERT INTO curatedListEpisode (username, epId, name, description, privacy, date, listId)
+                VALUES ('#{username}', #{ep_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
+    end
+  end
+
+  if seriesArray.empty? && seasonArray.empty? && episodeArray.empty?
+    puts "<script>alert('Please select at least one series, season, or episode before saving.');</script>"
     exit
   end
 
@@ -157,21 +175,23 @@ puts "          <label>Description</label>"
 puts "          <textarea name='description' class='form-control' rows='5'></textarea><br>"
 puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray'>"
 puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray'>"
+puts "          <input type='hidden' id='episodeArrayInput' name='episodeArray'>"
 puts "          <button id='saveList' name='saveList' class='btn btn-primary'>CREATE LIST</button>"
 puts "        </form>"
 puts "      </div>"
 
 puts "      <div class='col-12 col-md-4' id='listColumn'>"
-puts "        <h3 class='text-center'>Selected Series/Seasons</h3>"
-puts "        <ul id='seriesList' class='list-group'></ul>"
+puts "        <h3 class='text-center'>Selected Series/Seasons/Episodes</h3>"
+puts "        <ul id='selectedList' class='list-group'></ul>"
 puts "      </div>"
 
 puts "      <div class='col-12 col-md-4' id='searchColumn'>"
-puts "        <h3 class='text-center'>Search for a Series</h3>"
+puts "        <h3 class='text-center'>Search for a Series/Season/Episode</h3>"
 puts "        <form id='searchForm'>"
 puts "          <select id='type' name='typeSearch' class='form-control'>"
 puts "            <option value='Series' selected>Series</option>"
 puts "            <option value='Season'>Season</option>"
+puts "            <option value='Episode'>Episode</option>"
 puts "          </select><br>"
 puts "          <input type='text' name='mediaEntered' class='form-control'>"
 puts "          <input type='submit' value='Search' class='btn btn-secondary mt-2'>"
@@ -193,20 +213,16 @@ puts "  sessionStorage.removeItem('seasonArray');"
 puts "  sessionStorage.removeItem('episodeArray');"
 puts "  updateAllLists();"
 
-puts "  document.getElementById('searchForm').addEventListener('submit', function (event) {"
-puts "    event.preventDefault();"
-puts "    let searchInput = document.querySelector('input[name=\"mediaEntered\"]').value;"
-puts "    let type = document.querySelector('select[name=\"typeSearch\"]').value;"
-puts "    fetch('createNewList.cgi', {"
-puts "      method: 'POST',"
-puts "      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },"
-puts "      body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })"
-puts "    })"
-puts "    .then(response => response.text())"
-puts "    .then(data => { document.getElementById('searchResults').innerHTML = data; });"
+puts "  document.getElementById('saveList').addEventListener('click', function() {"
+puts "    var seriesArray = JSON.parse(sessionStorage.getItem('seriesArray') || '[]');"
+puts "    var seasonArray = JSON.parse(sessionStorage.getItem('seasonArray') || '[]');"
+puts "    var episodeArray = JSON.parse(sessionStorage.getItem('episodeArray') || '[]');"
+puts "    document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
+puts "    document.getElementById('seasonArrayInput').value = JSON.stringify(seasonArray);"
+puts "    document.getElementById('episodeArrayInput').value = JSON.stringify(episodeArray);"
 puts "  });"
 puts "});"
 puts "</script>"
-puts "</body></html>"
 
 session.close
+puts "</body></html>"
