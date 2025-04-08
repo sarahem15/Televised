@@ -18,10 +18,9 @@ print cgi.header(
 
 search = cgi['mediaEntered']
 type = cgi['typeSearch']
-
 listName = cgi['listName']
 description = cgi['description']
-privacy = cgi['views'] == "Public" ? 1 : 0  
+privacy = cgi['views'] == "Public" ? 1 : 0
 
 begin
   seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
@@ -36,13 +35,13 @@ rescue JSON::ParserError
 end
 
 db = Mysql2::Client.new(
-  host: '10.20.3.4', 
-  username: 'seniorproject25', 
-  password: 'TV_Group123!', 
+  host: '10.20.3.4',
+  username: 'seniorproject25',
+  password: 'TV_Group123!',
   database: 'televised_w25'
 )
 
-# Handle AJAX search functionality
+# Handle AJAX search
 if search != ""
   if type == "Series"
     results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
@@ -74,10 +73,9 @@ if search != ""
   exit
 end
 
-# Handle list creation
+# Save list
 if cgi['saveList'] && !listName.empty? && !description.empty?
   existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
-
   if existing_list.count > 0
     puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
     exit
@@ -86,7 +84,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
   db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
   list_id = db.last_id
 
-  if !seriesArray.empty?
+  unless seriesArray.empty?
     seriesArray.each do |series|
       series_id = series["id"].to_i
       db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
@@ -94,7 +92,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
     end
   end
 
-  if !seasonArray.empty?
+  unless seasonArray.empty?
     seasonArray.each do |season|
       show_id = season["seriesId"].to_i
       season_num = season["season"].to_i
@@ -116,7 +114,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
   exit
 end
 
-# Start HTML output
+# HTML layout
 puts "<!DOCTYPE html>"
 puts "<html lang='en'>"
 puts "<head>"
@@ -136,139 +134,131 @@ puts "      <div class='col-12 col-md-4' id='listRow'>"
 puts "        <h3 class='text-center'>List Details</h3>"
 puts "        <form id='newListForm' method='post'>"
 puts "          <label>Name</label>"
-puts "          <input type='text' name='listName' class='form-control' placeholder='Name' required>"
-puts "          <br>"
+puts "          <input type='text' name='listName' class='form-control' placeholder='Name' required><br>"
 puts "          <label>Who Can View</label>"
 puts "          <select name='views' class='form-control'>"
 puts "            <option value='Public'>Public - anyone can view</option>"
 puts "            <option value='Private'>Private - no one can view</option>"
-puts "          </select>"
-puts "          <br>"
+puts "          </select><br>"
 puts "          <label>Description</label>"
-puts "          <textarea name='description' class='form-control' rows='5'></textarea>"
-puts "          <br>"
+puts "          <textarea name='description' class='form-control' rows='5'></textarea><br>"
 puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray'>"
 puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray'>"
 puts "          <button id='saveList' name='saveList' class='btn btn-primary'>CREATE LIST</button>"
 puts "        </form>"
 puts "      </div>"
+
 puts "      <div class='col-12 col-md-4' id='listColumn'>"
 puts "        <h3 class='text-center'>Selected Series/Seasons</h3>"
 puts "        <ul id='seriesList' class='list-group'></ul>"
 puts "      </div>"
+
 puts "      <div class='col-12 col-md-4' id='searchColumn'>"
 puts "        <h3 class='text-center'>Search for a Series</h3>"
 puts "        <form id='searchForm'>"
 puts "          <select id='type' name='typeSearch' class='form-control'>"
 puts "            <option value='Series' selected>Series</option>"
 puts "            <option value='Season'>Season</option>"
-puts "          </select>"
-puts "          <br>"
+puts "          </select><br>"
 puts "          <input type='text' name='mediaEntered' class='form-control'>"
 puts "          <input type='submit' value='Search' class='btn btn-secondary mt-2'>"
 puts "        </form>"
 puts "        <div id='searchResults'></div>"
 puts "      </div>"
+
 puts "    </div>"
 puts "  </div>"
-puts '<!-- Scripts -->'
-puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-puts '<script src="Televised.js"></script>'
-puts <<~JAVASCRIPT
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    sessionStorage.removeItem('seriesArray');
-    sessionStorage.removeItem('seasonArray');
-    sessionStorage.removeItem('episodeArray');
-    updateAllLists();
 
-    document.getElementById('searchForm').addEventListener('submit', function (event) {
-      event.preventDefault();
-      let searchInput = document.querySelector('input[name="mediaEntered"]').value;
-      let type = document.querySelector('select[name="typeSearch"]').value;
-      fetch('createNewList.cgi', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })
-      })
-      .then(response => response.text())
-      .then(data => { document.getElementById('searchResults').innerHTML = data; });
-    });
+# Embedded JavaScript
+puts "<script>"
+puts "document.addEventListener('DOMContentLoaded', function () {"
+puts "  sessionStorage.removeItem('seriesArray');"
+puts "  sessionStorage.removeItem('seasonArray');"
+puts "  sessionStorage.removeItem('episodeArray');"
+puts "  updateAllLists();"
 
-    document.addEventListener("click", function (event) {
-      if (event.target.classList.contains("addToList")) {
-        event.preventDefault();
-        let seriesId = event.target.dataset.seriesId;
-        let seriesName = event.target.dataset.seriesName;
-        let parent = event.target.closest("p");
+puts "  document.getElementById('searchForm').addEventListener('submit', function (event) {"
+puts "    event.preventDefault();"
+puts "    let searchInput = document.querySelector('input[name=\"mediaEntered\"]').value;"
+puts "    let type = document.querySelector('select[name=\"typeSearch\"]').value;"
+puts "    fetch('createNewList.cgi', {"
+puts "      method: 'POST',"
+puts "      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },"
+puts "      body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })"
+puts "    })"
+puts "    .then(response => response.text())"
+puts "    .then(data => { document.getElementById('searchResults').innerHTML = data; });"
+puts "  });"
 
-        if (document.querySelector("select.seasonSelect", parent)) {
-          let seasonNum = parent.querySelector("select.seasonSelect").selectedIndex + 1;
-          let seasonArray = JSON.parse(sessionStorage.getItem("seasonArray")) || [];
-          if (!seasonArray.some(s => s.seriesId === seriesId && s.season === seasonNum)) {
-            seasonArray.push({ seriesId: seriesId, name: seriesName, season: seasonNum });
-            sessionStorage.setItem("seasonArray", JSON.stringify(seasonArray));
-            updateAllLists();
-          }
-        } else {
-          let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
-          if (!seriesArray.some(s => s.id === seriesId)) {
-            seriesArray.push({ id: seriesId, name: seriesName });
-            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));
-            updateAllLists();
-          }
-        }
-      }
+puts "  document.addEventListener('click', function (event) {"
+puts "    if (event.target.classList.contains('addToList')) {"
+puts "      event.preventDefault();"
+puts "      let seriesId = event.target.dataset.seriesId;"
+puts "      let seriesName = event.target.dataset.seriesName;"
+puts "      let parent = event.target.closest('p');"
 
-      if (event.target.classList.contains("removeFromList")) {
-        event.preventDefault();
-        const type = event.target.dataset.type;
-        const index = parseInt(event.target.dataset.index, 10);
-        let key = `${type}Array`;
-        let arr = JSON.parse(sessionStorage.getItem(key)) || [];
-        arr.splice(index, 1);
-        sessionStorage.setItem(key, JSON.stringify(arr));
-        updateAllLists();
-      }
-    });
+puts "      if (parent.querySelector('select.seasonSelect')) {"
+puts "        let seasonNum = parent.querySelector('select.seasonSelect').selectedIndex + 1;"
+puts "        let seasonArray = JSON.parse(sessionStorage.getItem('seasonArray')) || [];"
+puts "        if (!seasonArray.some(s => s.seriesId === seriesId && s.season === seasonNum)) {"
+puts "          seasonArray.push({ seriesId: seriesId, name: seriesName, season: seasonNum });"
+puts "          sessionStorage.setItem('seasonArray', JSON.stringify(seasonArray));"
+puts "          updateAllLists();"
+puts "        }"
+puts "      } else {"
+puts "        let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
+puts "        if (!seriesArray.some(s => s.id === seriesId)) {"
+puts "          seriesArray.push({ id: seriesId, name: seriesName });"
+puts "          sessionStorage.setItem('seriesArray', JSON.stringify(seriesArray));"
+puts "          updateAllLists();"
+puts "        }"
+puts "      }"
+puts "    }"
 
-    function updateAllLists() {
-      let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
-      let seasonArray = JSON.parse(sessionStorage.getItem("seasonArray")) || [];
+puts "    if (event.target.classList.contains('removeFromList')) {"
+puts "      event.preventDefault();"
+puts "      const type = event.target.dataset.type;"
+puts "      const index = parseInt(event.target.dataset.index, 10);"
+puts "      let key = `${type}Array`;"
+puts "      let arr = JSON.parse(sessionStorage.getItem(key)) || [];"
+puts "      arr.splice(index, 1);"
+puts "      sessionStorage.setItem(key, JSON.stringify(arr));"
+puts "      updateAllLists();"
+puts "    }"
+puts "  });"
 
-      document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);
-      document.getElementById('seasonArrayInput').value = JSON.stringify(seasonArray);
+puts "  function updateAllLists() {"
+puts "    let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
+puts "    let seasonArray = JSON.parse(sessionStorage.getItem('seasonArray')) || [];"
 
-      let container = document.getElementById("seriesList");
-      container.innerHTML = "";
+puts "    document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
+puts "    document.getElementById('seasonArrayInput').value = JSON.stringify(seasonArray);"
 
-      seriesArray.forEach((s, i) => {
-        container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>
-          \${s.name} <button class='removeFromList btn btn-danger btn-sm' data-type='series' data-index='\${i}'>X</button>
-        </li>`;
-      });
+puts "    let container = document.getElementById('seriesList');"
+puts "    container.innerHTML = '';"
 
-      seasonArray.forEach((s, i) => {
-        container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>
-          \${s.name} Season \${s.season} <button class='removeFromList btn btn-danger btn-sm' data-type='season' data-index='\${i}'>X</button>
-        </li>`;
-      });
+puts "    seriesArray.forEach((s, i) => {"
+puts "      container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>${s.name} <button class='removeFromList btn btn-danger btn-sm' data-type='series' data-index='${i}'>X</button></li>`;"
+puts "    });"
 
-      const typeSelect = document.getElementById("type");
-      if (seriesArray.length > 0) {
-        typeSelect.value = "Series";
-        typeSelect.disabled = true;
-      } else if (seasonArray.length > 0) {
-        typeSelect.value = "Season";
-        typeSelect.disabled = true;
-      } else {
-        typeSelect.disabled = false;
-      }
-    }
-  });
-</script>
-JAVASCRIPT
+puts "    seasonArray.forEach((s, i) => {"
+puts "      container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>${s.name} Season ${s.season} <button class='removeFromList btn btn-danger btn-sm' data-type='season' data-index='${i}'>X</button></li>`;"
+puts "    });"
+
+puts "    const typeSelect = document.getElementById('type');"
+puts "    if (seriesArray.length > 0) {"
+puts "      typeSelect.value = 'Series';"
+puts "      typeSelect.disabled = true;"
+puts "    } else if (seasonArray.length > 0) {"
+puts "      typeSelect.value = 'Season';"
+puts "      typeSelect.disabled = true;"
+puts "    } else {"
+puts "      typeSelect.disabled = false;"
+puts "    }"
+puts "  }"
+puts "});"
+puts "</script>"
+
 puts "</body>"
 puts "</html>"
 
