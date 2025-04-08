@@ -254,6 +254,17 @@ puts <<~JAVASCRIPT
           \${s.name} Season \${s.season} <button class='removeFromList btn btn-danger btn-sm' data-type='season' data-index='\${i}'>X</button>
         </li>`;
       });
+
+      const typeSelect = document.getElementById("type");
+      if (seriesArray.length > 0) {
+        typeSelect.value = "Series";
+        typeSelect.disabled = true;
+      } else if (seasonArray.length > 0) {
+        typeSelect.value = "Season";
+        typeSelect.disabled = true;
+      } else {
+        typeSelect.disabled = false;
+      }
     }
   });
 </script>
