@@ -196,7 +196,7 @@ puts "            <option value='Episode'>Episode</option>"
 puts "          </select><br>"
 puts "          <button type='submit' class='btn btn-primary'>Search</button>"
 puts "        </form>"
-puts "        <div id='searchResults'></div>"
+puts "        <div id='searchResults' class='mt-3'></div>"  # This section is now below the search button
 puts "      </div>"
 
 puts "    </div>"
