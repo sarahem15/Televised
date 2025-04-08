@@ -8,20 +8,32 @@ require 'cgi/session'
 require 'json'
 
 cgi = CGI.new
-session = CGI::Session.new(cgi)
+session = CGI::Session.new(cgi, { "cookie_only" => false })
 
-username = session['username']
+# Get username from session
+username = session["username"]
 
+# If not logged in, redirect
+unless username && !username.empty?
+  puts cgi.header
+  puts "<script>alert('You must be logged in to create a list.'); window.location = 'login.cgi';</script>"
+  session.close
+  exit
+end
+
+# Ensure the correct header is sent
 print cgi.header(
   'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
 )
 
+# Gather parameters from the form
 search = cgi['mediaEntered']
 type = cgi['typeSearch']
 listName = cgi['listName']
 description = cgi['description']
 privacy = cgi['views'] == "Public" ? 1 : 0
 
+# Parse the series and season arrays from sessionStorage, if present
 begin
   seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
 rescue JSON::ParserError
@@ -34,6 +46,7 @@ rescue JSON::ParserError
   seasonArray = []
 end
 
+# Initialize MySQL client
 db = Mysql2::Client.new(
   host: '10.20.3.4',
   username: 'seniorproject25',
@@ -170,9 +183,9 @@ puts "    </div>"
 puts "  </div>"
 
 # Embedded JavaScript
-  puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-  puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-  puts '<script src="Televised.js"></script>'
+puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
+puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
+puts '<script src="Televised.js"></script>'
 puts "<script>"
 puts "document.addEventListener('DOMContentLoaded', function () {"
 puts "  sessionStorage.removeItem('seriesArray');"
@@ -192,77 +205,8 @@ puts "    })"
 puts "    .then(response => response.text())"
 puts "    .then(data => { document.getElementById('searchResults').innerHTML = data; });"
 puts "  });"
-
-puts "  document.addEventListener('click', function (event) {"
-puts "    if (event.target.classList.contains('addToList')) {"
-puts "      event.preventDefault();"
-puts "      let seriesId = event.target.dataset.seriesId;"
-puts "      let seriesName = event.target.dataset.seriesName;"
-puts "      let parent = event.target.closest('p');"
-
-puts "      if (parent.querySelector('select.seasonSelect')) {"
-puts "        let seasonNum = parent.querySelector('select.seasonSelect').selectedIndex + 1;"
-puts "        let seasonArray = JSON.parse(sessionStorage.getItem('seasonArray')) || [];"
-puts "        if (!seasonArray.some(s => s.seriesId === seriesId && s.season === seasonNum)) {"
-puts "          seasonArray.push({ seriesId: seriesId, name: seriesName, season: seasonNum });"
-puts "          sessionStorage.setItem('seasonArray', JSON.stringify(seasonArray));"
-puts "          updateAllLists();"
-puts "        }"
-puts "      } else {"
-puts "        let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
-puts "        if (!seriesArray.some(s => s.id === seriesId)) {"
-puts "          seriesArray.push({ id: seriesId, name: seriesName });"
-puts "          sessionStorage.setItem('seriesArray', JSON.stringify(seriesArray));"
-puts "          updateAllLists();"
-puts "        }"
-puts "      }"
-puts "    }"
-
-puts "    if (event.target.classList.contains('removeFromList')) {"
-puts "      event.preventDefault();"
-puts "      const type = event.target.dataset.type;"
-puts "      const index = parseInt(event.target.dataset.index, 10);"
-puts "      let key = `${type}Array`;"
-puts "      let arr = JSON.parse(sessionStorage.getItem(key)) || [];"
-puts "      arr.splice(index, 1);"
-puts "      sessionStorage.setItem(key, JSON.stringify(arr));"
-puts "      updateAllLists();"
-puts "    }"
-puts "  });"
-
-puts "  function updateAllLists() {"
-puts "    let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
-puts "    let seasonArray = JSON.parse(sessionStorage.getItem('seasonArray')) || [];"
-
-puts "    document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
-puts "    document.getElementById('seasonArrayInput').value = JSON.stringify(seasonArray);"
-
-puts "    let container = document.getElementById('seriesList');"
-puts "    container.innerHTML = '';"
-
-puts "    seriesArray.forEach((s, i) => {"
-puts "      container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>${s.name} <button class='removeFromList btn btn-danger btn-sm' data-type='series' data-index='${i}'>X</button></li>`;"
-puts "    });"
-
-puts "    seasonArray.forEach((s, i) => {"
-puts "      container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>${s.name} Season ${s.season} <button class='removeFromList btn btn-danger btn-sm' data-type='season' data-index='${i}'>X</button></li>`;"
-puts "    });"
-
-puts "    const typeSelect = document.getElementById('type');"
-puts "    if (seriesArray.length > 0) {"
-puts "      typeSelect.value = 'Series';"
-puts "      typeSelect.disabled = true;"
-puts "    } else if (seasonArray.length > 0) {"
-puts "      typeSelect.value = 'Season';"
-puts "      typeSelect.disabled = true;"
-puts "    } else {"
-puts "      typeSelect.disabled = false;"
-puts "    }"
-puts "  }"
 puts "});"
 puts "</script>"
-
-puts "</body>"
-puts "</html>"
+puts "</body></html>"
 
 session.close
