@@ -22,17 +22,17 @@ db = Mysql2::Client.new(
     database: 'televised_w25'
   )
 
-
+epNum = 0
 if type == 'SEASON'
   reviewContent = db.query("SELECT * FROM seasonReview WHERE id ='" + reviewId + "';")
-  seriesImage = db.query("SELECT showId, imageName, showName, series.year FROM series 
+  seriesImage = db.query("SELECT showId, imageName, showName, series.year, season.seasonNum FROM series 
     JOIN season ON season.seriesId = series.showID
     JOIN seasonReview ON season.seasonId = seasonReview.seasonId 
     WHERE seasonReview.id= '" + reviewId + "';")
   reviewRating = db.query("SELECT rating FROM seasonRating JOIN seasonReview ON seasonRating.id = seasonReview.ratingId WHERE seasonReview.id = '" + reviewId + "';")
 elsif type == 'EP'
   reviewContent = db.query("SELECT * FROM episodeReview WHERE id ='" + reviewId + "';")
-  seriesImage = db.query("SELECT showId, imageName, showName, series.year FROM series 
+  seriesImage = db.query("SELECT showId, imageName, showName, series.year, season.seasonNum, episode.epName FROM series 
     JOIN season ON season.seriesId = series.showID
     JOIN episode ON episode.seasonId = season.seasonId
     JOIN episodeReview ON episode.epId = episodeReview.epId 
@@ -43,6 +43,20 @@ else
   seriesImage = db.query("SELECT showId, imageName, showName, year FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id= '" + reviewId + "';")
   reviewRating = db.query("SELECT rating FROM seriesRating JOIN seriesReview ON seriesRating.id = seriesReview.ratingId WHERE seriesReview.id = '" + reviewId + "';")
 end
+alreadyLiked = false
+reviewId = cgi['reviewId']
+reviewCreator = cgi['reviewCreator']
+likedReview = cgi['likedReview']
+
+if likedReview == "TRUE"
+    begin
+        db.query("INSERT INTO likedSeriesReview VALUES ('" + username.to_s + "', '" + reviewCreator + "', '" + reviewId + "');")
+    rescue => e
+        db.query("DELETE FROM likedSeriesReview WHERE userWhoLiked = '" + username.to_s + "' AND reviewId = '" + reviewId + "';")
+    end
+end
+
+privacy = db.query("SELECT * FROM account WHERE username = '" + reviewContent.first['username'] + "';")
 puts'<!DOCTYPE html>'
 puts'<html lang="en">'
 
@@ -61,7 +75,35 @@ puts'<body id="reviewIndiv">'
   puts'<br>'
   puts '<br>'
 puts '<div class="originalReview">'
-	puts "<img src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\">" 
+  if type == "SEASON"
+    puts '<form action="series.cgi" style="padding: 0; border-width: 0; background-color: transparent; width: 200px;">'
+    puts '<input type="hidden" name="clicked_image" value="' + seriesImage.first['imageName'] + '" >'
+      puts '<input type="hidden" name="seasonNumber" value="' + seriesImage.first['seasonNum'].to_s + '">'
+      likes = db.query("SELECT * FROM likedSeasonReview WHERE reviewId = '" + reviewId + "';")
+  elsif type == "EP"
+    allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + seriesImage.first['showName'] + "';")
+          allEps = allEps.to_a
+          (0...allEps.size).each do |j|
+            if allEps[j]['epName'] == seriesImage.first['epName']
+              epNum = j + 1
+            end
+          end 
+    puts '<form action="indivEp.cgi" method="POST">'
+      puts '<input type="hidden" name="ep_name" value="' + seriesImage.first['epName'] + '">'
+      puts '<input type="hidden" name="show_name" value="' + seriesImage.first['showName'] + '">'
+      puts '<input type="hidden" name="seriesId" value="' + seriesImage.first['showId'].to_s + '">'
+      puts '<input type="hidden" name="ep_num" value="' + epNum.to_s + '">'
+      puts '<input type="hidden" name="seasonNumber" value="' + seriesImage.first['seasonNum'].to_s + '">'
+      likes = db.query("SELECT * FROM likedEpisodeReview WHERE reviewId = '" + reviewId + "';")
+  else
+    puts '<form action="series.cgi">'
+    puts '<input type="hidden" name="clicked_image" value="' + seriesImage.first['imageName'] + '">'
+      puts '<input type="hidden" name="seasonNumber" value="1">'
+      likes = db.query("SELECT * FROM likedSeriesReview WHERE reviewId = '" + reviewId + "';")
+  end
+  puts "<input type='image' src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\" style='height: 420px; width: 320px; object-fit: cover;'>" 
+  puts '</form>'
+
 	puts '<div class="content-R">'
 	puts '<section class="UserDisplay">'
          puts '<img src="./ProfileImages/' + reviewContent.first['username'] + '.jpg" alt="">'
@@ -82,7 +124,27 @@ puts '<div class="originalReview">'
         	end
         puts '</section>'
        puts '<h3>' + reviewContent.first['review'] + '</h3>'
-       puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+
+       #######LIKES#########
+       likes = likes.to_a
+       (0...likes.size).each do |i|
+        if likes[i]['userWhoLiked'] == username.to_s
+            alreadyLiked = true
+          end
+        end
+       puts '<form action="reviewIndiv.cgi">'
+       if alreadyLiked
+        puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+      else
+        puts '<button class="LIKES">&#10084</button>'
+      end
+      puts '<input type="hidden" name="likeSeriesReview" value="TRUE">'
+        puts '<a href="whoHasLiked.cgi?reviewId=' + reviewContent.first['id'].to_s + '&type=EP">' + likes.size.to_s + '</a>'
+        puts '<input type="hidden" name="clicked_image" value="' + seriesImage.first['imageName'].to_s + '">'
+        puts '<input type="hidden" name="seasonNumber" value="' + seriesImage.first['seasonNum'].to_s + '">'
+        puts '<input type="hidden" name="reviewId" value="' + reviewContent.first['id'].to_s + '">'
+        puts '<input type="hidden" name="reviewCreator" value="' + reviewContent.first['username'].to_s + '">'
+      puts '</form>'
        puts '<br>'
        puts '<br>'
        puts '<br>'
@@ -90,6 +152,7 @@ puts '<div class="originalReview">'
 
 	puts '</div>'
   # START DIV FOR TEXT BOX
+  if privacy.first['replies'].to_i == 1
        puts '<div class="reply">'
        puts '<form action="threebuttons.cgi" method="POST">'
        puts '<h4>Type your reply here:</h4>'
@@ -112,6 +175,7 @@ puts '<div class="originalReview">'
        puts '<button id="saveReply" class="btn" style="background-color: #9daef6;" type="submit">Reply</button>'
       puts '</form>'
       puts '</div>'
+end
 puts '</div>'
 
 puts '<br>'
@@ -138,14 +202,15 @@ puts '<div class="content-Reply">'
       puts '</section>'
       puts '<br>'
        puts '<h3>' + replies[i]['reply'] + '</h3>'
-       puts '<button class="LIKES" style="color: pink;">&#10084</button>'
   puts '</div>'
   puts '<br>'
   puts '<hr style="margin-left: 80px; margin-right: 80px;">'
   puts '<br>'
 end
-  if replies.size == 0 
+  if replies.size == 0 && privacy.first['replies'].to_i == 1
     puts '<h5 style="text-align: center;"> Replies will show up here! </h5>'
+  elsif privacy.first['replies'].to_i == 0
+    puts '<h5 style="text-align: center;"> This user has disabled replies! </h5>'
   end
   puts '<br>'
 puts '<!-- Scripts -->'
