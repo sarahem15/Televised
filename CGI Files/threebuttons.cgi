@@ -91,7 +91,7 @@ elsif fromReviewIndiv == 'TRUE'
         print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/reviewIndiv.cgi?reviewId=" + reviewId.to_s + "'>\n"
     end
 else
-    print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
+    print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/series.cgi?clicked_image=" + imageName.first['imageName'].to_s + "&seasonNumber=" + seasonNumber + "'>\n"
 end
 puts "</head>"
 puts "<body>"
@@ -295,14 +295,14 @@ end
 if reply != ""
     if type == "SEASON"
         date = year + "-" + month + "-" + day
-        db.query("INSERT INTO seasonReply VALUES (NULL, '" + reply + "', '" + username + "', '" + seasonId.to_s + "', '" + reviewId.to_s + "', '" + date + "');")
+        db.query("INSERT INTO seasonReply VALUES (NULL, '" + reply.gsub("'", "\\\\'") + "', '" + username + "', '" + seasonId.to_s + "', '" + reviewId.to_s + "', '" + date + "');")
     elsif type == "EP"
         date = year + "-" + month + "-" + day
         puts epId.to_s + date
-        db.query("INSERT INTO episodeReply VALUES (NULL, '" + reply + "', '" + username + "', '" + epId.to_s + "', '" + reviewId.to_s + "', '" + date + "');")
+        db.query("INSERT INTO episodeReply VALUES (NULL, '" + reply.gsub("'", "\\\\'") + "', '" + username + "', '" + epId.to_s + "', '" + reviewId.to_s + "', '" + date + "');")
     else
         date = year + "-" + month + "-" + day
-        db.query("INSERT INTO seriesReply VALUES (NULL, '" + reply + "', '" + username + "', '" + seriesId.to_s + "', '" + reviewId.to_s + "', '" + date + "');")
+        db.query("INSERT INTO seriesReply VALUES (NULL, '" + reply.gsub("'", "\\\\'") + "', '" + username + "', '" + seriesId.to_s + "', '" + reviewId.to_s + "', '" + date + "');")
     end
 end
 
