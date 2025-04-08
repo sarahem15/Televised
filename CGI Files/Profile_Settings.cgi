@@ -514,7 +514,7 @@ puts '<body id="profileSettings">'
                         puts '<div class="item">'
                             if (tempCount < topEpImage.size)
                                 if (topEpImage[tempCount]['ranking'].to_i == (i + 1))
-                                    allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + topEpImage[tempCount]['showName'] + "';")
+                                    allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + topEpImage[tempCount]['showName'].gsub("'", "\\\\'") + "';")
                                     allEps = allEps.to_a
                                     (0...allEps.size).each do |j|
                                         if allEps[j]['epName'] == topEpImage[tempCount]['epName']

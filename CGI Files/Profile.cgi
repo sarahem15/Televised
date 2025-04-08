@@ -128,7 +128,7 @@ puts '<body id="profile">'
           
         puts '<div class="item">'
           if count < topFiveEpisode.size && topFiveEpisode[count]['ranking'] == (i+1)
-          allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + topFiveEpisode[count]['showName'] + "';")
+          allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + topFiveEpisode[count]['showName'].gsub("'", "\\\\'") + "';")
           allEps = allEps.to_a
           (0...allEps.size).each do |j|
             if allEps[j]['epName'] == topFiveEpisode[count]['epName']
