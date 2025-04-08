@@ -290,11 +290,9 @@ puts "              <div class='col'>"
 if valid
   puts "<img src=\"Episodes/" + showName.gsub(" ", "").gsub("'", "") + seasonNumber.to_s + "." + epNum.to_s + ".1.jpg\" alt=\"\" id=\"mediaReviewImage\">" 
 else
-  puts "<img src=\"./Episodes/Televised.jpg\" width=\"300\" height=\"225\" id=\"mediaReviewImage\">"
+  puts "<img src=\"./Episodes/Televised.jpg\" style='height:200px; width: 300px; object-fit:cover; ' id=\"mediaReviewImage\">"
 end
-
 puts "              </div>"
-  puts "<br>"
 puts "              <div class='col' id='showInfo'>"
 puts "                <p id='reviewHeader'>I WATCHED…</p>"
 puts "                <p id='reviewShowTitle'>" + showName + "</p>"
@@ -303,6 +301,8 @@ puts "                <p id='reviewEpName'>" + episode.first['epName'] + "</p>"
 puts "              </div>"
   puts "<br>"
 puts "            </div>"
+puts "<br>"
+
 puts "            <div class='mb-3'>"
 #puts "              <textarea name='reviewText' class='form-control' id='userReview' placeholder='Add a review…' required></textarea>"
 currentEpReview = db.query("SELECT review FROM episodeReview WHERE username = '" + username.to_s + "' AND epId = '" + episode.first['epId'].to_s + "';")
