@@ -259,7 +259,6 @@ if review != ""
                 db.query("UPDATE seasonReview SET review = '" + reviewText.gsub("'", "\\\\'") + "', date = '" + date + "' WHERE ratingId = '" + rateId.to_s + "' AND username = '" + username.to_s + "';")
                 #puts "updated"
             else
-                puts "why are you here?????"
                db.query("INSERT INTO seasonReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seasonId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
             end
         else
@@ -274,17 +273,18 @@ if review != ""
     if epRating != ""
         if rateId != ""
             date = year + "-" + month + "-" + day
-            db.query("INSERT INTO episodeReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + epId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+            #db.query("INSERT INTO episodeReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + epId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+            if alreadyReviewedEp == 'TRUE'
+                db.query("UPDATE episodeReview SET review = '" + reviewText.gsub("'", "\\\\'") + "', date = '" + date + "' WHERE ratingId = '" + rateId.to_s + "' AND username = '" + username.to_s + "';")
+                #puts "updated"
+            else
+               db.query("INSERT INTO episodeReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + epId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+            end
         else
             date = year + "-" + month + "-" + day
-            #puts seasonRating.to_s + " split "
-            puts seasonId.to_s
             db.query("INSERT INTO episodeRating (rating, username, epId) VALUES ('" + epRating.to_s + "', '" + username.to_s + "', '" + epId.to_s + "');")
             rateId = db.query("SELECT id from episodeRating WHERE username = '" + username.to_s + "' AND epId = '" + epId.to_s + "';")
             rateId = rateId.first['id'].to_s
-            puts reviewText
-            puts epId.to_s
-            puts " split " + rateId.to_s
             db.query("INSERT INTO episodeReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + epId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
         end
     end
