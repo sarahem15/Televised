@@ -34,6 +34,12 @@ rescue JSON::ParserError
   seasonArray = []
 end
 
+begin
+  episodeArray = cgi['episodeArray'] && !cgi['episodeArray'].empty? ? JSON.parse(cgi['episodeArray']) : []
+rescue JSON::ParserError
+  episodeArray = []
+end
+
 db = Mysql2::Client.new(
   host: '10.20.3.4',
   username: 'seniorproject25',
@@ -43,18 +49,23 @@ db = Mysql2::Client.new(
 
 # Handle AJAX search
 if search != ""
+
   if type == "Series"
     results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+
     if results.count > 0
       results.each do |row|
         puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
         puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
       end
+
     else
       puts "<p>We can't seem to find this title!</p>"
     end
+
   elsif type == "Season"
     results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+
     if results.count > 0
       results.each do |row|
         seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'").to_a
@@ -64,11 +75,45 @@ if search != ""
         seasons.each_with_index do |season, index|
           puts "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
         end
+
         puts "</select></p>"
       end
+
     else
       puts "<p>We can't seem to find this title!</p>"
     end
+
+#episodeSearch
+  elsif type == "Episode"
+    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+
+    if results.count > 0
+      results.each do |row|
+        seasons = db.query("SELECT seasonId from season WHERE seriesId = '" + images[i]['showId'].to_s + "';")
+        seasons = seasons.to_a
+        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
+        puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
+        seasons.each_with_index do |season, index|
+          puts "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
+        end
+        episodes = db.query("SELECT * FROM episode JOIN season ON season.seasonId = episode.seasonId WHERE seasonNum = '" + seasonNum + "' AND seriesId = '" + images[i]['showId'].to_s + "';")
+        episodes = episodes.to_a
+        puts '<select id="typeSeason" name="epNum" class="form-control">'
+        puts '<option value="" selected>Episode</option>'
+              (0...episodes.size).each do |h|
+              puts '<option value="' + episodes[h]['epId'].to_s + '">' + episodes[h]['epName'] + '</option>'
+            end
+          puts '</select>'
+        end
+
+        puts "</select></p>"
+      end
+
+    else
+      puts "<p>We can't seem to find this title!</p>"
+    end
+
   end
   exit
 end
