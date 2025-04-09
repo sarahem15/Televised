@@ -16,122 +16,46 @@ print cgi.header(
   'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
 )
 
+# Get search input and type
 search = cgi['mediaEntered']
 type = cgi['typeSearch']
-listName = cgi['listName']
-description = cgi['description']
-privacy = cgi['views'] == "Public" ? 1 : 0
 
-begin
-  seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
-rescue JSON::ParserError
-  seriesArray = []
-end
-
-begin
-  seasonArray = cgi['seasonArray'] && !cgi['seasonArray'].empty? ? JSON.parse(cgi['seasonArray']) : []
-rescue JSON::ParserError
-  seasonArray = []
-end
-
-begin
-  episodeArray = cgi['episodeArray'] && !cgi['episodeArray'].empty? ? JSON.parse(cgi['episodeArray']) : []
-rescue JSON::ParserError
-  episodeArray = []
-end
-
-db = Mysql2::Client.new(
-  host: '10.20.3.4',
-  username: 'seniorproject25',
-  password: 'TV_Group123!',
-  database: 'televised_w25'
-)
-
-# Handle adding to the series, season, or episode list
-if cgi['addSeries']
-  seriesArray.push({ "id" => cgi['seriesId'], "name" => cgi['seriesName'] })
-elsif cgi['removeSeries']
-  seriesArray.reject! { |series| series['id'] == cgi['seriesId'].to_i }
-elsif cgi['addSeason']
-  seasonArray.push({ "seriesId" => cgi['seriesId'], "season" => cgi['seasonNum'] })
-elsif cgi['removeSeason']
-  seasonArray.reject! { |season| season['seriesId'] == cgi['seriesId'].to_i && season['season'] == cgi['seasonNum'].to_i }
-elsif cgi['addEpisode']
-  episodeArray.push({ "id" => cgi['epId'], "name" => cgi['epName'], "seasonId" => cgi['seasonId'] })
-elsif cgi['removeEpisode']
-  episodeArray.reject! { |ep| ep['id'] == cgi['epId'].to_i }
-end
-
-# Save list
-if cgi['saveList'] && !listName.empty? && !description.empty?
-  existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
-  if existing_list.count > 0
-    puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
-    exit
-  end
-
-  db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
-  list_id = db.last_id
-
-  unless seriesArray.empty?
-    seriesArray.each do |series|
-      series_id = series["id"].to_i
-      db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
-                VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
-    end
-  end
-
-  unless seasonArray.empty?
-    seasonArray.each do |season|
-      show_id = season["seriesId"].to_i
-      season_num = season["season"].to_i
-      result = db.query("SELECT seasonId FROM season WHERE seriesId = #{show_id} ORDER BY seasonId ASC LIMIT 1 OFFSET #{season_num - 1}")
-      if result.count > 0
-        season_id = result.first["seasonId"].to_i
-        db.query("INSERT INTO curatedListSeason (username, seasonId, name, description, privacy, date, listId)
-                  VALUES ('#{username}', #{season_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
-      end
-    end
-  end
-
-  unless episodeArray.empty?
-    episodeArray.each do |episode|
-      ep_id = episode["id"].to_i
-      db.query("INSERT INTO curatedListEpisode (username, epId, name, description, privacy, date, listId)
-                VALUES ('#{username}', #{ep_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
-    end
-  end
-
-  if seriesArray.empty? && seasonArray.empty? && episodeArray.empty?
-    puts "<script>alert('Please select at least one series, season, or episode before saving.');</script>"
-    exit
-  end
-
-  puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_Lists.cgi';</script>"
-  exit
-end
-
-# Handle search dynamically
+# If search is performed
 if search && type
-  search_results = []
-  case type
-  when 'Series'
-    search_results = db.query("SELECT showId, showName FROM series WHERE showName LIKE '%#{db.escape(search)}%'")
-  when 'Season'
-    search_results = db.query("SELECT seasonId, seasonNum FROM season WHERE seasonNum LIKE '%#{db.escape(search)}%'")
-  when 'Episode'
-    search_results = db.query("SELECT epId, epName FROM episode WHERE epName LIKE '%#{db.escape(search)}%'")
-  end
+  begin
+    db = Mysql2::Client.new(
+      host: '10.20.3.4',
+      username: 'seniorproject25',
+      password: 'TV_Group123!',
+      database: 'televised_w25'
+    )
+    
+    # Initialize result variable
+    search_results = []
+    
+    case type
+    when 'Series'
+      search_results = db.query("SELECT showId, showName FROM series WHERE showName LIKE '%#{db.escape(search)}%'")
+    when 'Season'
+      search_results = db.query("SELECT seasonId, seasonNum FROM season WHERE seasonNum LIKE '%#{db.escape(search)}%'")
+    when 'Episode'
+      search_results = db.query("SELECT epId, epName FROM episode WHERE epName LIKE '%#{db.escape(search)}%'")
+    end
+    
+    # Format results for response
+    results_html = "<ul class='list-group'>"
+    search_results.each do |result|
+      results_html += "<li class='list-group-item'>#{result['showName'] || result['seasonNum'] || result['epName']}</li>"
+    end
+    results_html += "</ul>"
 
-  results_html = "<ul class='list-group'>"
-  search_results.each do |result|
-    results_html += "<li class='list-group-item'>#{result['showName'] || result['seasonNum'] || result['epName']}</li>"
+    # Return the results as the response
+    print results_html
+    exit
+  rescue Mysql2::Error => e
+    print "Error connecting to database: #{e.message}"
+    exit
   end
-  results_html += "</ul>"
-
-  # Return the results as the response
-  print results_html
-  exit
 end
 
 # HTML layout
@@ -142,7 +66,6 @@ puts "  <meta charset='UTF-8'>"
 puts "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
 puts "  <title>Televised</title>"
 puts "  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
-puts "  <link rel='stylesheet' href='Televised.css'>"
 puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
 puts "  <script>"
 puts "    $(document).ready(function() {"
@@ -156,6 +79,9 @@ puts "          type: 'GET',"
 puts "          data: { mediaEntered: searchText, typeSearch: type },"
 puts "          success: function(response) {"
 puts "            $('#searchResults').html(response);"
+puts "          },"
+puts "          error: function() {"
+puts "            alert('An error occurred while fetching the search results.');"
 puts "          }"
 puts "        });"
 puts "      });"
@@ -208,6 +134,7 @@ puts "    </div>"
 puts "  </div>"
 puts "</body>"
 puts "</html>"
+
 
 
 
