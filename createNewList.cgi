@@ -150,8 +150,22 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
     end
   end
 
-  if seriesArray.empty? && seasonArray.empty?
-    puts "<script>alert('Please select at least one series or season before saving.');</script>"
+  unless episodeArray.empty?
+    episodeArray.each do |episode|
+      show_id = episode["seriesId"].to_i
+      season_num = episode["season"].to_i
+      ep_name = episode["epName"]
+      result = db.query("SELECT seasonId FROM season WHERE seriesId = #{show_id} ORDER BY seasonId ASC LIMIT 1 OFFSET #{season_num - 1}")
+      if result.count > 0
+        season_id = result.first["seasonId"].to_i
+        db.query("INSERT INTO curatedListEpisode (username, seasonId, epName, name, description, privacy, date, listId)
+                  VALUES ('#{username}', #{season_id}, #{epName}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
+      end
+    end
+  end
+
+  if seriesArray.empty? && seasonArray.empty? && episodeArray.empty?
+    puts "<script>alert('Please select at least one series, season, or episode before saving.');</script>"
     exit
   end
 
@@ -194,7 +208,7 @@ puts "        </form>"
 puts "      </div>"
 
 puts "      <div class='col-12 col-md-4' id='listColumn'>"
-puts "        <h3 class='text-center'>Selected Series/Seasons</h3>"
+puts "        <h3 class='text-center'>Selected Series/Seasons?Episodes</h3>"
 puts "        <ul id='seriesList' class='list-group'></ul>"
 puts "      </div>"
 
@@ -311,3 +325,263 @@ puts "</body>"
 puts "</html>"
 
 session.close
+
+
+
+
+
+
+
+
+#!/usr/bin/env ruby
+require 'cgi'
+require 'mysql2'
+require 'json'
+require 'date'
+
+cgi = CGI.new
+puts cgi.header("type" => "text/html", "charset" => "utf-8")
+
+# --- Session Handling ---
+session = CGI::Cookie::new("name" => "user", "value" => "", "path" => "/")
+username = cgi.cookies["user"]&.first
+
+# --- HTML Output Start ---
+puts <<-HTML
+<html>
+<head>
+  <title>Create New List</title>
+  <script>
+    let seriesArray = [];
+    let seasonArray = [];
+    let episodeArray = [];
+
+    function updateDisplay() {
+      document.getElementById("seriesList").innerHTML = seriesArray.map((s, i) =>
+        `<li>${s}<button onclick="removeFromArray(${i}, 'series')">Remove</button></li>`).join("");
+      document.getElementById("seasonList").innerHTML = seasonArray.map((s, i) =>
+        `<li>${s}<button onclick="removeFromArray(${i}, 'season')">Remove</button></li>`).join("");
+      document.getElementById("episodeList").innerHTML = episodeArray.map((ep, i) =>
+        `<li>${ep.showName}: S${ep.seasonNumber}: ${ep.epName} <button onclick="removeFromArray(${i}, 'episode')">Remove</button></li>`).join("");
+    }
+
+    function removeFromArray(index, type) {
+      if (type === 'series') seriesArray.splice(index, 1);
+      else if (type === 'season') seasonArray.splice(index, 1);
+      else if (type === 'episode') episodeArray.splice(index, 1);
+      updateDisplay();
+    }
+
+    function addSeries() {
+      const series = document.getElementById("seriesInput").value;
+      if (series && !seriesArray.includes(series)) {
+        seriesArray.push(series);
+        updateDisplay();
+      }
+    }
+
+    function addSeason() {
+      const series = document.getElementById("seriesInput").value;
+      const season = document.getElementById("seasonInput").value;
+      if (series && season) {
+        const entry = `${series} Season ${season}`;
+        if (!seasonArray.includes(entry)) {
+          seasonArray.push(entry);
+          updateDisplay();
+        }
+      }
+    }
+
+    function fetchSeasons() {
+      const showId = document.getElementById("episodeSeries").value;
+      fetch(`/getSeasons.cgi?showId=${showId}`)
+        .then(res => res.json())
+        .then(data => {
+          const dropdown = document.getElementById("episodeSeason");
+          dropdown.innerHTML = "";
+          data.forEach(season => {
+            const opt = document.createElement("option");
+            opt.value = season.seasonId;
+            opt.text = "Season " + season.seasonNum;
+            dropdown.add(opt);
+          });
+        });
+    }
+
+    function fetchEpisodes() {
+      const seasonId = document.getElementById("episodeSeason").value;
+      fetch(`/getEpisodes.cgi?seasonId=${seasonId}`)
+        .then(res => res.json())
+        .then(data => {
+          const dropdown = document.getElementById("episodeName");
+          dropdown.innerHTML = "";
+          data.forEach(ep => {
+            const opt = document.createElement("option");
+            opt.value = ep.epId;
+            opt.text = ep.epName;
+            dropdown.add(opt);
+          });
+        });
+    }
+
+    function addEpisode() {
+      const seriesDropdown = document.getElementById("episodeSeries");
+      const seasonDropdown = document.getElementById("episodeSeason");
+      const episodeDropdown = document.getElementById("episodeName");
+
+      const showId = seriesDropdown.value;
+      const showName = seriesDropdown.options[seriesDropdown.selectedIndex].text;
+      const seasonNumber = seasonDropdown.options[seasonDropdown.selectedIndex].text.replace("Season ", "");
+      const epId = episodeDropdown.value;
+      const epName = episodeDropdown.options[episodeDropdown.selectedIndex].text;
+
+      const entry = { showId, showName, epId, epName, seasonNumber };
+      if (!episodeArray.some(e => e.epId === epId)) {
+        episodeArray.push(entry);
+        updateDisplay();
+      }
+
+      document.getElementById("mediaSelect").disabled = true;
+    }
+
+    function submitForm() {
+      const mediaType = document.getElementById("mediaSelect").value;
+      const name = document.getElementById("listName").value;
+      const description = document.getElementById("description").value;
+      const privacy = document.querySelector('input[name="privacy"]:checked').value;
+
+      fetch("createNewList.cgi", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mediaType, name, description, privacy,
+          seriesArray, seasonArray, episodeArray
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        if (data.success) {
+          document.getElementById("listName").value = "";
+          document.getElementById("description").value = "";
+          seriesArray = [];
+          seasonArray = [];
+          episodeArray = [];
+          updateDisplay();
+          document.getElementById("mediaSelect").disabled = false;
+          window.location.href = "Profile_List.cgi";
+        }
+      });
+    }
+  </script>
+</head>
+<body onload="updateDisplay()">
+  <h1>Create New List</h1>
+  <label for="mediaSelect">Media Type:</label>
+  <select id="mediaSelect">
+    <option value="series">Series</option>
+    <option value="season">Season</option>
+    <option value="episode">Episode</option>
+  </select><br><br>
+
+  <label for="seriesInput">Series Name:</label>
+  <input type="text" id="seriesInput">
+  <button onclick="addSeries()">Add Series</button><br><br>
+
+  <label for="seasonInput">Season #:</label>
+  <input type="number" id="seasonInput">
+  <button onclick="addSeason()">Add Season</button><br><br>
+
+  <label>Episode Selection:</label><br>
+  Series: 
+  <select id="episodeSeries" onchange="fetchSeasons()">
+    <!-- Filled from DB -->
+HTML
+
+# --- Database for episode dropdowns ---
+begin
+  client = Mysql2::Client.new(:host => "localhost", :username => "youruser", :password => "yourpass", :database => "yourdb")
+  results = client.query("SELECT showId, showName FROM series")
+  results.each do |row|
+    puts "<option value='#{row["showId"]}'>#{row["showName"]}</option>"
+  end
+rescue => e
+  puts "<option disabled>Error loading series</option>"
+end
+
+puts <<-HTML
+  </select>
+  Season: <select id="episodeSeason" onchange="fetchEpisodes()"></select>
+  Episode: <select id="episodeName"></select>
+  <button onclick="addEpisode()">Add Episode</button><br><br>
+
+  <label for="listName">List Name:</label>
+  <input type="text" id="listName"><br><br>
+
+  <label for="description">Description:</label><br>
+  <textarea id="description" rows="4" cols="50"></textarea><br><br>
+
+  <label>Privacy:</label>
+  <input type="radio" name="privacy" value="1" checked> Public
+  <input type="radio" name="privacy" value="0"> Private<br><br>
+
+  <button onclick="submitForm()">Save List</button><br><br>
+
+  <h3>Series List:</h3>
+  <ul id="seriesList"></ul>
+
+  <h3>Season List:</h3>
+  <ul id="seasonList"></ul>
+
+  <h3>Episode List:</h3>
+  <ul id="episodeList"></ul>
+</body>
+</html>
+HTML
+
+# --- Backend logic (only run for POST) ---
+if ENV["REQUEST_METHOD"] == "POST"
+  request = JSON.parse($stdin.read)
+  mediaType = request["mediaType"]
+  name = request["name"]
+  description = request["description"]
+  privacy = request["privacy"].to_i
+  date = Date.today.to_s
+
+  begin
+    list_exists = client.query("SELECT listId FROM listOwnership WHERE username='#{username}' AND name='#{client.escape(name)}'")
+    if list_exists.count > 0
+      puts({ success: false, message: "List with this name already exists." }.to_json)
+    else
+      client.query("INSERT INTO listOwnership (username, name) VALUES ('#{username}', '#{client.escape(name)}')")
+      listId = client.last_id
+
+      case mediaType
+      when "series"
+        request["seriesArray"].each do |title|
+          res = client.query("SELECT showId FROM series WHERE showName='#{client.escape(title)}'")
+          if row = res.first
+            client.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId) VALUES ('#{username}', #{row["showId"]}, '#{client.escape(name)}', '#{client.escape(description)}', #{privacy}, '#{date}', #{listId})")
+          end
+        end
+      when "season"
+        request["seasonArray"].each do |entry|
+          show, season = entry.split(" Season ")
+          res = client.query("SELECT seasonId FROM season JOIN series ON season.seriesId = series.showId WHERE series.showName='#{client.escape(show)}' AND season.seasonNum=#{season.to_i}")
+          if row = res.first
+            client.query("INSERT INTO curatedListSeason (username, seasonId, name, description, privacy, date, listId) VALUES ('#{username}', #{row["seasonId"]}, '#{client.escape(name)}', '#{client.escape(description)}', #{privacy}, '#{date}', #{listId})")
+          end
+        end
+      when "episode"
+        request["episodeArray"].each do |ep|
+          client.query("INSERT INTO curatedListEpisode (username, epId, name, description, privacy, date, listId) VALUES ('#{username}', #{ep["epId"]}, '#{client.escape(name)}', '#{client.escape(description)}', #{privacy}, '#{date}', #{listId})")
+        end
+      end
+
+      puts({ success: true, message: "List saved successfully!" }.to_json)
+    end
+  rescue => e
+    puts({ success: false, message: "Error: #{e.message}" }.to_json)
+  end
+end
+
