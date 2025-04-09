@@ -336,9 +336,6 @@ if pageNumber.to_i == 8
     service = 'Tubi'
 end
 if pageNumber.to_i == 9
-    service = 'Hulu'
-end
-if pageNumber.to_i == 10
     service = 'Paramount+'
 end
 
@@ -385,12 +382,7 @@ puts '<div class="pagination">'
     else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=8">Tubi</a>'
     end
-    if pageNumber.to_i == 9 
-        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=9">Hulu</a>'
-    else
-        puts '<a href="discover.cgi?sort=streaming&pageNumber=9">Hulu</a>'
-    end
-    if pageNumber.to_i == 10 
+    if pageNumber.to_i == 9
         puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=10">Paramount+</a>'
     else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=10">Paramount+</a>'
@@ -473,12 +465,7 @@ puts '<div class="pagination">'
     else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=8">Tubi</a>'
     end
-    if pageNumber.to_i == 9 
-        puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=9">Hulu</a>'
-    else
-        puts '<a href="discover.cgi?sort=streaming&pageNumber=9">Hulu</a>'
-    end
-    if pageNumber.to_i == 10 
+    if pageNumber.to_i == 9
         puts '<a class="active" href="discover.cgi?sort=streaming&pageNumber=10">Paramount+</a>'
     else
         puts '<a href="discover.cgi?sort=streaming&pageNumber=10">Paramount+</a>'
@@ -486,6 +473,7 @@ puts '<div class="pagination">'
       puts '</div>'
     puts '</div>'
   puts '</div>'
+  puts '<br>'
 end
 
  puts '<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
