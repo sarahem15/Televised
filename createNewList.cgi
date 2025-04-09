@@ -111,6 +111,29 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
   exit
 end
 
+# Handle search dynamically
+if search && type
+  search_results = []
+  case type
+  when 'Series'
+    search_results = db.query("SELECT showId, showName FROM series WHERE showName LIKE '%#{db.escape(search)}%'")
+  when 'Season'
+    search_results = db.query("SELECT seasonId, seasonNum FROM season WHERE seasonNum LIKE '%#{db.escape(search)}%'")
+  when 'Episode'
+    search_results = db.query("SELECT epId, epName FROM episode WHERE epName LIKE '%#{db.escape(search)}%'")
+  end
+
+  results_html = "<ul class='list-group'>"
+  search_results.each do |result|
+    results_html += "<li class='list-group-item'>#{result['showName'] || result['seasonNum'] || result['epName']}</li>"
+  end
+  results_html += "</ul>"
+
+  # Return the results as the response
+  print results_html
+  exit
+end
+
 # HTML layout
 puts "<!DOCTYPE html>"
 puts "<html lang='en'>"
@@ -185,8 +208,6 @@ puts "    </div>"
 puts "  </div>"
 puts "</body>"
 puts "</html>"
-
-
 
 
 
