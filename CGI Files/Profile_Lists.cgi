@@ -32,6 +32,10 @@ if seriesTab == ""
   seriesTab = "SERIES"
 end
 
+if cgi['likedList'] == "TRUE"
+  db.query("INSERT INTO likedList VALUES('" + username.to_s + "', '" + cgi['listCreator'] + "', '" + cgi['listId'] + "');")
+end
+
 # Handle delete request only if form is submitted
 if cgi.request_method == 'POST' && cgi['deleteListId']
   delete_list_id = cgi['deleteListId'].to_i
@@ -42,6 +46,7 @@ if cgi.request_method == 'POST' && cgi['deleteListId']
 
     # Delete from likedList, curatedListSeries, and listOwnership
     db.query("DELETE FROM likedList WHERE listId = #{delete_list_id}")
+    db.query("DELETE FROM curatedListSeason WHERE listId = #{delete_list_id}")
     db.query("DELETE FROM curatedListSeries WHERE listId = #{delete_list_id}")
     db.query("DELETE FROM listOwnership WHERE id = #{delete_list_id}")
 
@@ -161,7 +166,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<input type="hidden" name="deleteListId" value="' + listId.to_s + '">'
   puts '<button type="submit" class="btn btn-danger">Delete List</button>'
   puts '</form>'
-
+  puts '<form action="Profile_Lists.cgi" method="post">'
   # Likes handling
   alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.to_s + "';")
   if (alreadyLiked.to_a != [])
@@ -176,7 +181,6 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<a href="whoHasLiked.cgi?listName=' + lists[i]['name'] + '&listCreator=' + lists[i]['username'] + '&listId=' + listId.to_s + '">' + likeCount.to_s + '</a>'
   puts '<input type="hidden" name="likedList" value="TRUE">'
   puts '<input type="hidden" name="listId" value="' + listId.to_s + '">'
-  puts '<input type="hidden" name="likeUser" value="' + username.to_s + '">'
   puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
   puts '</form>'
   puts '</div>'
