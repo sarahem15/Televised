@@ -194,13 +194,14 @@ puts "      </div>"
 
 puts "      <div class='col-12 col-md-4' id='searchColumn'>"
 puts "        <h3 class='text-center'>Search for a Series/Season/Episode</h3>"
-puts "        <form id='searchForm'>"
+puts "        <form id='searchForm' method='get' action=''>"
 puts "          <select id='type' name='typeSearch' class='form-control'>"
 puts "            <option value='Series' selected>Series</option>"
 puts "            <option value='Season'>Season</option>"
 puts "            <option value='Episode'>Episode</option>"
 puts "          </select><br>"
 puts "          <input type='text' id='mediaSearch' name='mediaEntered' class='form-control' placeholder='Search for a show, season, or episode...'>"
+puts "          <button type='submit' class='btn btn-primary mt-2'>Search</button>"
 puts "        </form>"
 puts "        <div id='searchResults'></div>"
 puts "      </div>"
@@ -208,6 +209,7 @@ puts "    </div>"
 puts "  </div>"
 puts "</body>"
 puts "</html>"
+
 
 
 
