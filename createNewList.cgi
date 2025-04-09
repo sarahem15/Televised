@@ -49,73 +49,58 @@ db = Mysql2::Client.new(
 
 # Handle AJAX search
 if search != ""
-
   if type == "Series"
     results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-
     if results.count > 0
       results.each do |row|
         puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
         puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
       end
-
     else
       puts "<p>We can't seem to find this title!</p>"
     end
-
   elsif type == "Season"
     results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-
     if results.count > 0
       results.each do |row|
-        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'").to_a
+        seasons = db.query("SELECT seasonId, seasonNum FROM season WHERE seriesId = '#{row['showId']}'").to_a
         puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
         puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
         puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
-        seasons.each_with_index do |season, index|
-          puts "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
+        seasons.each do |season|
+          puts "<option value='#{season['seasonId']}'>Season #{season['seasonNum']}</option>"
         end
-
         puts "</select></p>"
       end
-
     else
       puts "<p>We can't seem to find this title!</p>"
     end
-
-#episodeSearch
   elsif type == "Episode"
-    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-
+    results = db.query("SELECT epName, epId, seasonId FROM episode WHERE epName LIKE '#{db.escape(search)}%'")
     if results.count > 0
       results.each do |row|
-        seasons = db.query("SELECT seasonId from season WHERE seriesId = '" + images[i]['showId'].to_s + "';")
-        seasons = seasons.to_a
-        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
-        puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
-        seasons.each_with_index do |season, index|
-          puts "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
-        end
-        episodes = db.query("SELECT * FROM episode JOIN season ON season.seasonId = episode.seasonId WHERE seasonNum = '" + seasonNum + "' AND seriesId = '" + images[i]['showId'].to_s + "';")
-        episodes = episodes.to_a
-        puts '<select id="typeSeason" name="epNum" class="form-control">'
-        puts '<option value="" selected>Episode</option>'
-              (0...episodes.size).each do |h|
-              puts '<option value="' + episodes[h]['epId'].to_s + '">' + episodes[h]['epName'] + '</option>'
-            end
-          puts '</select>'
-        end
-
-        puts "</select></p>"
+        puts "<p>#{row['epName']} <button class='addToList btn btn-success' data-ep-id='#{row['epId']}' data-ep-name='#{row['epName']}'>ADD</button></p>"
       end
-
     else
-      puts "<p>We can't seem to find this title!</p>"
+      puts "<p>We can't seem to find this episode!</p>"
     end
-
   end
   exit
+end
+
+# Handle adding to the series, season, or episode list
+if cgi['addSeries']
+  seriesArray.push({ "id" => cgi['seriesId'], "name" => cgi['seriesName'] })
+elsif cgi['removeSeries']
+  seriesArray.reject! { |series| series['id'] == cgi['seriesId'].to_i }
+elsif cgi['addSeason']
+  seasonArray.push({ "seriesId" => cgi['seriesId'], "season" => cgi['seasonNum'] })
+elsif cgi['removeSeason']
+  seasonArray.reject! { |season| season['seriesId'] == cgi['seriesId'].to_i && season['season'] == cgi['seasonNum'].to_i }
+elsif cgi['addEpisode']
+  episodeArray.push({ "id" => cgi['epId'], "name" => cgi['epName'], "seasonId" => cgi['seasonId'] })
+elsif cgi['removeEpisode']
+  episodeArray.reject! { |ep| ep['id'] == cgi['epId'].to_i }
 end
 
 # Save list
@@ -152,15 +137,9 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
 
   unless episodeArray.empty?
     episodeArray.each do |episode|
-      show_id = episode["seriesId"].to_i
-      season_num = episode["season"].to_i
-      ep_name = episode["epName"]
-      result = db.query("SELECT seasonId FROM season WHERE seriesId = #{show_id} ORDER BY seasonId ASC LIMIT 1 OFFSET #{season_num - 1}")
-      if result.count > 0
-        season_id = result.first["seasonId"].to_i
-        db.query("INSERT INTO curatedListEpisode (username, seasonId, epName, name, description, privacy, date, listId)
-                  VALUES ('#{username}', #{season_id}, #{epName}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
-      end
+      ep_id = episode["id"].to_i
+      db.query("INSERT INTO curatedListEpisode (username, epId, name, description, privacy, date, listId)
+                VALUES ('#{username}', #{ep_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
     end
   end
 
@@ -203,128 +182,32 @@ puts "          <label>Description</label>"
 puts "          <textarea name='description' class='form-control' rows='5'></textarea><br>"
 puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray'>"
 puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray'>"
+puts "          <input type='hidden' id='episodeArrayInput' name='episodeArray'>"
 puts "          <button id='saveList' name='saveList' class='btn btn-primary'>CREATE LIST</button>"
 puts "        </form>"
 puts "      </div>"
 
 puts "      <div class='col-12 col-md-4' id='listColumn'>"
-puts "        <h3 class='text-center'>Selected Series/Seasons?Episodes</h3>"
+puts "        <h3 class='text-center'>Selected Series/Seasons/Episodes</h3>"
 puts "        <ul id='seriesList' class='list-group'></ul>"
 puts "      </div>"
 
 puts "      <div class='col-12 col-md-4' id='searchColumn'>"
-puts "        <h3 class='text-center'>Search for a Series</h3>"
+puts "        <h3 class='text-center'>Search for a Series/Season/Episode</h3>"
 puts "        <form id='searchForm'>"
 puts "          <select id='type' name='typeSearch' class='form-control'>"
 puts "            <option value='Series' selected>Series</option>"
 puts "            <option value='Season'>Season</option>"
+puts "            <option value='Episode'>Episode</option>"
 puts "          </select><br>"
-puts "          <input type='text' name='mediaEntered' class='form-control'>"
-puts "          <input type='submit' value='Search' class='btn btn-secondary mt-2'>"
+puts "          <input type='text' id='mediaSearch' name='mediaEntered' class='form-control' placeholder='Search for a show, season, or episode...'>"
 puts "        </form>"
 puts "        <div id='searchResults'></div>"
 puts "      </div>"
-
 puts "    </div>"
 puts "  </div>"
-
-# Embedded JavaScript
-  puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-  puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-  puts '<script src="Televised.js"></script>'
-puts "<script>"
-puts "document.addEventListener('DOMContentLoaded', function () {"
-puts "  sessionStorage.removeItem('seriesArray');"
-puts "  sessionStorage.removeItem('seasonArray');"
-puts "  sessionStorage.removeItem('episodeArray');"
-puts "  updateAllLists();"
-
-puts "  document.getElementById('searchForm').addEventListener('submit', function (event) {"
-puts "    event.preventDefault();"
-puts "    let searchInput = document.querySelector('input[name=\"mediaEntered\"]').value;"
-puts "    let type = document.querySelector('select[name=\"typeSearch\"]').value;"
-puts "    fetch('createNewList.cgi', {"
-puts "      method: 'POST',"
-puts "      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },"
-puts "      body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })"
-puts "    })"
-puts "    .then(response => response.text())"
-puts "    .then(data => { document.getElementById('searchResults').innerHTML = data; });"
-puts "  });"
-
-puts "  document.addEventListener('click', function (event) {"
-puts "    if (event.target.classList.contains('addToList')) {"
-puts "      event.preventDefault();"
-puts "      let seriesId = event.target.dataset.seriesId;"
-puts "      let seriesName = event.target.dataset.seriesName;"
-puts "      let parent = event.target.closest('p');"
-
-puts "      if (parent.querySelector('select.seasonSelect')) {"
-puts "        let seasonNum = parent.querySelector('select.seasonSelect').selectedIndex + 1;"
-puts "        let seasonArray = JSON.parse(sessionStorage.getItem('seasonArray')) || [];"
-puts "        if (!seasonArray.some(s => s.seriesId === seriesId && s.season === seasonNum)) {"
-puts "          seasonArray.push({ seriesId: seriesId, name: seriesName, season: seasonNum });"
-puts "          sessionStorage.setItem('seasonArray', JSON.stringify(seasonArray));"
-puts "          updateAllLists();"
-puts "        }"
-puts "      } else {"
-puts "        let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
-puts "        if (!seriesArray.some(s => s.id === seriesId)) {"
-puts "          seriesArray.push({ id: seriesId, name: seriesName });"
-puts "          sessionStorage.setItem('seriesArray', JSON.stringify(seriesArray));"
-puts "          updateAllLists();"
-puts "        }"
-puts "      }"
-puts "    }"
-
-puts "    if (event.target.classList.contains('removeFromList')) {"
-puts "      event.preventDefault();"
-puts "      const type = event.target.dataset.type;"
-puts "      const index = parseInt(event.target.dataset.index, 10);"
-puts "      let key = `${type}Array`;"
-puts "      let arr = JSON.parse(sessionStorage.getItem(key)) || [];"
-puts "      arr.splice(index, 1);"
-puts "      sessionStorage.setItem(key, JSON.stringify(arr));"
-puts "      updateAllLists();"
-puts "    }"
-puts "  });"
-
-puts "  function updateAllLists() {"
-puts "    let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
-puts "    let seasonArray = JSON.parse(sessionStorage.getItem('seasonArray')) || [];"
-
-puts "    document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
-puts "    document.getElementById('seasonArrayInput').value = JSON.stringify(seasonArray);"
-
-puts "    let container = document.getElementById('seriesList');"
-puts "    container.innerHTML = '';"
-
-puts "    seriesArray.forEach((s, i) => {"
-puts "      container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>${s.name} <button class='removeFromList btn btn-danger btn-sm' data-type='series' data-index='${i}'>X</button></li>`;"
-puts "    });"
-
-puts "    seasonArray.forEach((s, i) => {"
-puts "      container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>${s.name} Season ${s.season} <button class='removeFromList btn btn-danger btn-sm' data-type='season' data-index='${i}'>X</button></li>`;"
-puts "    });"
-
-puts "    const typeSelect = document.getElementById('type');"
-puts "    if (seriesArray.length > 0) {"
-puts "      typeSelect.value = 'Series';"
-puts "      typeSelect.disabled = true;"
-puts "    } else if (seasonArray.length > 0) {"
-puts "      typeSelect.value = 'Season';"
-puts "      typeSelect.disabled = true;"
-puts "    } else {"
-puts "      typeSelect.disabled = false;"
-puts "    }"
-puts "  }"
-puts "});"
-puts "</script>"
-
 puts "</body>"
 puts "</html>"
-
-session.close
 
 
 
