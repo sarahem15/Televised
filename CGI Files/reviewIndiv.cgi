@@ -101,7 +101,7 @@ puts '<div class="originalReview">'
       puts '<input type="hidden" name="seasonNumber" value="1">'
       likes = db.query("SELECT * FROM likedSeriesReview WHERE reviewId = '" + reviewId + "';")
   end
-  puts "<input type='image' src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\" style='height: 420px; width: 320px; object-fit: cover;'>" 
+  puts "<input type='image' src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\" style='height: 350px; width: 250px; object-fit: cover;'>" 
   puts '</form>'
 
 	puts '<div class="content-R">'
