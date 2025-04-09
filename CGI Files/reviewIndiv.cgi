@@ -201,7 +201,24 @@ puts '<div class="content-Reply">'
           puts '<a href="othersProfiles.cgi?username=' + replies[i]['username'] + '">' + '<h3>' + replies[i]['username'] + '</h3></a>'
       puts '</section>'
       puts '<br>'
-       puts '<h3>' + replies[i]['reply'] + '</h3>'
+
+      if replies[i]['username'] == username
+       puts '<div id="text-display">'
+    puts '<p>' + replies[i]['reply'] + '</p>'
+    puts '<button class="btn" style="background-color: #9daef6;" onclick="showEditForm()">Edit</button>'
+  puts '</div>'
+
+      puts ' <div id="edit-form" style="display:none;">'
+    puts ' <form action="threebuttons.cgi" method="post" style="width: 50%">'
+      puts ' <input type="hidden" name="id" value="1" />'
+      puts ' <textarea name="text" rows="5" cols="0">' + replies[i]['reply'] + '</textarea><br><br>'
+      puts ' <button class="btn" style="background-color: #9daef6;" type="submit">Save</buttom>'
+    puts ' </form>'
+  puts ' </div>'
+      else
+        puts '<h3>' + replies[i]['reply'] + '</h3>'
+      end
+
   puts '</div>'
   puts '<br>'
   puts '<hr style="margin-left: 80px; margin-right: 80px;">'
@@ -217,6 +234,14 @@ puts '<!-- Scripts -->'
   puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
   puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
   puts '<script src="Televised.js"></script>'
+
+puts "<script>"
+puts "    function showEditForm() {"
+puts "      document.getElementById('text-display').style.display = 'none';"
+puts "      document.getElementById('edit-form').style.display = 'block';"
+puts "    }"
+puts "  </script>"
+
 puts '</body>'
 
 puts '</html>'
