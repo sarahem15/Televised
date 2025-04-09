@@ -232,3 +232,4 @@ puts '<br>'
 puts '</body>'
 
 puts '</html>'
+session.close

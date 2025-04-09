@@ -7,12 +7,12 @@ $stderr.reopen $stdout
 puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
-#require 'cgi/session'
+require 'cgi/session'
 
 # Initialize CGI
 cgi = CGI.new
-#session = CGI::Session.new(cgi)
-#username = session['username']
+session = CGI::Session.new(cgi)
+actualusername = session['username'].to_s
 username = cgi['username']
 
 db = Mysql2::Client.new(
@@ -32,6 +32,15 @@ seriesTab = cgi['seriesTab']
 if seriesTab == ""
   seriesTab = "SERIES"
 end
+alreadyLiked = false
+if cgi['likedList'] == "TRUE"
+  begin
+    db.query("INSERT INTO likedList VALUES ('" + actualusername + "', '" + cgi['listCreator'] + "', '" + cgi['listId'] + "');")
+  rescue => e
+    db.query("DELETE FROM likedList WHERE userWhoLiked = '" + actualusername + "'AND listId = '" + cgi['listId'] + "';")
+  end
+end
+
 
 
 puts '<!DOCTYPE html>'
@@ -73,36 +82,35 @@ puts '<body id="userProfile">'
       puts '<a href="#"class="active">Series</a>'
       puts '<a href="userLists.cgi?username=' + username + '&seriesTab=SEASON">Seasons</a>'
       puts '<a href="userLists.cgi?username=' + username + '&seriesTab=EP">Episodes</a>'
-      lists = db.query("SELECT DISTINCT name, description, date FROM curatedListSeries WHERE username = '" + username.to_s + "' AND privacy = 1;")
+      lists = db.query("SELECT DISTINCT name, description, date, listId FROM curatedListSeries WHERE username = '" + username.to_s + "' AND privacy = 1;")
       lists = lists.to_a
   elsif seriesTab == "SEASON"
       puts '<a href="userLists.cgi?username=' + username + '&seriesTab=SERIES">Series</a>'
       puts '<a href="#" class="active">Seasons</a>'
       puts '<a href="userLists.cgi?username=' + username + '&seriesTab=EP">Episodes</a>'
-      lists = db.query("SELECT DISTINCT name, description, date FROM curatedListSeason WHERE username = '" + username.to_s + "' AND privacy = 1;")
+      lists = db.query("SELECT DISTINCT name, description, date, listId FROM curatedListSeason WHERE username = '" + username.to_s + "' AND privacy = 1;")
       lists = lists.to_a
   elsif seriesTab == "EP"
       puts '<a href="userLists.cgi?username=' + username + '&seriesTab=SERIES">Series</a>'
       puts '<a href="userLists.cgi?username=' + username + '&seriesTab=SEASON">Seasons</a>'
       puts '<a href="#" class="active">Episodes</a>'
-      lists = db.query("SELECT DISTINCT name, description, date FROM curatedListEpisode WHERE username = '" + username.to_s + "' AND privacy = 1;")
+      lists = db.query("SELECT DISTINCT name, description, date, listId FROM curatedListEpisode WHERE username = '" + username.to_s + "' AND privacy = 1;")
       lists = lists.to_a
   end
     puts '</div>'
 puts '</div>'
-
-(0...lists.size).each do |i|
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
+(0...lists.size).each do |i|
   puts '<div class="listImages">'
     puts '<div class="listWrapper">'
         puts '<section class="carousel-section" id="listsPlease">'
-        listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'].gsub("'", "\\\\'") + "';")
+        listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
         listImages = listImages.to_a
         if seriesTab == "SEASON"
-          listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'].gsub("'", "\\\\'") + "';")
+          listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
           listImages = listImages.to_a
         elsif seriesTab == "EP"
-          listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN curatedListEpisode ON episode.epId = curatedListEpisode.epId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'].gsub("'", "\\\\'") + "';")
+          listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN curatedListEpisode ON episode.epId = curatedListEpisode.epId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
           listImages = listImages.to_a
         end
 
@@ -119,14 +127,40 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       puts '</div>'
       puts '<div>'
       puts '<section class="titleDate">'
-      puts '<a href="listContents.cgi?title='+ lists[i]['name'].gsub("'", "\\\\'") + '&contentType=' + seriesTab + '">' + lists[i]['name'] + '</a>'
-      puts '<h4>' + lists[i]['date'].to_s + '</h4>'
+      puts '<a href="listContents.cgi?title='+ lists[i]['name'] + '&contentType=' + seriesTab + '">' + lists[i]['name'] + '</a>'
+      puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
       puts '</section>'
 
       puts '<h3>' + lists[i]['description'] +'</h3>'
+
+      likes = db.query("SELECT * FROM likedList WHERE listId = '" + lists[i]['listId'].to_s + "';")
+      likes = likes.to_a
+      (0...likes.size).each do |j|
+        if likes[j]['userWhoLiked'] == actualusername
+            alreadyLiked = true
+        end
+    end
+
+    puts '<form action="userLists.cgi" method="post">'
+    if alreadyLiked == true
+      puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+    else
+        puts '<button class="LIKES">&#10084</button>'
+    end
+    puts '<input type="hidden" name="likedList" value="TRUE">'
+    puts '<a href="whoHasLiked.cgi?listId=' + lists[i]['listId'].to_s + '">' + likes.size.to_s + '</a>'
+    puts '<input type="hidden" name="listId" value="' + lists[i]['listId'].to_s + '">'
+    puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'].to_s + '">'
+    puts '<input type="hidden" name="seriesTab" value="' + seriesTab + '">'
+    puts '<input type="hidden" name="username" value="' + username + '">'
+    puts '</form>'
+
       puts '</div>'
     puts '</div>'
     puts '<br>'
+    puts '<hr style="margin-left: 80px; margin-right: 80px">'
+    puts '<br>'
+    alreadyLiked = false
 end
     puts '<!-- Scripts -->'
   puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
@@ -134,4 +168,4 @@ end
   puts '<script src="Televised.js"></script>'
 puts '</body>'
 puts '</html>'
-#session.close
+session.close

@@ -8,6 +8,9 @@ require 'cgi'
 require 'cgi/session'
 
 cgi = CGI.new
+session = CGI::Session.new(cgi)
+sessionUser = session['username'].to_s
+
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -26,6 +29,28 @@ if seriesTab == ""
   seriesTab = "SERIES"
 end
 contentType = ""
+alreadyLiked = false
+if cgi['likedReview'] == "TRUE"
+  if seriesTab == "SERIES"
+    begin
+      db.query("INSERT INTO likedSeriesReview VALUES ('" + sessionUser + "', '" + username.to_s + "', '" +  cgi['reviewId'] + "');")
+    rescue
+      db.query("DELETE FROM likedSeriesReview WHERE userWhoLiked = '" + sessionUser + "' AND reviewId = '" +  cgi['reviewId'] + "';")
+    end
+  elsif seriesTab == "SEASON"
+    begin
+      db.query("INSERT INTO likedSeasonReview VALUES ('" + sessionUser + "', '" + username.to_s + "', '" +  cgi['reviewId'] + "');")
+    rescue
+      db.query("DELETE FROM likedSeasonReview WHERE userWhoLiked = '" + sessionUser + "' AND reviewId = '" +  cgi['reviewId'] + "';")
+    end
+  else
+    begin
+      db.query("INSERT INTO likedEpisodeReview VALUES ('" + sessionUser + "', '" + username.to_s + "', '" +  cgi['reviewId'] + "');")
+    rescue
+      db.query("DELETE FROM likedEpisodeReview WHERE userWhoLiked = '" + sessionUser + "' AND reviewId = '" +  cgi['reviewId'] + "';")
+    end
+  end
+end
 
 puts'<head>'
   puts'<meta charset="UTF-8">'
@@ -85,14 +110,17 @@ puts '<br>'
   if seriesTab == "SERIES"
     seriesImage = db.query("SELECT imageName, showName, showId, year FROM series JOIN seriesReview ON series.showId = seriesReview.seriesId WHERE seriesReview.id= '" + seriesReviews[i]['id'].to_s + "';")
     reviewRating = db.query("SELECT rating FROM seriesRating JOIN seriesReview ON seriesRating.id = seriesReview.ratingId WHERE seriesReview.id = '" + seriesReviews[i]['id'].to_s + "';")
+    likes = db.query("SELECT * FROM likedSeriesReview WHERE reviewId = '" + seriesReviews[i]['id'].to_s + "';")
   elsif seriesTab == "SEASON"
     seriesImage = db.query("SELECT imageName, showName, showId, series.year, season.seasonNum FROM series JOIN season ON season.seriesId = series.showId JOIN seasonReview ON seasonReview.seasonId = season.seasonId WHERE seasonReview.id = '" + seriesReviews[i]['id'].to_s + "';")
     reviewRating = db.query("SELECT rating FROM seasonRating JOIN seasonReview ON seasonRating.id = seasonReview.ratingId WHERE seasonReview.id = '" + seriesReviews[i]['id'].to_s + "';")
     contentType = "SEASON"
+    likes = db.query("SELECT * FROM likedSeasonReview WHERE reviewId = '" + seriesReviews[i]['id'].to_s + "';")
   else
      seriesImage = db.query("SELECT imageName, showName, showId, series.year, season.seasonNum, episode.epName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN episodeReview ON episodeReview.epId = episode.epId WHERE episodeReview.id = '" + seriesReviews[i]['id'].to_s + "';")
      reviewRating = db.query("SELECT rating FROM episodeRating JOIN episodeReview ON episodeRating.id = episodeReview.ratingId WHERE episodeReview.id = '" + seriesReviews[i]['id'].to_s + "';") 
     contentType = "EP"
+    likes = db.query("SELECT * FROM likedEpisodeReview WHERE reviewId = '" + seriesReviews[i]['id'].to_s + "';")
   end
 
 epNum = 0
@@ -140,7 +168,31 @@ puts '<div class="originalReview">'
         	end
         puts '</section>'
        puts '<h3>' + seriesReviews[i]['review'] + '</h3>'
-       puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+       likes = likes.to_a
+      (0...likes.size).each do |j|
+        #likeCount = likeCount + 1
+        if likes[j]['userWhoLiked'] == sessionUser.to_s
+            alreadyLiked = true
+        end
+    end
+
+    puts '<form action="userReviews.cgi" method="post">'
+    if alreadyLiked == true
+      puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+    else
+        puts '<button class="LIKES">&#10084</button>'
+    end
+    puts '<input type="hidden" name="likedReview" value="TRUE">'
+    puts '<a href="whoHasLiked.cgi?reviewId=' + seriesReviews[i]['id'].to_s + '&type=EP">' + likes.size.to_s + '</a>'
+    puts '<input type="hidden" name="reviewId" value="' + seriesReviews[i]['id'].to_s + '">'    
+    puts '<input type="hidden" name="username" value="' + username.to_s + '">'
+    puts '<input type="hidden" name="seriesTab" value="' + seriesTab + '">'
+    puts '</form>'
+    alreadyLiked = false
+
+
+
+
 	puts '</div>'
 puts '</div>'
 puts '<br>'
@@ -154,3 +206,4 @@ puts '<!-- Scripts -->'
 puts '</body>'
 
 puts '</html>'
+session.close
