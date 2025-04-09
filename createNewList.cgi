@@ -47,47 +47,6 @@ db = Mysql2::Client.new(
   database: 'televised_w25'
 )
 
-# Handle AJAX search
-if search != ""
-  if type == "Series"
-    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-    if results.count > 0
-      results.each do |row|
-        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
-      end
-    else
-      puts "<p>We can't seem to find this title!</p>"
-    end
-  elsif type == "Season"
-    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-    if results.count > 0
-      results.each do |row|
-        seasons = db.query("SELECT seasonId, seasonNum FROM season WHERE seriesId = '#{row['showId']}'").to_a
-        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
-        puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
-        seasons.each do |season|
-          puts "<option value='#{season['seasonId']}'>Season #{season['seasonNum']}</option>"
-        end
-        puts "</select></p>"
-      end
-    else
-      puts "<p>We can't seem to find this title!</p>"
-    end
-  elsif type == "Episode"
-    results = db.query("SELECT epName, epId, seasonId FROM episode WHERE epName LIKE '#{db.escape(search)}%'")
-    if results.count > 0
-      results.each do |row|
-        puts "<p>#{row['epName']} <button class='addToList btn btn-success' data-ep-id='#{row['epId']}' data-ep-name='#{row['epName']}'>ADD</button></p>"
-      end
-    else
-      puts "<p>We can't seem to find this episode!</p>"
-    end
-  end
-  exit
-end
-
 # Handle adding to the series, season, or episode list
 if cgi['addSeries']
   seriesArray.push({ "id" => cgi['seriesId'], "name" => cgi['seriesName'] })
@@ -162,6 +121,23 @@ puts "  <title>Televised</title>"
 puts "  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
 puts "  <link rel='stylesheet' href='Televised.css'>"
 puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
+puts "  <script>"
+puts "    $(document).ready(function() {"
+puts "      $('#searchForm').submit(function(event) {"
+puts "        event.preventDefault();"
+puts "        var searchText = $('#mediaSearch').val();"
+puts "        var type = $('#type').val();"
+puts "        $.ajax({"
+puts "          url: '',"
+puts "          type: 'GET',"
+puts "          data: { mediaEntered: searchText, typeSearch: type },"
+puts "          success: function(response) {"
+puts "            $('#searchResults').html(response);"
+puts "          }"
+puts "        });"
+puts "      });"
+puts "    });"
+puts "  </script>"
 puts "</head>"
 puts "<body id='createNewList'>"
 puts "  <nav id='changingNav'></nav>"
@@ -209,6 +185,7 @@ puts "    </div>"
 puts "  </div>"
 puts "</body>"
 puts "</html>"
+
 
 
 
