@@ -4,15 +4,16 @@ require 'mysql2'
 require 'json'
 
 cgi = CGI.new
-db_client = Mysql2::Client.new(
-  host: "localhost",
-  username: "your_db_username",
-  password: "your_db_password",
-  database: "your_db_name"
-)
 
 # Assume session is already started and we can access the user's session
 username = cgi.cookies['username'] # Get the logged-in username from cookies
+
+db = Mysql2::Client.new(
+    host: '10.20.3.4', 
+    username: 'seniorproject25', 
+    password: 'TV_Group123!', 
+    database: 'televised_w25'
+  )
 
 # Fetch the listId (for example, passed via a hidden input or query parameter)
 list_id = cgi['listId']
