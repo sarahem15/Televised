@@ -1,413 +1,267 @@
-#!/usr/bin/ruby
-$stdout.sync = true
-$stderr.reopen $stdout
-
-require 'mysql2'
+#!/usr/bin/env ruby
 require 'cgi'
-require 'cgi/session'
+require 'mysql2'
 require 'json'
 
 cgi = CGI.new
-session = CGI::Session.new(cgi)
+puts cgi.header("type" => "text/html", "charset" => "utf-8")
 
-username = session['username']
-
-print cgi.header(
-  'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
+client = Mysql2::Client.new(
+  :host => "localhost",
+  :username => "root",
+  :password => "password",
+  :database => "tv_shows"
 )
 
-# Get search input and type
-search = cgi['mediaEntered']
-type = cgi['typeSearch']
+series_data = client.query("SELECT showId, showName FROM series").to_a
+season_data = client.query("SELECT seasonId, seasonNum, seriesId FROM season").to_a
+episode_data = client.query("SELECT epId, epName, seasonId FROM episode").to_a
 
-# If search is performed
-if search && type
-  begin
-    db = Mysql2::Client.new(
-      host: '10.20.3.4',
-      username: 'seniorproject25',
-      password: 'TV_Group123!',
-      database: 'televised_w25'
-    )
-    
-    # Initialize result variable
-    search_results = []
-    
-    case type
-    when 'Series'
-      search_results = db.query("SELECT showId, showName FROM series WHERE showName LIKE '%#{db.escape(search)}%'")
-    when 'Season'
-      search_results = db.query("SELECT seasonId, seasonNum FROM season WHERE seasonNum LIKE '%#{db.escape(search)}%'")
-    when 'Episode'
-      search_results = db.query("SELECT epId, epName FROM episode WHERE epName LIKE '%#{db.escape(search)}%'")
-    end
-    
-    # Format results for response
-    results_html = "<ul class='list-group'>"
-    search_results.each do |result|
-      results_html += "<li class='list-group-item'>#{result['showName'] || result['seasonNum'] || result['epName']}</li>"
-    end
-    results_html += "</ul>"
+puts <<~HTML
+<html>
+<head>
+  <title>Create New List</title>
+  <style>
+    .popup {
+      display: none;
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="popup" id="popup"></div>
 
-    # Return the results as the response
-    print results_html
-    exit
-  rescue Mysql2::Error => e
-    print "Error connecting to database: #{e.message}"
-    exit
-  end
-end
+  <form id="form">
+    <input type="text" id="listName" placeholder="List Name" required><br>
+    <textarea id="description" placeholder="Description"></textarea><br>
+    <select id="privacy">
+      <option value="1">Public</option>
+      <option value="0">Private</option>
+    </select><br>
 
-# HTML layout
-puts "<!DOCTYPE html>"
-puts "<html lang='en'>"
-puts "<head>"
-puts "  <meta charset='UTF-8'>"
-puts "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-puts "  <title>Televised</title>"
-puts "  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
-puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
-puts "  <script>"
-puts "    $(document).ready(function() {"
-puts "      $('#searchForm').submit(function(event) {"
-puts "        event.preventDefault();"
-puts "        var searchText = $('#mediaSearch').val();"
-puts "        var type = $('#type').val();"
-puts "        $.ajax({"
-puts "          url: '',"
-puts "          type: 'GET',"
-puts "          data: { mediaEntered: searchText, typeSearch: type },"
-puts "          success: function(response) {"
-puts "            $('#searchResults').html(response);"
-puts "          },"
-puts "          error: function() {"
-puts "            alert('An error occurred while fetching the search results.');"
-puts "          }"
-puts "        });"
-puts "      });"
-puts "    });"
-puts "  </script>"
-puts "</head>"
-puts "<body id='createNewList'>"
-puts "  <nav id='changingNav'></nav>"
-puts "  <h2 class='text-center mt-3'>Create a New List</h2>"
-puts "  <div class='container-fluid'>"
-puts "    <div class='row'>"
-puts "      <div class='col-12 col-md-4' id='listRow'>"
-puts "        <h3 class='text-center'>List Details</h3>"
-puts "        <form id='newListForm' method='post'>"
-puts "          <label>Name</label>"
-puts "          <input type='text' name='listName' class='form-control' placeholder='Name' required><br>"
-puts "          <label>Who Can View</label>"
-puts "          <select name='views' class='form-control'>"
-puts "            <option value='Public'>Public - anyone can view</option>"
-puts "            <option value='Private'>Private - no one can view</option>"
-puts "          </select><br>"
-puts "          <label>Description</label>"
-puts "          <textarea name='description' class='form-control' rows='5'></textarea><br>"
-puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray'>"
-puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray'>"
-puts "          <input type='hidden' id='episodeArrayInput' name='episodeArray'>"
-puts "          <button id='saveList' name='saveList' class='btn btn-primary'>CREATE LIST</button>"
-puts "        </form>"
-puts "      </div>"
+    <select id="mediaType">
+      <option value="series">Series</option>
+      <option value="season">Season</option>
+      <option value="episode">Episode</option>
+    </select><br>
 
-puts "      <div class='col-12 col-md-4' id='listColumn'>"
-puts "        <h3 class='text-center'>Selected Series/Seasons/Episodes</h3>"
-puts "        <ul id='seriesList' class='list-group'></ul>"
-puts "      </div>"
+    <div id="seriesSearch">
+      <select id="seriesDropdown"></select>
+      <button type="button" onclick="addSeries()">Add</button>
+    </div>
 
-puts "      <div class='col-12 col-md-4' id='searchColumn'>"
-puts "        <h3 class='text-center'>Search for a Series/Season/Episode</h3>"
-puts "        <form id='searchForm' method='get' action=''>"
-puts "          <select id='type' name='typeSearch' class='form-control'>"
-puts "            <option value='Series' selected>Series</option>"
-puts "            <option value='Season'>Season</option>"
-puts "            <option value='Episode'>Episode</option>"
-puts "          </select><br>"
-puts "          <input type='text' id='mediaSearch' name='mediaEntered' class='form-control' placeholder='Search for a show, season, or episode...'>"
-puts "          <button type='submit' class='btn btn-primary mt-2'>Search</button>"
-puts "        </form>"
-puts "        <div id='searchResults'></div>"
-puts "      </div>"
-puts "    </div>"
-puts "  </div>"
-puts "</body>"
-puts "</html>"
+    <div id="seasonSearch" style="display:none;">
+      <select id="seriesDropdownSeason" onchange="populateSeasonDropdown()"></select>
+      <select id="seasonDropdown"></select>
+      <button type="button" onclick="addSeason()">Add</button>
+    </div>
 
+    <div id="episodeSearch" style="display:none;">
+      <select id="seriesDropdownEpisode" onchange="populateSeasonDropdown()"></select>
+      <select id="seasonDropdownEpisode" onchange="populateEpisodeDropdown()"></select>
+      <select id="episodeDropdown"></select>
+      <button type="button" onclick="addEpisode()">Add</button>
+    </div>
 
+    <button type="submit">Save List</button>
+  </form>
 
+  <h3>Selected Series</h3>
+  <ul id="seriesList"></ul>
+  <h3>Selected Seasons</h3>
+  <ul id="seasonList"></ul>
+  <h3>Selected Episodes</h3>
+  <ul id="episodeList"></ul>
 
+  <script>
+    const seriesArray = JSON.parse(sessionStorage.getItem("seriesArray") || "[]");
+    const seasonArray = JSON.parse(sessionStorage.getItem("seasonArray") || "[]");
+    const episodeArray = JSON.parse(sessionStorage.getItem("episodeArray") || "[]");
 
+    const series = #{series_data.to_json};
+    const seasons = #{season_data.to_json};
+    const episodes = #{episode_data.to_json};
 
+    function showPopup(message, type) {
+      const popup = document.getElementById("popup");
+      popup.innerText = message;
+      popup.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+      popup.style.display = "block";
+      setTimeout(() => popup.style.display = "none", 3000);
+    }
 
+    function renderArray(listId, array, removeFn) {
+      const list = document.getElementById(listId);
+      list.innerHTML = "";
+      array.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.textContent = item.display;
+        const btn = document.createElement("button");
+        btn.textContent = "Remove";
+        btn.onclick = () => removeFn(index);
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+    }
 
+    function addSeries() {
+      const select = document.getElementById("seriesDropdown");
+      const option = select.options[select.selectedIndex];
+      const id = option.value;
+      const name = option.text;
+      if (!seriesArray.some(s => s.id === id)) {
+        seriesArray.push({ id, name, display: name });
+        sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));
+        renderArray("seriesList", seriesArray, i => {
+          seriesArray.splice(i, 1);
+          sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));
+          renderArray("seriesList", seriesArray, arguments.callee);
+        });
+      }
+    }
 
-#!/usr/bin/ruby
-$stdout.sync = true
-$stderr.reopen $stdout
+    function addSeason() {
+      const seriesSelect = document.getElementById("seriesDropdownSeason");
+      const seasonSelect = document.getElementById("seasonDropdown");
+      const seriesName = seriesSelect.options[seriesSelect.selectedIndex].text;
+      const seasonId = seasonSelect.value;
+      const seasonNum = seasonSelect.options[seasonSelect.selectedIndex].dataset.seasonnum;
 
-require 'mysql2'
-require 'cgi'
-require 'cgi/session'
-require 'json'
+      if (!seasonArray.some(s => s.seasonId === seasonId)) {
+        seasonArray.push({ seasonId, display: `${seriesName} Season ${seasonNum}` });
+        sessionStorage.setItem("seasonArray", JSON.stringify(seasonArray));
+        renderArray("seasonList", seasonArray, i => {
+          seasonArray.splice(i, 1);
+          sessionStorage.setItem("seasonArray", JSON.stringify(seasonArray));
+          renderArray("seasonList", seasonArray, arguments.callee);
+        });
+      }
+    }
 
-cgi = CGI.new
-session = CGI::Session.new(cgi)
+    function addEpisode() {
+      const seriesSelect = document.getElementById("seriesDropdownEpisode");
+      const seasonSelect = document.getElementById("seasonDropdownEpisode");
+      const episodeSelect = document.getElementById("episodeDropdown");
 
-username = session['username']
+      const showName = seriesSelect.options[seriesSelect.selectedIndex].text;
+      const seasonNum = seasonSelect.options[seasonSelect.selectedIndex].dataset.seasonnum;
+      const epName = episodeSelect.options[episodeSelect.selectedIndex].text;
+      const epId = episodeSelect.value;
 
-print cgi.header(
-  'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
-)
+      if (!episodeArray.some(e => e.epId === epId)) {
+        episodeArray.push({ epId, display: `${showName}: S${seasonNum}: ${epName}` });
+        sessionStorage.setItem("episodeArray", JSON.stringify(episodeArray));
+        renderArray("episodeList", episodeArray, i => {
+          episodeArray.splice(i, 1);
+          sessionStorage.setItem("episodeArray", JSON.stringify(episodeArray));
+          renderArray("episodeList", episodeArray, arguments.callee);
+        });
+      }
+    }
 
-search = cgi['mediaEntered']
-type = cgi['typeSearch']
-listName = cgi['listName']
-description = cgi['description']
-privacy = cgi['views'] == "Public" ? 1 : 0
+    function populateDropdowns() {
+      ["seriesDropdown", "seriesDropdownSeason", "seriesDropdownEpisode"].forEach(id => {
+        const dropdown = document.getElementById(id);
+        dropdown.innerHTML = "";
+        series.forEach(s => {
+          dropdown.innerHTML += `<option value="${s.showId}">${s.showName}</option>`;
+        });
+      });
+    }
 
-begin
-  seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
-rescue JSON::ParserError
-  seriesArray = []
-end
+    function populateSeasonDropdown() {
+      const type = document.getElementById("mediaType").value;
+      const seriesSelect = document.getElementById(type === "season" ? "seriesDropdownSeason" : "seriesDropdownEpisode");
+      const seasonSelect = document.getElementById(type === "season" ? "seasonDropdown" : "seasonDropdownEpisode");
 
-begin
-  seasonArray = cgi['seasonArray'] && !cgi['seasonArray'].empty? ? JSON.parse(cgi['seasonArray']) : []
-rescue JSON::ParserError
-  seasonArray = []
-end
+      const seriesId = seriesSelect.value;
+      seasonSelect.innerHTML = "";
+      seasons.filter(s => s.seriesId == seriesId).forEach(s => {
+        seasonSelect.innerHTML += `<option value="${s.seasonId}" data-seasonnum="${s.seasonNum}" data-seriesid="${s.seriesId}">Season ${s.seasonNum}</option>`;
+      });
 
-db = Mysql2::Client.new(
-  host: '10.20.3.4',
-  username: 'seniorproject25',
-  password: 'TV_Group123!',
-  database: 'televised_w25'
-)
+      if (type === "episode") populateEpisodeDropdown();
+    }
 
-# Handle AJAX search
-if search != ""
-  if type == "Series"
-    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-    if results.count > 0
-      results.each do |row|
-        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
-      end
-    else
-      puts "<p>We can't seem to find this title!</p>"
-    end
-  elsif type == "Season"
-    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-    if results.count > 0
-      results.each do |row|
-        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'").to_a
-        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
-        puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
-        seasons.each_with_index do |season, index|
-          puts "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
-        end
-        puts "</select></p>"
-      end
-    else
-      puts "<p>We can't seem to find this title!</p>"
-    end
-  end
-  exit
-end
+    function populateEpisodeDropdown() {
+      const seasonSelect = document.getElementById("seasonDropdownEpisode");
+      const episodeSelect = document.getElementById("episodeDropdown");
+      const seasonId = seasonSelect.value;
+      episodeSelect.innerHTML = "";
+      episodes.filter(e => e.seasonId == seasonId).forEach(e => {
+        episodeSelect.innerHTML += `<option value="${e.epId}">${e.epName}</option>`;
+      });
+    }
 
-# Save list
-if cgi['saveList'] && !listName.empty? && !description.empty?
-  existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
-  if existing_list.count > 0
-    puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
-    exit
-  end
+    document.getElementById("mediaType").addEventListener("change", () => {
+      const type = document.getElementById("mediaType").value;
+      document.getElementById("seriesSearch").style.display = type === "series" ? "block" : "none";
+      document.getElementById("seasonSearch").style.display = type === "season" ? "block" : "none";
+      document.getElementById("episodeSearch").style.display = type === "episode" ? "block" : "none";
+    });
 
-  db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
-  list_id = db.last_id
+    document.getElementById("form").addEventListener("submit", e => {
+      e.preventDefault();
+      const button = document.querySelector("button[type='submit']");
+      button.disabled = true;
 
-  unless seriesArray.empty?
-    seriesArray.each do |series|
-      series_id = series["id"].to_i
-      db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
-                VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
-    end
-  end
+      const payload = {
+        listName: document.getElementById("listName").value,
+        description: document.getElementById("description").value,
+        privacy: document.getElementById("privacy").value,
+        mediaType: document.getElementById("mediaType").value,
+        seriesArray,
+        seasonArray,
+        episodeArray
+      };
 
-  unless seasonArray.empty?
-    seasonArray.each do |season|
-      show_id = season["seriesId"].to_i
-      season_num = season["season"].to_i
-      result = db.query("SELECT seasonId FROM season WHERE seriesId = #{show_id} ORDER BY seasonId ASC LIMIT 1 OFFSET #{season_num - 1}")
-      if result.count > 0
-        season_id = result.first["seasonId"].to_i
-        db.query("INSERT INTO curatedListSeason (username, seasonId, name, description, privacy, date, listId)
-                  VALUES ('#{username}', #{season_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
-      end
-    end
-  end
+      fetch("saveList.cgi", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).then(res => res.json())
+        .then(data => {
+          if (data.success) {
+            sessionStorage.clear();
+            document.getElementById("form").reset();
+            document.getElementById("seriesList").innerHTML = '';
+            document.getElementById("seasonList").innerHTML = '';
+            document.getElementById("episodeList").innerHTML = '';
+            localStorage.setItem("message", "List created successfully!");
+            window.location.href = "Profile_List.cgi";
+          } else {
+            showPopup(data.error || "An error occurred.", "error");
+            button.disabled = false;
+          }
+        }).catch(() => {
+          showPopup("Network error.", "error");
+          button.disabled = false;
+        });
+    });
 
-  if seriesArray.empty? && seasonArray.empty?
-    puts "<script>alert('Please select at least one series or season before saving.');</script>"
-    exit
-  end
+    // Initialize
+    renderArray("seriesList", seriesArray, i => seriesArray.splice(i, 1));
+    renderArray("seasonList", seasonArray, i => seasonArray.splice(i, 1));
+    renderArray("episodeList", episodeArray, i => episodeArray.splice(i, 1));
+    populateDropdowns();
+    populateSeasonDropdown();
+    populateEpisodeDropdown();
 
-  puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_Lists.cgi';</script>"
-  exit
-end
-
-# HTML layout
-puts "<!DOCTYPE html>"
-puts "<html lang='en'>"
-puts "<head>"
-puts "  <meta charset='UTF-8'>"
-puts "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-puts "  <title>Televised</title>"
-puts "  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
-puts "  <link rel='stylesheet' href='Televised.css'>"
-puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
-puts "</head>"
-puts "<body id='createNewList'>"
-puts "  <nav id='changingNav'></nav>"
-puts "  <h2 class='text-center mt-3'>Create a New List</h2>"
-puts "  <div class='container-fluid'>"
-puts "    <div class='row'>"
-puts "      <div class='col-12 col-md-4' id='listRow'>"
-puts "        <h3 class='text-center'>List Details</h3>"
-puts "        <form id='newListForm' method='post'>"
-puts "          <label>Name</label>"
-puts "          <input type='text' name='listName' class='form-control' placeholder='Name' required><br>"
-puts "          <label>Who Can View</label>"
-puts "          <select name='views' class='form-control'>"
-puts "            <option value='Public'>Public - anyone can view</option>"
-puts "            <option value='Private'>Private - no one can view</option>"
-puts "          </select><br>"
-puts "          <label>Description</label>"
-puts "          <textarea name='description' class='form-control' rows='5'></textarea><br>"
-puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray'>"
-puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray'>"
-puts "          <button id='saveList' name='saveList' class='btn btn-primary'>CREATE LIST</button>"
-puts "        </form>"
-puts "      </div>"
-
-puts "      <div class='col-12 col-md-4' id='listColumn'>"
-puts "        <h3 class='text-center'>Selected Series/Seasons</h3>"
-puts "        <ul id='seriesList' class='list-group'></ul>"
-puts "      </div>"
-
-puts "      <div class='col-12 col-md-4' id='searchColumn'>"
-puts "        <h3 class='text-center'>Search for a Series</h3>"
-puts "        <form id='searchForm'>"
-puts "          <select id='type' name='typeSearch' class='form-control'>"
-puts "            <option value='Series' selected>Series</option>"
-puts "            <option value='Season'>Season</option>"
-puts "          </select><br>"
-puts "          <input type='text' name='mediaEntered' class='form-control'>"
-puts "          <input type='submit' value='Search' class='btn btn-secondary mt-2'>"
-puts "        </form>"
-puts "        <div id='searchResults'></div>"
-puts "      </div>"
-
-puts "    </div>"
-puts "  </div>"
-
-# Embedded JavaScript
-  puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-  puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-  puts '<script src="Televised.js"></script>'
-puts "<script>"
-puts "document.addEventListener('DOMContentLoaded', function () {"
-puts "  sessionStorage.removeItem('seriesArray');"
-puts "  sessionStorage.removeItem('seasonArray');"
-puts "  sessionStorage.removeItem('episodeArray');"
-puts "  updateAllLists();"
-
-puts "  document.getElementById('searchForm').addEventListener('submit', function (event) {"
-puts "    event.preventDefault();"
-puts "    let searchInput = document.querySelector('input[name=\"mediaEntered\"]').value;"
-puts "    let type = document.querySelector('select[name=\"typeSearch\"]').value;"
-puts "    fetch('createNewList.cgi', {"
-puts "      method: 'POST',"
-puts "      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },"
-puts "      body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })"
-puts "    })"
-puts "    .then(response => response.text())"
-puts "    .then(data => { document.getElementById('searchResults').innerHTML = data; });"
-puts "  });"
-
-puts "  document.addEventListener('click', function (event) {"
-puts "    if (event.target.classList.contains('addToList')) {"
-puts "      event.preventDefault();"
-puts "      let seriesId = event.target.dataset.seriesId;"
-puts "      let seriesName = event.target.dataset.seriesName;"
-puts "      let parent = event.target.closest('p');"
-
-puts "      if (parent.querySelector('select.seasonSelect')) {"
-puts "        let seasonNum = parent.querySelector('select.seasonSelect').selectedIndex + 1;"
-puts "        let seasonArray = JSON.parse(sessionStorage.getItem('seasonArray')) || [];"
-puts "        if (!seasonArray.some(s => s.seriesId === seriesId && s.season === seasonNum)) {"
-puts "          seasonArray.push({ seriesId: seriesId, name: seriesName, season: seasonNum });"
-puts "          sessionStorage.setItem('seasonArray', JSON.stringify(seasonArray));"
-puts "          updateAllLists();"
-puts "        }"
-puts "      } else {"
-puts "        let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
-puts "        if (!seriesArray.some(s => s.id === seriesId)) {"
-puts "          seriesArray.push({ id: seriesId, name: seriesName });"
-puts "          sessionStorage.setItem('seriesArray', JSON.stringify(seriesArray));"
-puts "          updateAllLists();"
-puts "        }"
-puts "      }"
-puts "    }"
-
-puts "    if (event.target.classList.contains('removeFromList')) {"
-puts "      event.preventDefault();"
-puts "      const type = event.target.dataset.type;"
-puts "      const index = parseInt(event.target.dataset.index, 10);"
-puts "      let key = `${type}Array`;"
-puts "      let arr = JSON.parse(sessionStorage.getItem(key)) || [];"
-puts "      arr.splice(index, 1);"
-puts "      sessionStorage.setItem(key, JSON.stringify(arr));"
-puts "      updateAllLists();"
-puts "    }"
-puts "  });"
-
-puts "  function updateAllLists() {"
-puts "    let seriesArray = JSON.parse(sessionStorage.getItem('seriesArray')) || [];"
-puts "    let seasonArray = JSON.parse(sessionStorage.getItem('seasonArray')) || [];"
-
-puts "    document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);"
-puts "    document.getElementById('seasonArrayInput').value = JSON.stringify(seasonArray);"
-
-puts "    let container = document.getElementById('seriesList');"
-puts "    container.innerHTML = '';"
-
-puts "    seriesArray.forEach((s, i) => {"
-puts "      container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>${s.name} <button class='removeFromList btn btn-danger btn-sm' data-type='series' data-index='${i}'>X</button></li>`;"
-puts "    });"
-
-puts "    seasonArray.forEach((s, i) => {"
-puts "      container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>${s.name} Season ${s.season} <button class='removeFromList btn btn-danger btn-sm' data-type='season' data-index='${i}'>X</button></li>`;"
-puts "    });"
-
-puts "    const typeSelect = document.getElementById('type');"
-puts "    if (seriesArray.length > 0) {"
-puts "      typeSelect.value = 'Series';"
-puts "      typeSelect.disabled = true;"
-puts "    } else if (seasonArray.length > 0) {"
-puts "      typeSelect.value = 'Season';"
-puts "      typeSelect.disabled = true;"
-puts "    } else {"
-puts "      typeSelect.disabled = false;"
-puts "    }"
-puts "  }"
-puts "});"
-puts "</script>"
-
-puts "</body>"
-puts "</html>"
-
-session.close
+    // Show message from previous page if available
+    const msg = localStorage.getItem("message");
+    if (msg) {
+      showPopup(msg, "success");
+      localStorage.removeItem("message");
+    }
+  </script>
+</body>
+</html>
+HTML
