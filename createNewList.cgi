@@ -22,31 +22,45 @@ privacy = cgi['privacy'] # Assuming this is passed in form
 episode_array = JSON.parse(cgi['episodeArray']) # episodeArray is a JSON string sent from JS
 
 # Start SQL transaction
-db_client.query("START TRANSACTION")
+begin
+  db_client.query("START TRANSACTION")
 
-# Insert into curatedListEpisode
-episode_array.each do |episode|
-  show_id = episode['showId']
-  show_name = episode['showName']
-  ep_id = episode['epId']
-  ep_name = episode['epName']
-  season_num = episode['seasonNum']
-  
-  # SQL to insert episode into curatedListEpisode
-  query = "
-    INSERT INTO curatedListEpisode (listId, username, showId, showName, epId, epName, seasonNum, privacy, date)
-    VALUES (#{list_id}, '#{username}', #{show_id}, '#{show_name}', #{ep_id}, '#{ep_name}', #{season_num}, #{privacy}, NOW())
-  "
-  
-  db_client.query(query)
-end
+  # Insert into curatedListEpisode
+  episode_array.each do |episode|
+    show_id = episode['showId']
+    show_name = episode['showName']
+    ep_id = episode['epId']
+    ep_name = episode['epName']
+    season_num = episode['seasonNum']
+    
+    # SQL to insert episode into curatedListEpisode
+    query = "
+      INSERT INTO curatedListEpisode (listId, username, showId, showName, epId, epName, seasonNum, privacy, date)
+      VALUES (#{list_id}, '#{username}', #{show_id}, '#{show_name}', #{ep_id}, '#{ep_name}', #{season_num}, #{privacy}, NOW())
+    "
+    
+    db_client.query(query)
+  end
 
-# Commit the transaction
-db_client.query("COMMIT")
+  # Commit the transaction
+  db_client.query("COMMIT")
 
-# Send a success response back
-cgi.out("Content-Type" => "application/json") do
-  { success: true, message: "Episodes added successfully!" }.to_json
+  # Send a success response back
+  cgi.out("Content-Type" => "application/json") do
+    { success: true, message: "Episodes added successfully!" }.to_json
+  end
+
+rescue Mysql2::Error => e
+  # Handle MySQL errors
+  cgi.out("Content-Type" => "application/json") do
+    { success: false, message: "Database error: #{e.message}" }.to_json
+  end
+
+rescue StandardError => e
+  # Handle general errors
+  cgi.out("Content-Type" => "application/json") do
+    { success: false, message: "Error: #{e.message}" }.to_json
+  end
 end
 
 # HTML and JS starts here:
