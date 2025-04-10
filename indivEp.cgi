@@ -13,7 +13,7 @@ cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
 
-episodeName = cgi['ep_name'].gsub("'", "\\\\'")
+episodeName = cgi['ep_name']
 showName = cgi['show_name']
 epNum = cgi['ep_num']
 seasonNumber = cgi['seasonNumber']
@@ -30,7 +30,7 @@ db = Mysql2::Client.new(
   )
 
 #seriesImage = db.query("SELECT imageName FROM series WHERE showName = '" + showName + "';")
-episode = db.query("SELECT episode.* FROM episode JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE episode.epName = '" + episodeName + "' AND series.showName = '" + showName.gsub("'", "\\\\'") + "';")
+episode = db.query("SELECT episode.* FROM episode JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE episode.epName = '" + episodeName + "' AND series.showName = '" + showName + "';")
 
 episodeRating = 0
 sumRating = 0
