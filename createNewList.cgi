@@ -1,267 +1,205 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
 require 'cgi'
 require 'mysql2'
 require 'json'
 
 cgi = CGI.new
-puts cgi.header("type" => "text/html", "charset" => "utf-8")
-
-client = Mysql2::Client.new(
-  :host => "localhost",
-  :username => "root",
-  :password => "password",
-  :database => "tv_shows"
+db_client = Mysql2::Client.new(
+  host: "localhost",
+  username: "your_db_username",
+  password: "your_db_password",
+  database: "your_db_name"
 )
 
-series_data = client.query("SELECT showId, showName FROM series").to_a
-season_data = client.query("SELECT seasonId, seasonNum, seriesId FROM season").to_a
-episode_data = client.query("SELECT epId, epName, seasonId FROM episode").to_a
+# Assume session is already started and we can access the user's session
+username = cgi.cookies['username'] # Get the logged-in username from cookies
 
-puts <<~HTML
-<html>
-<head>
-  <title>Create New List</title>
-  <style>
-    .popup {
-      display: none;
-      position: fixed;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 9999;
-      padding: 10px;
-      border-radius: 5px;
-      background-color: #4CAF50;
-      color: white;
-    }
-  </style>
-</head>
-<body>
-  <div class="popup" id="popup"></div>
+# Fetch the listId (for example, passed via a hidden input or query parameter)
+list_id = cgi['listId']
+privacy = cgi['privacy'] # Assuming this is passed in form
 
-  <form id="form">
-    <input type="text" id="listName" placeholder="List Name" required><br>
-    <textarea id="description" placeholder="Description"></textarea><br>
-    <select id="privacy">
-      <option value="1">Public</option>
-      <option value="0">Private</option>
-    </select><br>
+# Fetch the episodeArray JSON from the form data
+episode_array = JSON.parse(cgi['episodeArray']) # episodeArray is a JSON string sent from JS
 
-    <select id="mediaType">
-      <option value="series">Series</option>
-      <option value="season">Season</option>
-      <option value="episode">Episode</option>
-    </select><br>
+# Start SQL transaction
+db_client.query("START TRANSACTION")
 
-    <div id="seriesSearch">
-      <select id="seriesDropdown"></select>
-      <button type="button" onclick="addSeries()">Add</button>
+# Insert into curatedListEpisode
+episode_array.each do |episode|
+  show_id = episode['showId']
+  show_name = episode['showName']
+  ep_id = episode['epId']
+  ep_name = episode['epName']
+  season_num = episode['seasonNum']
+  
+  # SQL to insert episode into curatedListEpisode
+  query = "
+    INSERT INTO curatedListEpisode (listId, username, showId, showName, epId, epName, seasonNum, privacy, date)
+    VALUES (#{list_id}, '#{username}', #{show_id}, '#{show_name}', #{ep_id}, '#{ep_name}', #{season_num}, #{privacy}, NOW())
+  "
+  
+  db_client.query(query)
+end
+
+# Commit the transaction
+db_client.query("COMMIT")
+
+# Send a success response back
+cgi.out("Content-Type" => "application/json") do
+  { success: true, message: "Episodes added successfully!" }.to_json
+end
+
+# HTML and JS starts here:
+cgi.out {
+  <<~HTML
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Create New List</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+        }
+        #formContainer, #arrayContainer, #searchContainer {
+          margin: 10px;
+        }
+        .button {
+          background-color: #4CAF50;
+          color: white;
+          padding: 10px;
+          border: none;
+          cursor: pointer;
+        }
+        .button:hover {
+          background-color: #45a049;
+        }
+      </style>
+    </head>
+    <body>
+
+    <div id="formContainer">
+      <h2>Create New List</h2>
+      <form id="listForm">
+        <label for="listName">List Name:</label><br>
+        <input type="text" id="listName" name="listName"><br><br>
+
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="description"></textarea><br><br>
+
+        <label for="privacy">Privacy:</label><br>
+        <input type="radio" id="public" name="privacy" value="1">
+        <label for="public">Public</label>
+        <input type="radio" id="private" name="privacy" value="0" checked>
+        <label for="private">Private</label><br><br>
+
+        <input type="button" class="button" value="Save List" onclick="saveList()">
+      </form>
     </div>
 
-    <div id="seasonSearch" style="display:none;">
-      <select id="seriesDropdownSeason" onchange="populateSeasonDropdown()"></select>
-      <select id="seasonDropdown"></select>
-      <button type="button" onclick="addSeason()">Add</button>
+    <div id="arrayContainer">
+      <h2>Selected Episodes</h2>
+      <ul id="episodeList"></ul>
     </div>
 
-    <div id="episodeSearch" style="display:none;">
-      <select id="seriesDropdownEpisode" onchange="populateSeasonDropdown()"></select>
-      <select id="seasonDropdownEpisode" onchange="populateEpisodeDropdown()"></select>
-      <select id="episodeDropdown"></select>
-      <button type="button" onclick="addEpisode()">Add</button>
+    <div id="searchContainer">
+      <h2>Search</h2>
+      <label for="seriesSearch">Search Series:</label><br>
+      <input type="text" id="seriesSearch" onkeyup="searchSeries()"><br><br>
+
+      <label for="seasonSearch">Search Season:</label><br>
+      <input type="text" id="seasonSearch" onkeyup="searchSeason()"><br><br>
+
+      <label for="episodeSearch">Search Episode:</label><br>
+      <input type="text" id="episodeSearch" onkeyup="searchEpisode()"><br><br>
     </div>
 
-    <button type="submit">Save List</button>
-  </form>
+    <script>
+      var episodeArray = [];
 
-  <h3>Selected Series</h3>
-  <ul id="seriesList"></ul>
-  <h3>Selected Seasons</h3>
-  <ul id="seasonList"></ul>
-  <h3>Selected Episodes</h3>
-  <ul id="episodeList"></ul>
+      // Example function to add episodes
+      function addEpisode(showId, showName, epId, epName, seasonNum) {
+        var episode = {
+          showId: showId,
+          showName: showName,
+          epId: epId,
+          epName: epName,
+          seasonNum: seasonNum
+        };
+        episodeArray.push(episode);
+        displayEpisodeList();
+      }
 
-  <script>
-    const seriesArray = JSON.parse(sessionStorage.getItem("seriesArray") || "[]");
-    const seasonArray = JSON.parse(sessionStorage.getItem("seasonArray") || "[]");
-    const episodeArray = JSON.parse(sessionStorage.getItem("episodeArray") || "[]");
+      // Display the selected episodes
+      function displayEpisodeList() {
+        var episodeList = document.getElementById("episodeList");
+        episodeList.innerHTML = ""; // Clear the list before adding updated episodes
 
-    const series = #{series_data.to_json};
-    const seasons = #{season_data.to_json};
-    const episodes = #{episode_data.to_json};
-
-    function showPopup(message, type) {
-      const popup = document.getElementById("popup");
-      popup.innerText = message;
-      popup.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
-      popup.style.display = "block";
-      setTimeout(() => popup.style.display = "none", 3000);
-    }
-
-    function renderArray(listId, array, removeFn) {
-      const list = document.getElementById(listId);
-      list.innerHTML = "";
-      array.forEach((item, index) => {
-        const li = document.createElement("li");
-        li.textContent = item.display;
-        const btn = document.createElement("button");
-        btn.textContent = "Remove";
-        btn.onclick = () => removeFn(index);
-        li.appendChild(btn);
-        list.appendChild(li);
-      });
-    }
-
-    function addSeries() {
-      const select = document.getElementById("seriesDropdown");
-      const option = select.options[select.selectedIndex];
-      const id = option.value;
-      const name = option.text;
-      if (!seriesArray.some(s => s.id === id)) {
-        seriesArray.push({ id, name, display: name });
-        sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));
-        renderArray("seriesList", seriesArray, i => {
-          seriesArray.splice(i, 1);
-          sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));
-          renderArray("seriesList", seriesArray, arguments.callee);
+        episodeArray.forEach(function(episode, index) {
+          var li = document.createElement("li");
+          li.textContent = episode.showName + ": S" + episode.seasonNum + " - " + episode.epName;
+          var removeBtn = document.createElement("button");
+          removeBtn.textContent = "Remove";
+          removeBtn.onclick = function() {
+            removeEpisode(index);
+          };
+          li.appendChild(removeBtn);
+          episodeList.appendChild(li);
         });
       }
-    }
 
-    function addSeason() {
-      const seriesSelect = document.getElementById("seriesDropdownSeason");
-      const seasonSelect = document.getElementById("seasonDropdown");
-      const seriesName = seriesSelect.options[seriesSelect.selectedIndex].text;
-      const seasonId = seasonSelect.value;
-      const seasonNum = seasonSelect.options[seasonSelect.selectedIndex].dataset.seasonnum;
-
-      if (!seasonArray.some(s => s.seasonId === seasonId)) {
-        seasonArray.push({ seasonId, display: `${seriesName} Season ${seasonNum}` });
-        sessionStorage.setItem("seasonArray", JSON.stringify(seasonArray));
-        renderArray("seasonList", seasonArray, i => {
-          seasonArray.splice(i, 1);
-          sessionStorage.setItem("seasonArray", JSON.stringify(seasonArray));
-          renderArray("seasonList", seasonArray, arguments.callee);
-        });
+      // Remove episode from array
+      function removeEpisode(index) {
+        episodeArray.splice(index, 1);
+        displayEpisodeList();
       }
-    }
 
-    function addEpisode() {
-      const seriesSelect = document.getElementById("seriesDropdownEpisode");
-      const seasonSelect = document.getElementById("seasonDropdownEpisode");
-      const episodeSelect = document.getElementById("episodeDropdown");
-
-      const showName = seriesSelect.options[seriesSelect.selectedIndex].text;
-      const seasonNum = seasonSelect.options[seasonSelect.selectedIndex].dataset.seasonnum;
-      const epName = episodeSelect.options[episodeSelect.selectedIndex].text;
-      const epId = episodeSelect.value;
-
-      if (!episodeArray.some(e => e.epId === epId)) {
-        episodeArray.push({ epId, display: `${showName}: S${seasonNum}: ${epName}` });
-        sessionStorage.setItem("episodeArray", JSON.stringify(episodeArray));
-        renderArray("episodeList", episodeArray, i => {
-          episodeArray.splice(i, 1);
-          sessionStorage.setItem("episodeArray", JSON.stringify(episodeArray));
-          renderArray("episodeList", episodeArray, arguments.callee);
-        });
+      // Search series, season, and episode (this is a simplified example)
+      function searchSeries() {
+        var query = document.getElementById("seriesSearch").value.toLowerCase();
+        // You would filter your series here based on the query
       }
-    }
 
-    function populateDropdowns() {
-      ["seriesDropdown", "seriesDropdownSeason", "seriesDropdownEpisode"].forEach(id => {
-        const dropdown = document.getElementById(id);
-        dropdown.innerHTML = "";
-        series.forEach(s => {
-          dropdown.innerHTML += `<option value="${s.showId}">${s.showName}</option>`;
-        });
-      });
-    }
+      function searchSeason() {
+        var query = document.getElementById("seasonSearch").value.toLowerCase();
+        // You would filter your seasons here based on the query
+      }
 
-    function populateSeasonDropdown() {
-      const type = document.getElementById("mediaType").value;
-      const seriesSelect = document.getElementById(type === "season" ? "seriesDropdownSeason" : "seriesDropdownEpisode");
-      const seasonSelect = document.getElementById(type === "season" ? "seasonDropdown" : "seasonDropdownEpisode");
+      function searchEpisode() {
+        var query = document.getElementById("episodeSearch").value.toLowerCase();
+        // You would filter your episodes here based on the query
+      }
 
-      const seriesId = seriesSelect.value;
-      seasonSelect.innerHTML = "";
-      seasons.filter(s => s.seriesId == seriesId).forEach(s => {
-        seasonSelect.innerHTML += `<option value="${s.seasonId}" data-seasonnum="${s.seasonNum}" data-seriesid="${s.seriesId}">Season ${s.seasonNum}</option>`;
-      });
+      // Save the list (episodes and other form data)
+      function saveList() {
+        var listId = document.getElementById("listId").value;
+        var privacy = document.querySelector('input[name="privacy"]:checked').value;
 
-      if (type === "episode") populateEpisodeDropdown();
-    }
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "createNewList.cgi", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-    function populateEpisodeDropdown() {
-      const seasonSelect = document.getElementById("seasonDropdownEpisode");
-      const episodeSelect = document.getElementById("episodeDropdown");
-      const seasonId = seasonSelect.value;
-      episodeSelect.innerHTML = "";
-      episodes.filter(e => e.seasonId == seasonId).forEach(e => {
-        episodeSelect.innerHTML += `<option value="${e.epId}">${e.epName}</option>`;
-      });
-    }
+        var data = "listId=" + encodeURIComponent(listId) +
+                   "&privacy=" + encodeURIComponent(privacy) +
+                   "&episodeArray=" + encodeURIComponent(JSON.stringify(episodeArray));
 
-    document.getElementById("mediaType").addEventListener("change", () => {
-      const type = document.getElementById("mediaType").value;
-      document.getElementById("seriesSearch").style.display = type === "series" ? "block" : "none";
-      document.getElementById("seasonSearch").style.display = type === "season" ? "block" : "none";
-      document.getElementById("episodeSearch").style.display = type === "episode" ? "block" : "none";
-    });
+        xhr.send(data);
 
-    document.getElementById("form").addEventListener("submit", e => {
-      e.preventDefault();
-      const button = document.querySelector("button[type='submit']");
-      button.disabled = true;
-
-      const payload = {
-        listName: document.getElementById("listName").value,
-        description: document.getElementById("description").value,
-        privacy: document.getElementById("privacy").value,
-        mediaType: document.getElementById("mediaType").value,
-        seriesArray,
-        seasonArray,
-        episodeArray
-      };
-
-      fetch("saveList.cgi", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      }).then(res => res.json())
-        .then(data => {
-          if (data.success) {
-            sessionStorage.clear();
-            document.getElementById("form").reset();
-            document.getElementById("seriesList").innerHTML = '';
-            document.getElementById("seasonList").innerHTML = '';
-            document.getElementById("episodeList").innerHTML = '';
-            localStorage.setItem("message", "List created successfully!");
-            window.location.href = "Profile_List.cgi";
-          } else {
-            showPopup(data.error || "An error occurred.", "error");
-            button.disabled = false;
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            if (response.success) {
+              alert(response.message);
+            } else {
+              alert("There was an error: " + response.message);
+            }
           }
-        }).catch(() => {
-          showPopup("Network error.", "error");
-          button.disabled = false;
-        });
-    });
+        };
+      }
+    </script>
 
-    // Initialize
-    renderArray("seriesList", seriesArray, i => seriesArray.splice(i, 1));
-    renderArray("seasonList", seasonArray, i => seasonArray.splice(i, 1));
-    renderArray("episodeList", episodeArray, i => episodeArray.splice(i, 1));
-    populateDropdowns();
-    populateSeasonDropdown();
-    populateEpisodeDropdown();
-
-    // Show message from previous page if available
-    const msg = localStorage.getItem("message");
-    if (msg) {
-      showPopup(msg, "success");
-      localStorage.removeItem("message");
-    }
-  </script>
-</body>
-</html>
-HTML
+    </body>
+    </html>
+  HTML
+}
