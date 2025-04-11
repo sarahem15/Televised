@@ -41,39 +41,53 @@ db = Mysql2::Client.new(
 )
 
 # Handle AJAX search functionality for Series, Seasons, and Episodes
-if type == "Series" && search != ""
-  results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-  
-  if results.count > 0
-    results.each do |row|
-      puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-      puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
-      puts "<button class='viewSeasons btn btn-info' data-series-id='#{row['showId']}'>View Seasons</button></p>"
+if search != ""
+  if type == "Series"
+    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+    
+    if results.count > 0
+      output = "<ul class='list-group'>"
+      results.each do |row|
+        output += "<li class='list-group-item d-flex justify-content-between align-items-center'>"
+        output += "#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        output += "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
+        output += "</li>"
+      end
+      output += "</ul>"
+      puts "<div id='searchResults'>#{output}</div>"
+    else
+      puts "<p>We can't seem to find this title!</p>"
     end
-  else
-    puts "<p>We can't seem to find this title!</p>"
-  end
-  exit
-elsif type == "Season" && search != ""
-  results = db.query("SELECT seasonId, seasonNum FROM season WHERE seriesId = '#{search}'")
-  
-  if results.count > 0
-    results.each do |row|
-      puts "<p>Season #{row['seasonNum']} <button class='addSeason btn btn-success' data-season-id='#{row['seasonId']}' data-season-num='#{row['seasonNum']}'>ADD</button></p>"
+  elsif type == "Season"
+    results = db.query("SELECT seasonId, seasonNum FROM season WHERE seriesId = '#{search}'")
+    
+    if results.count > 0
+      output = "<ul class='list-group'>"
+      results.each do |row|
+        output += "<li class='list-group-item d-flex justify-content-between align-items-center'>"
+        output += "Season #{row['seasonNum']} <button class='addSeason btn btn-success' data-season-id='#{row['seasonId']}' data-season-num='#{row['seasonNum']}'>ADD</button>"
+        output += "</li>"
+      end
+      output += "</ul>"
+      puts "<div id='searchResults'>#{output}</div>"
+    else
+      puts "<p>No seasons found for this series!</p>"
     end
-  else
-    puts "<p>No seasons found for this series!</p>"
-  end
-  exit
-elsif type == "Episode" && search != ""
-  results = db.query("SELECT epId, epName FROM episode WHERE seasonId = '#{search}'")
-  
-  if results.count > 0
-    results.each do |row|
-      puts "<p>Episode: #{row['epName']} <button class='addEpisode btn btn-success' data-ep-id='#{row['epId']}' data-ep-name='#{row['epName']}'>ADD</button></p>"
+  elsif type == "Episode"
+    results = db.query("SELECT epId, epName FROM episode WHERE seasonId = '#{search}'")
+    
+    if results.count > 0
+      output = "<ul class='list-group'>"
+      results.each do |row|
+        output += "<li class='list-group-item d-flex justify-content-between align-items-center'>"
+        output += "Episode: #{row['epName']} <button class='addEpisode btn btn-success' data-ep-id='#{row['epId']}' data-ep-name='#{row['epName']}'>ADD</button>"
+        output += "</li>"
+      end
+      output += "</ul>"
+      puts "<div id='searchResults'>#{output}</div>"
+    else
+      puts "<p>No episodes found for this season!</p>"
     end
-  else
-    puts "<p>No episodes found for this season!</p>"
   end
   exit
 end
