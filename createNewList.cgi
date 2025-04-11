@@ -9,10 +9,10 @@ puts cgi.header("type" => "text/html", "charset" => "utf-8")
 
 begin
   client = Mysql2::Client.new(
-    host: "localhost",
-    username: "your_username",
-    password: "your_password",
-    database: "your_database"
+    host: '10.20.3.4', 
+    username: 'seniorproject25', 
+    password: 'TV_Group123!', 
+    database: 'televised_w25'
   )
 rescue Mysql2::Error => e
   puts "<p>Database connection error: #{e.message}</p>"
