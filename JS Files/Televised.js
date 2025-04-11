@@ -338,20 +338,3 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
-/*
-// Fills in episode name on review modal
-document.addEventListener("DOMContentLoaded", function () {
-  var reviewModal = document.getElementById("CreateEpisodeReview");
- 
-  reviewModal.addEventListener("show.bs.modal", function (event) {
-    var button = event.relatedTarget; // Button that triggered the modal
-    var episodeName = button.getAttribute("data-epName"); // Get data-epName attribute
-   
-    var epNameElement = document.getElementById("reviewEpName");
-    if (epNameElement) {
-      epNameElement.textContent = episodeName; // Update modal content
-      epNameElement.value = episodeName;
-    }
-  });
-});
-*/
