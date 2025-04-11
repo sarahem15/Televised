@@ -33,6 +33,13 @@ reviewId = cgi['reviewId']
 reviewCreator = cgi['reviewCreator']
 likedReview = cgi['likedReview']
 
+fav1Images = "GossipGirl.jpg,NewGirl.jpg,Community.jpg,ModernFamily.jpg,That70sShow.jpg"
+fav1 = "Gossip Girl,New Girl,Community,Modern Family,That '70s Show"
+fav2Images = "H2O.jpg,WizardsOfWaverlyPlace.jpg,EveryWitchWay.jpg,Supacell.jpg,PercyJackson.jpg"
+fav2 = "H2O: Just Add Water,Wizards Of Waverly Place,Every Witch Way,Supacell,Percy Jackson and the Olympians"
+fav3 = "Smiling Friends,Clarksons Farm,Futurama,Bojack Horseman,WandaVision"
+fav3Images = "SmilingFriends.jpg,ClarksonsFarm.jpg,Futurama.jpg,BojackHorseman.jpg,WandaVision.jpg"
+
 if likedReview == "TRUE"
     begin
         db.query("INSERT INTO likedSeriesReview VALUES ('" + username.to_s + "', '" + reviewCreator + "', '" + reviewId + "');")
@@ -60,18 +67,20 @@ puts'<body id="homePage">'
   puts'<h3 id="slogan">Your T.V. Guide, Reimagined</h3>'
   puts'<br>'
   puts'<br>'
-  puts'<p>What\'s Popular</p>'
+  puts'<p>Curator\'s Choice</p>'
   puts'<hr style="margin-left: 80px; margin-right: 80px">'
   puts'<section id="homePopular">'
     puts'<div class="wrapper">'
       puts'<section class="carousel-section" id="homePopularSection">'
         puts'<a href=#homePopularSection3>‹</a>'
         (0...5).each do |i|
+            seriesImages = fav1Images.split(",")
+            seriesSubtitles = fav1.split(",")
             puts '<div class="item">'
             puts '<form action="series.cgi" method="POST">'
-                puts '<input type="image" src="' + series[i]['imageName'] + '" alt="' + series[i]['imageName'] + '">'
-                puts '<h5 style="text-align: center;">' + series[i]['showName'].gsub("Fucking", "F***ing") + '</h5>'
-                puts '<input type="hidden" name="clicked_image" value="' + series[i]['imageName'] + '">'
+                puts '<input type="image" src="' + seriesImages[i] + '" alt="' + seriesImages[i] + '">'
+                puts '<h5 style="text-align: center;">' + seriesSubtitles[i] + '</h5>'
+                puts '<input type="hidden" name="clicked_image" value="' + seriesImages[i] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
 
             puts '</form>'
@@ -82,12 +91,14 @@ puts'<body id="homePage">'
       puts'</section>'
       puts'<section class="carousel-section" id="homePopularSection2">'
         puts'<a href="#homePopularSection">‹</a>'
-        (6...11).each do |i|
+        (0...5).each do |i|
+            seriesImages = fav2Images.split(",")
+            seriesSubtitles = fav2.split(",")
             puts '<div class="item">'
             puts '<form action="series.cgi" method="POST">'
-                puts '<input type="image" src="' + series[i]['imageName'] + '" alt="' + series[i]['imageName'] + '">'
-                puts '<h5 style="text-align: center;">' + series[i]['showName'].gsub("Fucking", "F***ing") + '</h5>'
-                puts '<input type="hidden" name="clicked_image" value="' + series[i]['imageName'] + '">'
+                puts '<input type="image" src="' + seriesImages[i] + '" alt="' + seriesImages[i] + '">'
+                puts '<h5 style="text-align: center;">' + seriesSubtitles[i] + '</h5>'
+                puts '<input type="hidden" name="clicked_image" value="' + seriesImages[i] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
             puts '</form>'
             puts '</div>'
@@ -96,12 +107,14 @@ puts'<body id="homePage">'
       puts'</section>'
       puts'<section class="carousel-section" id="homePopularSection3">'
         puts'<a href="#homePopularSection2">‹</a>'
-        (12...17).each do |i|
+        (0...5).each do |i|
+            seriesImages = fav3Images.split(",")
+            seriesSubtitles = fav3.split(",")
             puts '<div class="item">'
             puts '<form action="series.cgi" method="POST">'
-                puts '<input type="image" src="' + series[i]['imageName'] + '" alt="' + series[i]['imageName'] + '">'
-                puts '<h5 style="text-align: center;">' + series[i]['showName'].gsub("Fucking", "F***ing") + '</h5>'
-                puts '<input type="hidden" name="clicked_image" value="' + series[i]['imageName'] + '">'
+                puts '<input type="image" src="' + seriesImages[i] + '" alt="' + seriesImages[i] + '">'
+                puts '<h5 style="text-align: center;">' + seriesSubtitles[i] + '</h5>'
+                puts '<input type="hidden" name="clicked_image" value="' + seriesImages[i] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
             puts '</form>'
             puts '</div>'
@@ -123,7 +136,7 @@ puts'<body id="homePage">'
                 puts '<input type="image" src="' + sortedSeries[i]['imageName'] + '" alt="' + sortedSeries[i]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + sortedSeries[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
-                puts '<h5 style="text-align: center;">' + sortedSeries[i]['showName'].gsub("Fucking", "F***ing") + '</h5>'
+                puts '<h5 style="text-align: center;">' + sortedSeries[i]['showName'] + '</h5>'
             puts '</form>'
             puts '</div>'
         end
@@ -137,7 +150,7 @@ puts'<body id="homePage">'
                 puts '<input type="image" src="' + sortedSeries[i]['imageName'] + '" alt="' + sortedSeries[i]['imageName'] + '">'
                 puts '<input type="hidden" name="clicked_image" value="' + sortedSeries[i]['imageName'] + '">'
                 puts '<input type="hidden" name="seasonNumber" value="' + 1.to_s + '">'
-                puts '<h5 style="text-align: center;">' + sortedSeries[i]['showName'].gsub("Fucking", "F***ing") + '</h5>'
+                puts '<h5 style="text-align: center;">' + sortedSeries[i]['showName'] + '</h5>'
             puts '</form>'
             puts '</div>'
         end
@@ -199,7 +212,7 @@ puts '<div class="ReviewIndiv">'
         end
     end
 
-    puts '<form action="Home.cgi" method="post">'
+    puts '<form class="LikeAndCount" action="Home.cgi" method="post">'
     if alreadyLiked == true
       puts '<button class="LIKES" style="color: pink;">&#10084</button>'
     else

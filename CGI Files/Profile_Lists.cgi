@@ -124,7 +124,7 @@ elsif seriesTab == "EP"
   lists = lists.to_a
 end
 puts '</div>'
-puts '<button id="newListProfile" class="createListButton"> <a href="createNewList.cgi"> Create a New List </a> </button>'
+puts '<a href="createNewList.cgi"><button id="newListProfile" class="createListButton">Create a New List</button></a>'
 puts '</div>'
 
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
@@ -166,7 +166,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<input type="hidden" name="deleteListId" value="' + listId.to_s + '">'
   puts '<button type="submit" class="btn btn-danger">Delete List</button>'
   puts '</form>'
-  puts '<form action="Profile_Lists.cgi" method="post">'
+  puts '<form  class="LikeAndCount" action="Profile_Lists.cgi" method="post">'
   # Likes handling
   alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.to_s + "';")
   if (alreadyLiked.to_a != [])

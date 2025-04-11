@@ -144,7 +144,7 @@ puts '<div class="originalReview">'
       puts '<input type="hidden" name="ep_num" value="' + epNum.to_s + '">'
       puts '<input type="hidden" name="seasonNumber" value="' + seriesImage.first['seasonNum'].to_s + '">'
   end  
-	puts "<input type='image' src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\" style='width: 250px; height: 300px; object-fit: cover;'>" 
+	puts "<input type='image' src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\" style='width: 200px; height: 270px; object-fit: cover;'>" 
   puts '</form>'
 	puts '<div class="content-R">'
       puts '<section class="NameAndYear">'
@@ -189,9 +189,6 @@ puts '<div class="originalReview">'
     puts '<input type="hidden" name="seriesTab" value="' + seriesTab + '">'
     puts '</form>'
     alreadyLiked = false
-
-
-
 
 	puts '</div>'
 puts '</div>'

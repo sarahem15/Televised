@@ -124,7 +124,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
               puts '<input type="hidden" name="ep_num" value="' + epNum.to_s + '">'
         end
         puts '<input type="hidden" name="seasonNumber" value="' + rateImages[i]['seasonNum'].to_s + '">'
-        puts "<input type='image' src=\"" + rateImages[i]['imageName'] + "\"alt=\"" + rateImages[i]['imageName'] + "\" style='width: 150px; height: 220px; object-fit: cover;'>" 
+        puts "<input type='image' src=\"" + rateImages[i]['imageName'] + "\"alt=\"" + rateImages[i]['imageName'] + "\" style='width: 200px; height: 270px; object-fit: cover;'>" 
         puts '</form>'
 
 

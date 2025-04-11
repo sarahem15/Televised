@@ -67,7 +67,32 @@ puts '<body id="listContent">'
     puts '<h3>List by <a href="othersProfiles.cgi?username=' + listContent.first['username'] + '">' + displayName.first['displayName'] + '</a></h3>'
   puts '</section>'
   puts '<br>'
+  puts '<section class="titleLike">'
   puts '<h1>' + listTitle.to_s + '</h1>'
+  (0...likes.size).each do |j|
+  if likes[j]['userWhoLiked'] == username.to_s
+    alreadyLiked = true
+  end
+end
+
+puts '<form  class="LikeAndCount" action="listContents.cgi" method="post">'
+      #alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.first['id'].to_s + "';")
+      
+      if (alreadyLiked)
+        puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+      else
+        puts '<button class="LIKES">&#10084</button>'
+        end
+        puts '<a href="whoHasLiked.cgi?listName=' + listTitle + '&listCreator=' + listContent.first['username'] + '&listId=' + listId.first['id'].to_s + '">' + likes.size.to_s + '</a>'
+        puts '<input type="hidden" name="likedList" value="TRUE">'
+        puts '<input type="hidden" name="listId" value="' + listId.first['id'].to_s + '">'
+        #puts '<input type="hidden" name="likeUser" value="' + username.to_s + '">'
+        puts '<input type="hidden" name="listCreator" value="' + listContent.first['username'] + '">'
+        puts '<input type="hidden" name="title" value="' + listTitle + '">'
+        puts '<input type="hidden" name="contentType" value="' + type + '">'
+        
+    puts '</form>'
+    puts '</section>'
   puts '<hr>'
   puts '<section class="contents">'
   puts '<div class="listContents">'
@@ -89,29 +114,6 @@ puts '<body id="listContent">'
        puts '<br>'
   puts '</div>'
 
-(0...likes.size).each do |j|
-  if likes[j]['userWhoLiked'] == username.to_s
-    alreadyLiked = true
-  end
-end
-
-puts '<form action="listContents.cgi" method="post">'
-      #alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.first['id'].to_s + "';")
-      
-      if (alreadyLiked)
-        puts '<button class="LIKES" style="color: pink;">&#10084</button>'
-      else
-        puts '<button class="LIKES">&#10084</button>'
-        end
-        puts '<a href="whoHasLiked.cgi?listName=' + listTitle + '&listCreator=' + listContent.first['username'] + '&listId=' + listId.first['id'].to_s + '">' + likes.size.to_s + '</a>'
-        puts '<input type="hidden" name="likedList" value="TRUE">'
-        puts '<input type="hidden" name="listId" value="' + listId.first['id'].to_s + '">'
-        #puts '<input type="hidden" name="likeUser" value="' + username.to_s + '">'
-        puts '<input type="hidden" name="listCreator" value="' + listContent.first['username'] + '">'
-        puts '<input type="hidden" name="title" value="' + listTitle + '">'
-        puts '<input type="hidden" name="contentType" value="' + type + '">'
-        
-    puts '</form>'
 
   tempCount = 0
   if (haveWatched.size > 0)

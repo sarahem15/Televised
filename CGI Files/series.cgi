@@ -162,7 +162,7 @@ puts "<body id=\"showsPage\">"
         if doneReview != "[]"
         puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeriesReview\" style='color: #00156d;'>&#128488</button>"
       else
-        puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeriesReview\">&#128488</button>"
+        puts "<span class='infoQuestion'><button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeriesReview\">&#128488</button><i><h4><p class=\"info\"> To review a series, click the icon above! </p></h4></i></span>"
       end
         #puts "<button class=\"rateButton\">STARS</button>"
 
@@ -204,11 +204,41 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="wantToWatch" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
-        puts '<form action="threebuttons.cgi" method="POST">'
-        puts "<button>Add to Existing List</button>"
-        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
-        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+
+
+        #puts '<form action="threebuttons.cgi" method="POST">'
+        #puts "<button>Add to Existing List</button>"
+        #puts "<button onclick=\"openAddToExistingModal()\">Add to Existing List</button>"
+        puts "<button data-bs-toggle=\"modal\" data-bs-target=\"#addToExisting\">Add to Existing List</button>"
+=begin
+        puts '<div id="addToExisting">'
+        puts '<div class="modal-content">'
+        puts '<span class="close" onclick="document.getElementById(\'addToExisting\').style.display=\'none\'">&times;</span>'
+        puts '<form method="post" action="handle_name.cgi">'
+
+        lists = db.query("SELECT listName FROM listOwnership WHERE username = '" + username.to_s + "';")
+        lists = lists.to_a
+        (0...lists.size).each do |i|
+          puts "<input type='radio' name='list' value='" + lists[i]['listName'] + "<br>"
+        end
+
+        puts '<br>'
+        puts '<input type="submit" value="Submit">'
         puts '</form>'
+=end
+
+
+        #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        #puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        #puts '</form>'
+
+
+
+        
+
+
+
+
         puts '<form action="createNewList.cgi" method="POST">'
         puts "<button>Add to New List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
@@ -294,7 +324,7 @@ puts "<body id=\"showsPage\">"
         if (alreadyWatchedSeason.to_a.to_s != "[]")
           puts '<button class="watchedButton"><i class="eye-icon fa fa-eye" style="color: #6bdf10;"></i></button>'
         else
-          puts '<span class="infoQuestion"><button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button><i><h5><p class="info"> Add a season to Have Watched </p></h5></i></span>'
+          puts '<span class="infoQuestion"><button class="watchedButton"><i class="eye-icon fa fa-eye"></i></button><i><h5><p class="info"> Add a season to Have Watched! </p></h5></i></span>'
         end
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="watchedButton" value="TRUE">'
@@ -305,7 +335,7 @@ puts "<body id=\"showsPage\">"
         if doneReview != "[]"
           puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeasonReview\" style='color: #00156d;'>&#128488</button>"
         else 
-          puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeasonReview\">&#128488</button>"
+          puts "<span class='infoQuestion'><button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeriesReview\">&#128488</button><i><h5><p class=\"info\"> To review a season, click the icon above! </p></h5></i></span>"
         end
         # puts "<button class=\"rateButton\">STARS</button>"
         alreadyRatedSeason = db.query("SELECT * FROM seasonRating WHERE username = '" + username + "' AND seasonId = '" + seasonId.to_s + "';")
@@ -396,7 +426,7 @@ puts "<body id=\"showsPage\">"
 
     puts "<div class=\"words\">"
     puts '<section class="titleTime">'
-      puts "<a href=\"indivEp.cgi?ep_name=" + episode['epName'].gsub("'", "\\\\'").gsub("#", "\\\#").gsub(".", "\\\.") + "&show_name=" + series.first['showName'] + "&seriesID=" + series.first['showId'].to_s + "&ep_num=" + epNum.to_s + "&seasonNumber=" + seasonNumber.to_s + "\"><h3 style=\"font-family: 'Times New Roman', Times, serif; text-align: left;\">" + epNum.to_s + ". " + episode['epName'] + "</h3></a>"
+      puts "<a href=\"indivEp.cgi?ep_name=" + episode['epName'].gsub("'", "\\\\'").gsub("#", "\\\#").gsub(".", "\\\.") + "&show_name=" + series.first['showName'].gsub("'", "\\\\'") + "&seriesID=" + series.first['showId'].to_s + "&ep_num=" + epNum.to_s + "&seasonNumber=" + seasonNumber.to_s + "\"><h3 style=\"font-family: 'Times New Roman', Times, serif; text-align: left;\">" + epNum.to_s + ". " + episode['epName'] + "</h3></a>"
       puts "<h4 style=\"font-family: 'Times New Roman', Times, serif; color: #436eb1; text-align: left;\">" + episode['runtime'].to_s + "m</h4>"
       puts '</section>'
       puts "<h5 style=\"font-family: 'Times New Roman', Times, serif; color: white; text-align: left;\">" + episode['description'] + "</h5>"
@@ -476,6 +506,7 @@ puts "<body id=\"showsPage\">"
         puts "</div>"
         puts "</div>"
         
+        puts "<span class='infoQuestion'><h3 style='padding-top: 35%;'><i class=\"fa fa-question-circle\"></i></h3><i><h5><p class=\"info\"> To review an episode or for more information, click the episode title! </p></h5></i></span>"
       puts "</div>"
     puts "</div>"
   puts "</div>"
@@ -502,7 +533,7 @@ else
     reviewDisplayName = db.query("SELECT displayName FROM account WHERE username = '" + seriesReviews[i]['username'] + "';")
         puts '<section class="UserDisplay">'
             puts '<img src="./ProfileImages/' + seriesReviews[i]['username'] + '.jpg" alt="" style="height: 50px; width: 50px; corner-rounding: 100%; background-color: gray;">'
-            puts '<h3>' + reviewDisplayName.first['displayName'] + '</h3>'
+            puts '<a href="othersProfiles.cgi?username=' + seriesReviews[i]['username'] + '"><h3>' + reviewDisplayName.first['displayName'] + '</h3></a>'
             #RATING!
         puts '</section>'
         puts '<br>'
@@ -542,7 +573,7 @@ end
     reviewDisplayName = db.query("SELECT displayName FROM account WHERE username = '" + seasonReviews[i]['username'] + "';")
         puts '<section class="UserDisplay">'
             puts '<img src="./ProfileImages/' + seasonReviews[i]['username'] + '.jpg" alt="" style="height: 50px; width: 50px; corner-rounding: 100%; background-color: gray;">'
-            puts '<h3>' + reviewDisplayName.first['displayName'] + '</h3>'
+            puts '<a href="othersProfiles.cgi?username=' + seasonReviews[i]['username'] + '"><h3>' + reviewDisplayName.first['displayName'] + '</h3></a>'
             #RATING!
         puts '</section>'
         puts '<br>'
@@ -783,6 +814,52 @@ puts "      });"
 puts "    });"
 puts "  });"
 puts "  </script>"
+
+
+puts '  <div class="modal fade" id="addToExisting" tabindex="-1" aria-labelledby="addToExisting" aria-hidden="true">'
+puts '    <div class="modal-dialog">'
+puts '    <div class="modal-dialog">'
+puts '      <div class="modal-content">'
+puts '        <div class="modal-header">'
+puts '          <h5 class="modal-title" id="addToExisting">Choose a list:</h5>'
+puts '          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>'
+puts '        </div>'
+puts '        <div class="modal-body">'
+
+puts '          <form id="addToExistingForm" name="addToExisting" method="POST" action="createAcc.cgi"">'
+=begin
+puts '            <div class="mb-3">'
+puts '              <label for="unameSignInInput" class="form-label">Username</label>'
+puts '              <input type="text" class="form-control" id="unameSignInInput" name="unameSignInInput" placeholder="Enter your username" required>'
+puts '            </div>'
+puts '            <div class="mb-3">'
+puts '              <label for="passSignInInput" class="form-label">Password</label>'
+puts '              <input type="password" class="form-control" id="passSignInInput" name="passSignInInput" placeholder="Enter your password" required>'
+puts '              <input type="hidden" id="attemptingLogIn" name="attempting" value="true">'
+puts '              <input type="hidden" id="fromCreate2" name="fromCreate" value="false">'
+puts '            </div>'
+puts '            <div class="modal-footer">'
+=end
+
+                  lists = db.query("SELECT listName FROM listOwnership WHERE username = '" + username.to_s + "';")
+                  lists = lists.to_a
+                  (0...lists.size).each do |i|
+                    puts "<input type='radio' name='list' value='" + lists[i]['listName'] + "'>" + lists[i]['listName'] + 
+                    "<br>"
+                  end
+
+
+                  #lists = db.query("SELECT listName FROM listOwnership WHERE username = '" + username.to_s + "';")
+                  #puts "<input type='radio' name='list' value='" + lists.first['listName'] + "'<br>"
+puts '              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>'
+puts '              <button type="submit" class="btn btn-primary">Add</button>'
+puts '            </div>'
+puts '          </div>'
+puts '          </form>'
+
+puts '        </div>'
+puts '    </div>'
+puts '  </div>'
 
 
 puts "</body>"

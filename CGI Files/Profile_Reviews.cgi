@@ -135,7 +135,7 @@ puts '<div class="originalReview">'
   else
     puts '<form action="indivEp.cgi">'
   end
-	puts "<input type='image' src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\" style='width: 250px; height: 300px; object-fit: cover;'>" 
+	puts "<input type='image' src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\" style='width: 200px; height: 275px; object-fit: cover;'>" 
   puts '<input type="hidden" name="clicked_image" value="' + seriesImage.first['imageName'] + '">'
   if seriesTab == "SERIES"
     puts '<input type="hidden" name="seasonNumber" value="1">'
@@ -183,7 +183,7 @@ puts '<div class="originalReview">'
         end
     end
 
-    puts '<form action="Profile_Reviews.cgi?seriesTab=' + seriesTab + '" method="post">'
+    puts '<form  class="LikeAndCount" action="Profile_Reviews.cgi?seriesTab=' + seriesTab + '" method="post">'
     if alreadyLiked == true
       puts '<button class="LIKES" style="color: pink;">&#10084</button>'
     else

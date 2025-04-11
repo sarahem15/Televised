@@ -166,7 +166,7 @@ else
     reviewDisplayName = db.query("SELECT displayName FROM account WHERE username = '" + reviews[i]['userWhoReviewed'] + "';")
     puts '<div class="content-L">'
     puts '<form action="series.cgi" method="POST" style="padding: 0;">'
-    puts "<input type='image' src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\" style='height: 300px; width: 250px; object-fit: cover; padding: 1;'>" 
+    puts "<input type='image' src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\" style='height: 270px; width: 200px; object-fit: cover; padding: 1;'>" 
     puts '<input type="hidden" name="clicked_image" value="' + seriesImage.first['imageName'] + '"">'
     puts '<input type="hidden" name="seasonNumber" value="1">'
     puts '</form>'
@@ -199,11 +199,11 @@ else
         likeCount = likeCount + 1
     end
 
-    puts '<form action="Likes_Lists.cgi" method="POST">'
+    puts '<form class="LikeAndCount" action="Likes_Lists.cgi" method="POST">'
     puts '<button class="LIKES" style="color: pink;">&#10084</button>'
     puts '<input type="hidden" name="likedReview" value="TRUE">'
-    #puts '<a href="whoHasLiked.cgi?reviewId=' + reviews[i]['reviewId'].to_s + '">' + likeCount.to_s + '</a>'
-    puts likeCount.to_s
+    puts '<a href="whoHasLiked.cgi?reviewId=' + reviews[i]['reviewId'].to_s + '&type=EP">' + likeCount.to_s + '</a>'
+    #puts likeCount.to_s
     puts '<input type="hidden" name="reviewId" value="' + reviews[i]['reviewId'].to_s + '">'
     puts '<input type="hidden" name="reviewCreator" value="' + reviews[i]['userWhoReviewed'].to_s + '">'
     puts '</form>'
@@ -257,11 +257,11 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       (0...likes.size).each do |i|
         likeCount = likeCount + 1
     end
-    puts '<form action="Likes_Lists.cgi" method="POST">'
+    puts '<form  class="LikeAndCount" action="Likes_Lists.cgi" method="POST">'
     puts '<button class="LIKES" style="color: pink;">&#10084</button>'
     puts '<input type="hidden" name="likedReview" value="TRUE">'
-    #puts '<a href="whoHasLiked.cgi?reviewId=' + reviews[i]['reviewId'].to_s + '">' + likeCount.to_s + '</a>'
-    puts likeCount.to_s
+    puts '<a href="whoHasLiked.cgi?reviewId=' + reviews[i]['reviewId'].to_s + '&type=EP">' + likeCount.to_s + '</a>'
+    #puts likeCount.to_s
     puts '<input type="hidden" name="reviewId" value="' + reviews[i]['reviewId'].to_s + '">'
     puts '<input type="hidden" name="reviewCreator" value="' + reviews[i]['userWhoReviewed'].to_s + '">'
     puts '</form>'
@@ -277,13 +277,13 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
     reviews = db.query("SELECT * FROM likedEpisodeReview where userWhoLiked = '" + username.to_s + "';")
     reviews = reviews.to_a
   (0...reviews.size).each do |i|
-    seriesImage = db.query("SELECT imageName, showName, series.year, season.seasonNum. episode.epName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN episodeReview ON episode.epId = episodeReview.epId WHERE episodeReview.id = '" + reviews[i]['reviewId'].to_s + "';")
+    seriesImage = db.query("SELECT imageName, showName, series.year, season.seasonNum, episode.epName FROM series JOIN season ON season.seriesId = series.showId JOIN episode ON episode.seasonId = season.seasonId JOIN episodeReview ON episode.epId = episodeReview.epId WHERE episodeReview.id = '" + reviews[i]['reviewId'].to_s + "';")
     reviewRating = db.query("SELECT rating FROM seasonRating JOIN seasonReview ON seasonRating.id = seasonReview.ratingId WHERE seasonReview.id = '" + reviews[i]['reviewId'].to_s + "';")
     reviewContent = db.query("SELECT * FROM episodeReview WHERE id = '" + reviews[i]['reviewId'].to_s + "';")
     reviewDisplayName = db.query("SELECT displayName FROM account WHERE username = '" + reviews[i]['userWhoReviewed'] + "';")
     puts '<div class="content-L">'
-    puts '<form action="series.cgi" method="POST" style="padding: 0;">'
-    puts "<input type='image' src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\" style='height: 300px; width: 50%; object-fit: cover; padding: 1;'>" 
+    puts '<form action="series.cgi" method="POST" style="padding: 0; width: 250px;">'
+    puts "<input type='image' src=\"" + seriesImage.first['imageName'] + "\"alt=\"" + seriesImage.first['imageName'] + "\" style='height: 300px; width: 250px; object-fit: cover; padding: 1;'>" 
     puts '<input type="hidden" name="clicked_image" value="' + seriesImage.first['imageName'] + '"">'
     puts '<input type="hidden" name="seasonNumber" value="' + seriesImage.first['seasonNum'].to_s + '">'
     puts '</form>'
@@ -315,11 +315,11 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
       (0...likes.size).each do |i|
         likeCount = likeCount + 1
     end
-    puts '<form action="Likes_Lists.cgi" method="POST">'
+    puts '<form  class="LikeAndCount" action="Likes_Lists.cgi" method="POST">'
     puts '<button class="LIKES" style="color: pink;">&#10084</button>'
     puts '<input type="hidden" name="likedReview" value="TRUE">'
-    #puts '<a href="whoHasLiked.cgi?reviewId=' + reviews[i]['reviewId'].to_s + '">' + likeCount.to_s + '</a>'
-    puts likeCount.to_s
+    puts '<a href="whoHasLiked.cgi?reviewId=' + reviews[i]['reviewId'].to_s + '&type=EP">' + likeCount.to_s + '</a>'
+    #puts likeCount.to_s
     puts '<input type="hidden" name="reviewId" value="' + reviews[i]['reviewId'].to_s + '">'
     puts '<input type="hidden" name="reviewCreator" value="' + reviews[i]['userWhoReviewed'].to_s + '">'
     puts '</form>'

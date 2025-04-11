@@ -126,6 +126,10 @@ puts '<body id="profile">'
             size = size + 1
           puts '</form>'
         puts '</div>'
+      else
+        puts '<div class="Nothing">'
+          puts 'spacer'
+        puts '</div>'
       end
       end
         puts '</section>'

@@ -264,6 +264,10 @@ if (sortBy == 'az')
                         size = size + 1
                     puts '</form>'
                     puts '</div>'
+                    else
+                        puts '<div class="Nothing">'
+                            puts 'spacer'
+                        puts '</div>'
                     end
                 end
                 puts '</section>'
@@ -412,7 +416,9 @@ endArray = 5
             puts '</form>'
             puts '</div>'
             else
-                puts '<br>'
+                puts '<div class="Nothing">'
+                puts 'spacer'
+                puts '</div>'
             end
         end
         puts '</section>'

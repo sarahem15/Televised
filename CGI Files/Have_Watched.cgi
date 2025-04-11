@@ -133,6 +133,10 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
 
             puts '</form>'
             puts '</div>'
+          else
+            puts '<div class="Nothing">'
+              puts 'spacer'
+            puts '</div>'
           end
         end
         puts '</section>'

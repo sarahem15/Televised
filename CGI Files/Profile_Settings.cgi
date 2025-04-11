@@ -78,6 +78,7 @@ puts '<head>'
     puts '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
     puts '<title>Televised</title>'
     puts '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">'
+    puts '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">'
     puts '<link rel="stylesheet" href="Televised.css">'
 puts '</head>'
 
@@ -169,31 +170,39 @@ puts '<body id="profileSettings">'
                 puts '</div>'
 
         puts '<div class="TopFiveProfile">'
+            puts '<section class="labels">'
+                puts '<label>Media Type &#9660</label>'
+                if type == "Episodes"
+                    puts '<label>Season &#9660</label>'
+                end
+                puts '<label>Search</label>'
+            puts '</section>'
             puts '<form id="imageSearch" method="post" action="Profile_Settings.cgi">'
             puts '<select id="type" name="typeSearch" class="form-control">'
             if type == "Series"
-                puts '<option value="Series" selected>Series &#9660</option>'
+                puts '<option value="Series" selected>Series </option>'
                 puts '<option value="Season">Season</option>'
                 puts '<option value="Episodes">Episodes</option>'
             elsif type == "Season"
                 puts '<option value="Series">Series</option>'
-                puts '<option value="Season" selected>Season &#9660</option>'
+                puts '<option value="Season" selected>Season </option>'
                 puts '<option value="Episodes">Episodes</option>'
             else
                 puts '<option value="Series">Series</option>'
                 puts '<option value="Season">Season</option>'
-                puts '<option value="Episodes" selected>Episodes &#9660</option>'
+                puts '<option value="Episodes" selected>Episodes </option>'
             end
+
             puts '</select>'
             if type == "Episodes"
                 puts '<select id="type" name="seasonNum" class="form-control">'
                 if seasonNum == '1'
-                    puts '<option value="1" selected>1</option>'
+                    puts '<option value="1" selected>1 </option>'
                     puts '<option value="2">2</option>'
                     puts '<option value="3">3</option>'
                 elsif seasonNum == '2'
                     puts '<option value="1">1</option>'
-                    puts '<option value="2" selected>2</option>'
+                    puts '<option value="2" selected>2 </option>'
                     puts '<option value="3">3</option>'
                 else
                     puts '<option value="1">1</option>'
@@ -421,7 +430,7 @@ puts '<body id="profileSettings">'
             #seasons = db.query("SELECT season.* FROM season JOIN series ON season.seriesId = series.showId WHERE series.imageName = '" + seriesImage + "';")
             topSeriesImage = db.query("SELECT series.imageName, series.showName, series.showId, topFiveSeries.ranking FROM series JOIN topFiveSeries ON series.showId = topFiveSeries.seriesId WHERE username = '" + username.to_s + "' ORDER BY ranking ASC;")
             topSeriesImage = topSeriesImage.to_a
-            puts '<h3>My Top Five Favs <span class="infoQuestion"> ? <p class="info"> To add to your top five favorite series, seasons, and episodes, use the search bar above and rank them! </p></span></h3>'
+            puts '<h3>My Top Five Favs <span class="infoQuestion"><i class="fa fa-question-circle"></i><p class="info" style="font-size: 65%;"> To add to your top five favorite series, seasons, and episodes, use the search bar above and rank them! </p></span></h3>'
             puts '<h5>Shows</h5>'
             puts '<div class="TopFiveSeries">'
                 puts '<div class="wrapper">'

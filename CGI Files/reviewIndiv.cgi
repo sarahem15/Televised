@@ -132,7 +132,7 @@ puts '<div class="originalReview">'
             alreadyLiked = true
           end
         end
-       puts '<form action="reviewIndiv.cgi">'
+       puts '<form class="LikeAndCount" action="reviewIndiv.cgi">'
        if alreadyLiked
         puts '<button class="LIKES" style="color: pink;">&#10084</button>'
       else
@@ -210,8 +210,26 @@ puts '<div class="content-Reply">'
 
       puts ' <div id="edit-form" style="display:none;">'
     puts ' <form action="threebuttons.cgi" method="post" style="width: 50%">'
-      puts ' <input type="hidden" name="id" value="1" />'
-      puts ' <textarea name="text" rows="5" cols="0">' + replies[i]['reply'] + '</textarea><br><br>'
+      puts ' <textarea name="reply" rows="5" cols="0">' + replies[i]['reply'] + '</textarea><br><br>'
+      #puts ' <textarea name="text" rows="5" cols="0">' + type + '</textarea><br><br>'
+      puts ' <input type="hidden" name="replyId" value="' + replies[i]['id'].to_s + '">'
+      puts "<input type='hidden' name='fromReviewIndiv' value='TRUE'>"
+      puts "<input type='hidden' name='alreadyReplied' value='TRUE'>"
+      puts '<input type="hidden" name="seriesID" value="' + seriesImage.first['showId'].to_s + '">'
+
+       if type == 'SEASON'
+        puts '<input type="hidden" name="seasonId" value="' + reviewContent.first['seasonId'].to_s + '">'
+      elsif type == 'EP'
+        puts '<input type="hidden" name="epID" value="' + reviewContent.first['epId'].to_s + '">'
+      end
+
+       puts '<input type="hidden" name="reviewId" value="' + reviewId.to_s + '">'
+       puts '<input type="hidden" name="username" value="' + username + '">'
+       puts "<input type='hidden' name='year' value='" + time.year.to_s + "'>"
+       puts "<input type='hidden' name='month' value='" + time.month.to_s + "'>"
+       puts "<input type='hidden' name='day' value='" + time.day.to_s + "'>"
+       puts "<input type='hidden' name='type' value='" + type + "'>"
+
       puts ' <button class="btn" style="background-color: #9daef6;" type="submit">Save</buttom>'
     puts ' </form>'
   puts ' </div>'
