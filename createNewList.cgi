@@ -24,7 +24,16 @@ puts <<-HTML
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Create New List</title>
+    puts "<meta charset=\"UTF-8\">"
+    puts "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+    puts "<title>Televised</title>"
+    puts "<link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\">"
+    puts "<link rel=\"stylesheet\" href=\"Televised.css\">"
+    puts '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">'
+
+    puts "<script src=\"https://code.jquery.com/jquery-3.6.0.min.js\"></script>"
+    puts "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js\"></script>"
+    puts "<script src=\"Televised.js\"></script>"
   <style>
     body { font-family: Arial; }
     .container { display: flex; justify-content: space-between; padding: 20px; }
