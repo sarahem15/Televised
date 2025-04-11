@@ -25,7 +25,7 @@ db = Mysql2::Client.new(
 
 seriesImages = db.query("SELECT imageName FROM series;")
 seriesImages = seriesImages.to_a()
-lists = db.query("SELECT DISTINCT name, description, username, date FROM curatedListSeries WHERE privacy = 1;")
+lists = db.query("SELECT DISTINCT name, description, username, date FROM curatedListSeries WHERE privacy = 1 ORDER BY date DESC;")
 lists = lists.to_a
 likeCount = 0
 seriesTab = cgi['seriesTab']
@@ -51,7 +51,7 @@ puts '<body id="ListsPage">'
   puts '<br>'
   puts '<h1 class="text-center text-white mt-5">Find a List!</h1>'
   puts '<br>'
-  puts '<button id="newListProfile" class="createListButton" style="margin: auto;"> <a href="createNewList.cgi"> Create a New List </a> </button>'
+  puts '<a href="createNewList.cgi"><button id="newListProfile" class="createListButton" style="margin: auto;">Create a New List</button></a>'
   puts '<h5 class="text-center text-white mt-5">See some lists created by fellow users.</h5>'
   #puts '<br>'
   #puts '<hr style="margin-left: 80px; margin-right: 80px">'
@@ -116,7 +116,7 @@ if seriesTab == "SERIES"
       puts '<h3>' + lists[i]['description'] +'</h3>'
         
         listId = db.query("SELECT id FROM listOwnership WHERE username = '" + lists[i]['username'] + "' AND listName = '" + lists[i]['name'].gsub("'", "\\\\'") + "';")
-      puts '<form action="threebuttons.cgi" method="post">'
+      puts '<form  class="LikeAndCount" action="threebuttons.cgi" method="post">'
       alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.first['id'].to_s + "';")
       
       if (alreadyLiked.to_a != [])
@@ -145,7 +145,7 @@ end
 
 elsif seriesTab == "EP"
 
-lists = db.query("SELECT DISTINCT name, description, username, date FROM curatedListEpisode WHERE privacy = 1;")
+lists = db.query("SELECT DISTINCT name, description, username, date FROM curatedListEpisode WHERE privacy = 1 ORDER BY date DESC;")
 lists = lists.to_a
 (0...lists.size).each do |i|
 
@@ -207,9 +207,8 @@ lists = lists.to_a
     likeCount = 0
 end
 
-
 else
-lists = db.query("SELECT DISTINCT name, description, username, date FROM curatedListSeason WHERE privacy = 1;")
+lists = db.query("SELECT DISTINCT name, description, username, date FROM curatedListSeason WHERE privacy = 1 ORDER BY date DESC;")
 lists = lists.to_a
 (0...lists.size).each do |i|
   puts '<div class="listImages">'

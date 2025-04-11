@@ -204,11 +204,41 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="wantToWatch" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
-        puts '<form action="threebuttons.cgi" method="POST">'
-        puts "<button>Add to Existing List</button>"
-        puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
-        puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+
+
+        #puts '<form action="threebuttons.cgi" method="POST">'
+        #puts "<button>Add to Existing List</button>"
+        #puts "<button onclick=\"openAddToExistingModal()\">Add to Existing List</button>"
+        puts "<button data-bs-toggle=\"modal\" data-bs-target=\"#addToExisting\">Add to Existing List</button>"
+=begin
+        puts '<div id="addToExisting">'
+        puts '<div class="modal-content">'
+        puts '<span class="close" onclick="document.getElementById(\'addToExisting\').style.display=\'none\'">&times;</span>'
+        puts '<form method="post" action="handle_name.cgi">'
+
+        lists = db.query("SELECT listName FROM listOwnership WHERE username = '" + username.to_s + "';")
+        lists = lists.to_a
+        (0...lists.size).each do |i|
+          puts "<input type='radio' name='list' value='" + lists[i]['listName'] + "<br>"
+        end
+
+        puts '<br>'
+        puts '<input type="submit" value="Submit">'
         puts '</form>'
+=end
+
+
+        #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
+        #puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
+        #puts '</form>'
+
+
+
+        
+
+
+
+
         puts '<form action="createNewList.cgi" method="POST">'
         puts "<button>Add to New List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
@@ -784,6 +814,52 @@ puts "      });"
 puts "    });"
 puts "  });"
 puts "  </script>"
+
+
+puts '  <div class="modal fade" id="addToExisting" tabindex="-1" aria-labelledby="addToExisting" aria-hidden="true">'
+puts '    <div class="modal-dialog">'
+puts '    <div class="modal-dialog">'
+puts '      <div class="modal-content">'
+puts '        <div class="modal-header">'
+puts '          <h5 class="modal-title" id="addToExisting">Choose a list:</h5>'
+puts '          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>'
+puts '        </div>'
+puts '        <div class="modal-body">'
+
+puts '          <form id="addToExistingForm" name="addToExisting" method="POST" action="createAcc.cgi"">'
+=begin
+puts '            <div class="mb-3">'
+puts '              <label for="unameSignInInput" class="form-label">Username</label>'
+puts '              <input type="text" class="form-control" id="unameSignInInput" name="unameSignInInput" placeholder="Enter your username" required>'
+puts '            </div>'
+puts '            <div class="mb-3">'
+puts '              <label for="passSignInInput" class="form-label">Password</label>'
+puts '              <input type="password" class="form-control" id="passSignInInput" name="passSignInInput" placeholder="Enter your password" required>'
+puts '              <input type="hidden" id="attemptingLogIn" name="attempting" value="true">'
+puts '              <input type="hidden" id="fromCreate2" name="fromCreate" value="false">'
+puts '            </div>'
+puts '            <div class="modal-footer">'
+=end
+
+                  lists = db.query("SELECT listName FROM listOwnership WHERE username = '" + username.to_s + "';")
+                  lists = lists.to_a
+                  (0...lists.size).each do |i|
+                    puts "<input type='radio' name='list' value='" + lists[i]['listName'] + "'>" + lists[i]['listName'] + 
+                    "<br>"
+                  end
+
+
+                  #lists = db.query("SELECT listName FROM listOwnership WHERE username = '" + username.to_s + "';")
+                  #puts "<input type='radio' name='list' value='" + lists.first['listName'] + "'<br>"
+puts '              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>'
+puts '              <button type="submit" class="btn btn-primary">Add</button>'
+puts '            </div>'
+puts '          </div>'
+puts '          </form>'
+
+puts '        </div>'
+puts '    </div>'
+puts '  </div>'
 
 
 puts "</body>"

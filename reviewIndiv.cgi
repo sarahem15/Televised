@@ -132,7 +132,7 @@ puts '<div class="originalReview">'
             alreadyLiked = true
           end
         end
-       puts '<form action="reviewIndiv.cgi">'
+       puts '<form class="LikeAndCount" action="reviewIndiv.cgi">'
        if alreadyLiked
         puts '<button class="LIKES" style="color: pink;">&#10084</button>'
       else
