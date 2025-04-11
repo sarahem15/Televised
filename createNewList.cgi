@@ -1,184 +1,260 @@
 #!/usr/bin/env ruby
 require 'cgi'
 require 'mysql2'
+require 'json'
 require 'date'
 
 cgi = CGI.new
-search = cgi['mediaEntered']
-type = cgi['typeSearch']
+params = cgi.params
 
-def db_client
-  Mysql2::Client.new(
-    host: "localhost",
-    username: "root",
-    password: "yourpassword",
-    database: "yourdatabase"
-  )
-end
-
-def search_series(client, query)
-  results = client.query("SELECT * FROM series WHERE showName LIKE '%#{client.escape(query)}%'")
-  results.map do |row|
-    <<~HTML
-      <div class="search-result">
-        <img src="/images/#{row['imageName']}" alt="#{row['showName']}" style="height:100px;">
-        <p>#{row['showName']}</p>
-        <button onclick="addSeries('#{row['showId']}', '#{row['showName']}')">Add</button>
-      </div>
-    HTML
-  end.join
-end
-
-def search_season(client, query)
-  results = client.query("SELECT s.showName, s.imageName, s.showId, se.seasonNum, se.seasonId 
-                          FROM series s 
-                          JOIN season se ON s.showId = se.seriesId 
-                          WHERE s.showName LIKE '%#{client.escape(query)}%' 
-                          GROUP BY s.showId")
-  results.map do |row|
-    season_options = client.query("SELECT seasonNum FROM season WHERE seriesId = #{row['showId']} ORDER BY seasonNum ASC").map do |s|
-      "<option value='#{s['seasonNum']}'>Season #{s['seasonNum']}</option>"
-    end.join
-
-    <<~HTML
-      <div class="search-result">
-        <img src="/images/#{row['imageName']}" alt="#{row['showName']}" style="height:100px;">
-        <p>#{row['showName']}</p>
-        <select onchange="updateSelectedSeason(this)">
-          #{season_options}
-        </select>
-        <button onclick="addSeason('#{row['showId']}', '#{row['showName']}', this.previousElementSibling.value)">Add</button>
-      </div>
-    HTML
-  end.join
-end
-
-def search_episode(client, query)
-  results = client.query("SELECT DISTINCT s.showName, s.imageName, s.showId 
-                          FROM series s 
-                          JOIN season se ON s.showId = se.seriesId 
-                          JOIN episode e ON se.seasonId = e.seasonId 
-                          WHERE s.showName LIKE '%#{client.escape(query)}%'")
-  results.map do |row|
-    season_options = client.query("SELECT seasonNum, seasonId FROM season WHERE seriesId = #{row['showId']} ORDER BY seasonNum ASC").map do |s|
-      "<option value='#{s['seasonId']},#{s['seasonNum']}'>Season #{s['seasonNum']}</option>"
-    end.join
-
-    <<~HTML
-      <div class="search-result">
-        <img src="/images/#{row['imageName']}" alt="#{row['showName']}" style="height:100px;">
-        <p>#{row['showName']}</p>
-        <select onchange="loadEpisodes(this, #{row['showId']})">
-          #{season_options}
-        </select>
-        <select class="episodeDropdown"></select>
-        <button onclick="addEpisode('#{row['showId']}', '#{row['showName']}', this.previousElementSibling.value)">Add</button>
-      </div>
-    HTML
-  end.join
-end
-
-# Return only search results if it's an AJAX request
-if search != ""
-  puts "Content-Type: text/html\n\n"
-  client = db_client
-  output = case type
-           when "Series" then search_series(client, search)
-           when "Season" then search_season(client, search)
-           when "Episode" then search_episode(client, search)
-           else "<p>No valid type selected.</p>"
-           end
-  puts output
+# --- AJAX: SEARCH ---
+if params["action"]&.first == "search"
+  term = cgi['term']
+  type = cgi['mediaType']
+  client = Mysql2::Client.new(host: "localhost", username: "your_username", password: "your_password", database: "your_database")
+  results = []
+  series_query = client.prepare("SELECT * FROM series WHERE showName LIKE ?")
+  series_query.execute("%#{term}%").each do |row|
+    item = { showId: row["showId"], showName: row["showName"], imageName: row["imageName"] }
+    if type == "season" || type == "episode"
+      seasons = []
+      season_query = client.prepare("SELECT seasonId, seasonNum FROM season WHERE seriesId = ?")
+      season_query.execute(row["showId"]).each { |s| seasons << { seasonId: s["seasonId"], seasonNum: s["seasonNum"] } }
+      item[:seasons] = seasons
+    end
+    results << item
+  end
+  puts cgi.header("type" => "application/json")
+  puts results.to_json
   exit
 end
 
-# Default page load: full HTML
-puts "Content-Type: text/html\n\n"
+# --- AJAX: GET EPISODES ---
+if params["action"]&.first == "getEpisodes"
+  client = Mysql2::Client.new(host: "localhost", username: "your_username", password: "your_password", database: "your_database")
+  season_id = cgi['seasonId']
+  stmt = client.prepare("SELECT epId, epName FROM episode WHERE seasonId = ?")
+  result = stmt.execute(season_id).map { |ep| { epId: ep["epId"], epName: ep["epName"] } }
+  puts cgi.header("type" => "application/json")
+  puts result.to_json
+  exit
+end
+
+# --- AJAX: SAVE LIST ---
+if params["action"]&.first == "saveList"
+  client = Mysql2::Client.new(host: "localhost", username: "your_username", password: "your_password", database: "your_database")
+
+  username = "test_user" # Replace with session value if applicable
+  list_name = cgi['listName']
+  description = cgi['description']
+  privacy = cgi['privacy'] == "Public" ? 1 : 0
+  media_type = cgi['mediaType']
+  items = JSON.parse(cgi['items'])
+  today = Date.today.to_s
+
+  # Check for duplicate list name
+  check = client.prepare("SELECT * FROM listOwnership WHERE username = ? AND listName = ?")
+  exists = check.execute(username, list_name).count > 0
+  if exists
+    puts cgi.header("type" => "application/json")
+    puts({ success: false, message: "List name already exists." }.to_json)
+    exit
+  end
+
+  # Insert into listOwnership
+  insert_owner = client.prepare("INSERT INTO listOwnership (username, listName, description, privacy, date) VALUES (?, ?, ?, ?, ?)")
+  insert_owner.execute(username, list_name, description, privacy, today)
+
+  # Get listId
+  get_id = client.prepare("SELECT listId FROM listOwnership WHERE username = ? AND listName = ?")
+  list_id = get_id.execute(username, list_name).first["listId"]
+
+  if media_type == "series"
+    stmt = client.prepare("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId) VALUES (?, ?, ?, ?, ?, ?, ?)")
+    items.each { |s| stmt.execute(username, s["showId"], list_name, description, privacy, today, list_id) }
+
+  elsif media_type == "season"
+    stmt = client.prepare("INSERT INTO curatedListSeason (username, seasonId, name, description, privacy, date, listId) VALUES (?, ?, ?, ?, ?, ?, ?)")
+    items.each { |s| stmt.execute(username, s["seasonId"], list_name, description, privacy, today, list_id) }
+
+  elsif media_type == "episode"
+    stmt = client.prepare("INSERT INTO curatedListEpisode (username, epId, name, description, privacy, date, listId) VALUES (?, ?, ?, ?, ?, ?, ?)")
+    items.each { |e| stmt.execute(username, e["epId"], list_name, description, privacy, today, list_id) }
+  end
+
+  puts cgi.header("type" => "application/json")
+  puts({ success: true, message: "List saved successfully!" }.to_json)
+  exit
+end
+
+# --- MAIN PAGE HTML ---
+puts cgi.header("type" => "text/html", "charset" => "utf-8")
 puts <<~HTML
 <!DOCTYPE html>
 <html>
 <head>
   <title>Create New List</title>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <style>
-    .search-result {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-bottom: 10px;
-    }
+    body { font-family: Arial, sans-serif; }
+    #searchResults { margin-top: 10px; }
+    .resultBlock { border: 1px solid #ccc; padding: 10px; margin: 5px 0; }
+    .resultImage { width: 100px; }
+    select, button { margin-top: 5px; }
   </style>
 </head>
 <body>
-  <h1>Create a New List</h1>
+  <h1>Create New List</h1>
 
-  <form id="searchForm">
-    <label for="type">Select Media Type:</label>
-    <select id="type" name="typeSearch">
-      <option value="Series">Series</option>
-      <option value="Season">Season</option>
-      <option value="Episode">Episode</option>
+  <form id="listForm" onsubmit="event.preventDefault(); saveList();">
+    <label>List Name:</label>
+    <input type="text" id="listName" required><br><br>
+
+    <label>Description:</label><br>
+    <textarea id="description" rows="3" cols="40"></textarea><br><br>
+
+    <label>Privacy:</label>
+    <select id="privacy">
+      <option value="Public">Public</option>
+      <option value="Private">Private</option>
     </select><br><br>
 
-    <label for="mediaEntered">Search:</label>
-    <input type="text" name="mediaEntered">
-    <input type="submit" value="Search">
+    <label>Media Type:</label>
+    <select id="mediaType">
+      <option value="series">Series</option>
+      <option value="season">Season</option>
+      <option value="episode">Episode</option>
+    </select><br><br>
+
+    <label>Search:</label>
+    <input type="text" id="searchBox">
+    <button type="button" onclick="performSearch()">Search</button>
+    <button type="submit">Save List</button>
   </form>
 
   <div id="searchResults"></div>
 
   <script>
-    $('#searchForm').submit(function(e) {
-      e.preventDefault();
-      const type = $('#type').val();
-      const query = $('input[name="mediaEntered"]').val();
+    let mediaType, seriesArray = [], seasonArray = [], episodeArray = [];
 
-      $.ajax({
-        url: 'createNewList.cgi',
-        method: 'GET',
-        data: { mediaEntered: query, typeSearch: type },
-        success: function(response) {
-          $('#searchResults').html(response);
-        },
-        error: function() {
-          $('#searchResults').html("<p style='color:red;'>Error loading search results.</p>");
-        }
-      });
-    });
+    function performSearch() {
+      const term = document.getElementById('searchBox').value;
+      mediaType = document.getElementById('mediaType').value;
+      if (!term) return;
 
-    function addSeries(id, name) {
-      alert("Added series: " + name);
-      // Add to sessionStorage or DOM as needed
+      fetch(`createNewList.cgi?action=search&term=${encodeURIComponent(term)}&mediaType=${mediaType}`)
+        .then(response => response.json())
+        .then(data => {
+          const container = document.getElementById('searchResults');
+          container.innerHTML = '';
+
+          data.forEach(item => {
+            const block = document.createElement('div');
+            block.className = 'resultBlock';
+
+            const title = document.createElement('h3');
+            title.textContent = item.showName;
+            block.appendChild(title);
+
+            const image = document.createElement('img');
+            image.src = '/images/' + item.imageName;
+            image.className = 'resultImage';
+            block.appendChild(image);
+
+            let seasonDropdown, epDropdown;
+
+            if (mediaType === 'season') {
+              seasonDropdown = document.createElement('select');
+              item.seasons.forEach(season => {
+                const option = document.createElement('option');
+                option.value = JSON.stringify({ seasonId: season.seasonId, seasonNum: season.seasonNum });
+                option.textContent = 'Season ' + season.seasonNum;
+                seasonDropdown.appendChild(option);
+              });
+              block.appendChild(seasonDropdown);
+            }
+
+            if (mediaType === 'episode') {
+              seasonDropdown = document.createElement('select');
+              epDropdown = document.createElement('select');
+
+              seasonDropdown.onchange = function () {
+                const seasonId = JSON.parse(this.value).seasonId;
+                fetch(`createNewList.cgi?action=getEpisodes&seasonId=${seasonId}`)
+                  .then(res => res.json())
+                  .then(episodes => {
+                    epDropdown.innerHTML = '';
+                    episodes.forEach(ep => {
+                      const option = document.createElement('option');
+                      option.value = JSON.stringify({ epId: ep.epId, epName: ep.epName });
+                      option.textContent = ep.epName;
+                      epDropdown.appendChild(option);
+                    });
+                  });
+              };
+
+              item.seasons.forEach(season => {
+                const option = document.createElement('option');
+                option.value = JSON.stringify({ seasonId: season.seasonId, seasonNum: season.seasonNum });
+                option.textContent = 'Season ' + season.seasonNum;
+                seasonDropdown.appendChild(option);
+              });
+
+              block.appendChild(seasonDropdown);
+              block.appendChild(epDropdown);
+            }
+
+            const addBtn = document.createElement('button');
+            addBtn.textContent = 'Add';
+            addBtn.onclick = function () {
+              if (mediaType === 'series') {
+                seriesArray.push({ showId: item.showId, showName: item.showName });
+              } else if (mediaType === 'season') {
+                const selected = JSON.parse(seasonDropdown.value);
+                seasonArray.push({ seasonId: selected.seasonId, seasonNum: selected.seasonNum });
+              } else if (mediaType === 'episode') {
+                const season = JSON.parse(seasonDropdown.value);
+                const ep = JSON.parse(epDropdown.value);
+                episodeArray.push({ epId: ep.epId, epName: ep.epName, seasonNum: season.seasonNum });
+              }
+              alert("Item added.");
+            };
+            block.appendChild(addBtn);
+
+            container.appendChild(block);
+          });
+        });
     }
 
-    function addSeason(id, name, seasonNum) {
-      alert("Added season: " + name + " Season " + seasonNum);
-    }
+    function saveList() {
+      const listName = document.getElementById('listName').value;
+      const description = document.getElementById('description').value;
+      const privacy = document.getElementById('privacy').value;
+      const mediaType = document.getElementById('mediaType').value;
 
-    function addEpisode(showId, showName, epData) {
-      let [epId, epName] = epData.split(',');
-      alert("Added episode: " + showName + " - " + epName);
-    }
+      let items;
+      if (mediaType === 'series') items = seriesArray;
+      else if (mediaType === 'season') items = seasonArray;
+      else if (mediaType === 'episode') items = episodeArray;
 
-    function updateSelectedSeason(selectEl) {
-      // can be used to update display
-    }
-
-    function loadEpisodes(seasonSelect, showId) {
-      const seasonData = seasonSelect.value;
-      const seasonId = seasonData.split(',')[0];
-      const dropdown = seasonSelect.nextElementSibling;
-
-      $.ajax({
-        url: 'loadEpisodes.cgi', // A separate CGI that returns episode options
-        method: 'GET',
-        data: { seasonId: seasonId },
-        success: function(response) {
-          $(dropdown).html(response);
-        },
-        error: function() {
-          $(dropdown).html("<option>Error loading episodes</option>");
-        }
-      });
+      fetch('createNewList.cgi?action=saveList', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          listName, description, privacy, mediaType,
+          items: JSON.stringify(items)
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message);
+          if (data.success) {
+            seriesArray = [];
+            seasonArray = [];
+            episodeArray = [];
+            document.getElementById('listForm').reset();
+            document.getElementById('searchResults').innerHTML = '';
+          }
+        });
     }
   </script>
 </body>
