@@ -10,6 +10,7 @@ body {
     background-color: #140044;
     min-height: 100vh; /* Ensure full screen coverage */
     margin: 0;
+    font-family: Garamond;
 }
 
 /* Center H1 Under Header */
@@ -59,6 +60,7 @@ html {
     background-color: #140044;
     min-height: 100vh;
     margin: 0;
+    font-family: Garamond;
 }
 
 button {
@@ -758,6 +760,7 @@ button:hover {
 #profileSettings .TopFiveProfile form {
     display: grid;
     grid-template-columns: repeat(4, auto);
+    margin: auto;
 }
 
 #createNewList .container-fluid {
@@ -803,11 +806,13 @@ button:hover {
 
 .LIKES:hover {color: pink; background-color: transparent;}
 
+.LikeAndCount a:hover {color: pink; text-decoration: underline;}
+
 .LIKES active {
     color: red;
 }
 
-#homePage .ReviewIndiv .ReviewContent a, #ListsPage a, #reviewIndiv a, #viewOnOtherLists a, #profile .listInfo a, #profile .createdLists a, #whoLiked a, #profile .content-R a {
+#homePage .ReviewIndiv .ReviewContent a, #ListsPage a, #reviewIndiv a, #viewOnOtherLists a, #profile .listInfo a, #profile .createdLists a, #whoLiked a, #profile .content-R a, .LikeAndCount a {
     text-decoration: none;
     color: white;
 }
@@ -819,6 +824,7 @@ button:hover {
 
 #homePage .ReviewContent .UserDisplay a h3{
     font-size: 80%;
+    padding-top: 15%;
 }
 
 #homePage .ReviewIndiv .ReviewContent a :hover {color: lightpink; text-decoration: underline;}
@@ -880,6 +886,7 @@ button:hover {
 }
 
 #reviewIndiv .UserDisplay h3 {
+    padding-top: 10%;
     font-size: 20px;
     margin: auto;
 }
@@ -1009,15 +1016,15 @@ button:hover {
 
 #profileSettings .wrapper .item .tooltiptext form input {
     visibility: hidden;
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
     bottom:  95%;
     left:  90%;
     background-color: black;
     color: #fff;
     text-align: center;
     border-radius: 100%;
-    padding: 5px 0;
+    padding: 0;
 
     /* Position the tooltip */
     position: absolute;
@@ -1028,7 +1035,7 @@ button:hover {
 
 #profile .content-L {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto 70%;
     margin: auto;
     width:  60%;
 }
@@ -1055,4 +1062,49 @@ button:hover {
     z-index: 1;
 }
 
+.infoQuestion:hover {color: pink;} 
 .infoQuestion:hover .info{visibility: visible;}
+
+#profile .wrapper .item .tooltiptext form input {
+    visibility: hidden;
+    width: 20px;
+    height: 20px;
+    bottom:  97%;
+    left:  97%;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 100%;
+    padding: 5px 0;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+}
+
+#profile .wrapper .item:hover .tooltiptext form input {visibility: visible;}
+
+.TopFiveProfile .labels {
+    display: grid;
+    grid-template-columns: 22% 30% auto;
+    width:  84%;
+    margin:  auto;
+}
+
+.LikeAndCount a {
+    font-size: 18px;
+}
+
+.titleLike {
+    display: grid;
+    grid-template-columns: 90% auto;
+}
+
+#showsPage .titleTime a h3:hover {color: pink; text-decoration: underline;}
+
+.Nothing {
+    width: 220px;
+    height: 325px;
+    background-color: transparent;
+    color: transparent;
+}
