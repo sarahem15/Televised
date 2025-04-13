@@ -13,7 +13,6 @@ require 'cgi/session'
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
-#username = "try@try"
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -64,20 +63,6 @@ if cgi.request_method == 'POST' && cgi['deleteListId']
   end
 end
 
-# Handle profile update (editing displayName, bio, pronouns)
-if cgi.request_method == 'POST' && cgi['updateProfile']
-  updated_display_name = cgi['displayName']
-  updated_bio = cgi['bio']
-  updated_pronouns = cgi['pronouns']
-
-  # Update user profile details in the database
-  db.query("UPDATE account SET displayName = '#{updated_display_name}', bio = '#{updated_bio}', pronouns = '#{updated_pronouns}' WHERE username = '#{username}'")
-
-  # Reload the page after updating
-  puts "<html><body><script>window.location.href='Profile_Lists.cgi';</script></body></html>"
-  exit
-end
-
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
 
@@ -103,24 +88,6 @@ puts '<h4>' + bio.first['bio'].to_s + '</h4>'
 puts '</section>'
 puts '<hr>'
 
-# Profile Edit Form (New)
-puts '<form method="POST" action="Profile_Lists.cgi">'
-puts '<h4>Edit Profile:</h4>'
-puts '<div class="form-group">'
-puts '<label for="displayName">Display Name:</label>'
-puts '<input type="text" class="form-control" id="displayName" name="displayName" value="' + displayName.first['displayName'].to_s + '" required>'
-puts '</div>'
-puts '<div class="form-group">'
-puts '<label for="bio">Bio:</label>'
-puts '<textarea class="form-control" id="bio" name="bio" rows="3" required>' + bio.first['bio'].to_s + '</textarea>'
-puts '</div>'
-puts '<div class="form-group">'
-puts '<label for="pronouns">Pronouns:</label>'
-puts '<input type="text" class="form-control" id="pronouns" name="pronouns" value="' + pronouns.first['pronouns'].to_s + '" required>'
-puts '</div>'
-puts '<button type="submit" name="updateProfile" class="btn btn-primary">Update Profile</button>'
-puts '</form>'
-
 puts '<div class="profileHeader">'
 puts '<a href="Profile.cgi">Profile</a>'
 puts '<a href="Have_Watched.cgi">Have Watched</a>'
@@ -141,19 +108,19 @@ if seriesTab == "SERIES"
   puts '<a href="#"class="active">Series</a>'
   puts '<a href="Profile_Lists.cgi?seriesTab=SEASON">Seasons</a>'
   puts '<a href="Profile_Lists.cgi?seriesTab=EP">Episodes</a>'
-  lists = db.query("SELECT DISTINCT name, description, date, username FROM curatedListSeries WHERE username = '#{username}';")
+  lists = db.query("SELECT DISTINCT name, description, date, username, listId FROM curatedListSeries WHERE username = '#{username}';")
   lists = lists.to_a
 elsif seriesTab == "SEASON"
   puts '<a href="Profile_Lists.cgi?seriesTab=SERIES">Series</a>'
   puts '<a href="#" class="active">Seasons</a>'
   puts '<a href="Profile_Lists.cgi?seriesTab=EP">Episodes</a>'
-  lists = db.query("SELECT DISTINCT name, description, username FROM curatedListSeason WHERE username = '#{username}';")
+  lists = db.query("SELECT DISTINCT name, description, username, listId FROM curatedListSeason WHERE username = '#{username}';")
   lists = lists.to_a
 elsif seriesTab == "EP"
   puts '<a href="Profile_Lists.cgi?seriesTab=SERIES">Series</a>'
   puts '<a href="Profile_Lists.cgi?seriesTab=SEASON">Seasons</a>'
   puts '<a href="#" class="active">Episodes</a>'
-  lists = db.query("SELECT DISTINCT name, description, username FROM curatedListEpisode WHERE username = '#{username}';")
+  lists = db.query("SELECT DISTINCT name, description, username, listId FROM curatedListEpisode WHERE username = '#{username}';")
   lists = lists.to_a
 end
 puts '</div>'
@@ -198,7 +165,11 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '</div>'
   puts '</div>'
   puts '<section class="listButtons">'
-  # Add edit and delete functionality
+  # Edit and delete buttons
+  puts '<form method="POST" action="createNewList.cgi">'
+  puts '<input type="hidden" name="editListId" value="' + lists[i]['listId'].to_s + '">'
+  puts '<button type="submit" class="btn btn-warning">Edit List</button>'
+  puts '</form>'
   puts '<form method="POST" action="Profile_Lists.cgi">'
   puts '<input type="hidden" name="deleteListId" value="' + lists[i]['listId'].to_s + '">'
   puts '<button type="submit" class="btn btn-danger">Delete List</button>'
