@@ -13,20 +13,19 @@ require 'cgi/session'
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
-#username = "try@try"
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
     username: 'seniorproject25', 
     password: 'TV_Group123!', 
     database: 'televised_w25'
-  )
+)
 
 # Fetch user information
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
 bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
 pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
-likeCount = 0
+
 seriesTab = cgi['seriesTab']
 if seriesTab == ""
   seriesTab = "SERIES"
@@ -105,7 +104,7 @@ puts '<div class="profileListHeader">'
 
 # Handle seriesTab filter
 if seriesTab == "SERIES"
-  puts '<a href="#"class="active">Series</a>'
+  puts '<a href="#" class="active">Series</a>'
   puts '<a href="Profile_Lists.cgi?seriesTab=SEASON">Seasons</a>'
   puts '<a href="Profile_Lists.cgi?seriesTab=EP">Episodes</a>'
   lists = db.query("SELECT DISTINCT name, description, date, username FROM curatedListSeries WHERE username = '" + username.to_s + "';")
@@ -133,6 +132,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<div class="listImages">'
   puts '<div class="listWrapper">'
   puts '<section class="carousel-section" id="listsPlease">'
+
   if seriesTab == "SERIES"
     listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
   elsif seriesTab == "SEASON"
@@ -153,7 +153,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<div class="createdLists">'
   puts '<section class="titleDate">'
   puts '<a href="listContents.cgi?title=' + lists[i]['name'] + '&contentType=' + seriesTab + '">' + lists[i]['name'] + '</a>'
-  puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'  # Fixed date conversion
+  puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
   puts '</section>'
   puts '<h3>' + lists[i]['description'] +'</h3>'
 
@@ -161,33 +161,38 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   listId = db.query("SELECT id FROM listOwnership WHERE username = '" + lists[i]['username'] + "' AND listName = '" + lists[i]['name'] + "';")
   listId = listId.first['id']
 
-  # Edit Button (redirect to createNewList with data pre-filled)
-  puts '<form action="createNewList.cgi" method="get" style="display:inline;">'
-  puts '<input type="hidden" name="editListId" value="' + listId.to_s + '">'
-  puts '<button type="submit" class="btn btn-warning">Edit List</button>'
-  puts '</form>'
-
-  # Delete Button (displayed inline)
-  puts '<form action="Profile_Lists.cgi" method="post" style="display:inline;">'
+  # Delete Button
+  puts '<form action="Profile_Lists.cgi" method="post" style="display:inline-block;">'
   puts '<input type="hidden" name="deleteListId" value="' + listId.to_s + '">'
-  puts '<button type="submit" class="btn btn-danger">Delete List</button>'
+  puts '<button type="submit" class="btn btn-danger" style="display:inline;">Delete List</button>'
   puts '</form>'
 
   # Like Button
-  puts '<form  class="LikeAndCount" action="Profile_Lists.cgi" method="post" style="display:inline;">'
+  puts '<form  class="LikeAndCount" action="Profile_Lists.cgi" method="post" style="display:inline-block;">'
+  # Likes handling
   alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.to_s + "';")
   if (alreadyLiked.to_a != [])
-    puts '<button class="LIKES" style="background-color: #FF6F61" name="likedList" value="TRUE">Liked</button>'
+    puts '<button class="LIKES" style="color: pink;">&#10084</button>'
   else
-    puts '<button class="LIKES" name="likedList" value="TRUE">Like</button>'
+    puts '<button class="LIKES">&#10084</button>'
   end
-  puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
+  currentLikes = db.query("SELECT * FROM likedList WHERE listId = '" + listId.to_s + "';")
+  likeCount = currentLikes.size
+  puts '<a href="whoHasLiked.cgi?listName=' + lists[i]['name'] + '&listCreator=' + lists[i]['username'] + '&listId=' + listId.to_s + '">' + likeCount.to_s + '</a>'
+  puts '<input type="hidden" name="likedList" value="TRUE">'
   puts '<input type="hidden" name="listId" value="' + listId.to_s + '">'
+  puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
   puts '</form>'
   puts '</div>'
   puts '</div>'
+  puts '<br>'
+  puts '<hr style="margin-left: 80px; margin-right: 80px">'
 end
 
-puts '</div>'
+puts '<!-- Scripts -->'
+puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
+puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
+puts '<script src="Televised.js"></script>'
 puts '</body>'
 puts '</html>'
+session.close
