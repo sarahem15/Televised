@@ -162,19 +162,19 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   listId = listId.first['id']
 
   # Edit Button (redirect to createNewList with data pre-filled)
-  puts '<form action="createNewList.cgi" method="get">'
+  puts '<form action="createNewList.cgi" method="get" style="display:inline;">'
   puts '<input type="hidden" name="editListId" value="' + listId.to_s + '">'
   puts '<button type="submit" class="btn btn-warning">Edit List</button>'
   puts '</form>'
 
-  # Delete Button
-  puts '<form action="Profile_Lists.cgi" method="post">'
+  # Delete Button (displayed inline)
+  puts '<form action="Profile_Lists.cgi" method="post" style="display:inline;">'
   puts '<input type="hidden" name="deleteListId" value="' + listId.to_s + '">'
   puts '<button type="submit" class="btn btn-danger">Delete List</button>'
   puts '</form>'
 
-  puts '<form  class="LikeAndCount" action="Profile_Lists.cgi" method="post">'
-  # Likes handling
+  # Like Button
+  puts '<form  class="LikeAndCount" action="Profile_Lists.cgi" method="post" style="display:inline;">'
   alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.to_s + "';")
   if (alreadyLiked.to_a != [])
     puts '<button class="LIKES" style="background-color: #FF6F61" name="likedList" value="TRUE">Liked</button>'
