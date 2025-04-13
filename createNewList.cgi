@@ -11,14 +11,35 @@ cgi = CGI.new
 session = CGI::Session.new(cgi)
 
 username = session['username']
-list_id = cgi['list_id'].to_i  # Getting the list ID to edit
 
-# Set up the database connection
+print cgi.header(
+  'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
+)
+
+search = cgi['mediaEntered']
+type = cgi['typeSearch']
+
+listName = cgi['listName']
+description = cgi['description']
+privacy = cgi['views'] == "Public" ? 1 : 0  
+
+begin
+  seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
+rescue JSON::ParserError
+  seriesArray = []
+end
+
+begin
+  seasonArray = cgi['seasonArray'] && !cgi['seasonArray'].empty? ? JSON.parse(cgi['seasonArray']) : []
+rescue JSON::ParserError
+  seasonArray = []
+end
+
 begin
   db = Mysql2::Client.new(
-    host: '10.20.3.4',
-    username: 'seniorproject25',
-    password: 'TV_Group123!',
+    host: '10.20.3.4', 
+    username: 'seniorproject25', 
+    password: 'TV_Group123!', 
     database: 'televised_w25'
   )
 rescue Mysql2::Error => e
@@ -28,73 +49,128 @@ rescue Mysql2::Error => e
   exit
 end
 
-# Fetch existing list details
-begin
-  list_details = db.query("SELECT * FROM listOwnership WHERE id = #{list_id} AND username = '#{username}'").first
-  if list_details.nil?
-    puts "<script>alert('List not found or you do not have permission to edit it.'); window.location.href = 'Profile_Lists.cgi';</script>"
+# Handle AJAX search functionality
+if search != ""
+  if type == "Series"
+    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+    if results.count > 0
+      results.each do |row|
+        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
+      end
+    else
+      puts "<p>We can't seem to find this title!</p>"
+    end
+  elsif type == "Season"
+    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
+    if results.count > 0
+      results.each do |row|
+        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'").to_a
+        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
+        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
+        puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
+        seasons.each_with_index do |season, index|
+          puts "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
+        end
+        puts "</select></p>"
+      end
+    else
+      puts "<p>We can't seem to find this title!</p>"
+    end
+  end
+  exit
+end
+
+# Handle list creation
+if cgi['saveList'] && !listName.empty? && !description.empty?
+  begin
+    existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
+  
+    if existing_list.count > 0
+      puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
+      exit
+    end
+
+    db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
+    list_id = db.last_id
+  
+    if !seriesArray.empty?
+      seriesArray.each do |series|
+        series_id = series["id"].to_i
+        db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
+                  VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
+      end
+    end
+  
+    if !seasonArray.empty?
+      seasonArray.each do |season|
+        show_id = season["seriesId"].to_i
+        season_num = season["season"].to_i
+        result = db.query("SELECT seasonId FROM season WHERE seriesId = #{show_id} ORDER BY seasonId ASC LIMIT 1 OFFSET #{season_num - 1}")
+        if result.count > 0
+          season_id = result.first["seasonId"].to_i
+          db.query("INSERT INTO curatedListSeason (username, seasonId, name, description, privacy, date, listId)
+                    VALUES ('#{username}', #{season_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
+        end
+      end
+    end
+
+    if seriesArray.empty? && seasonArray.empty?
+      puts "<script>alert('Please select at least one series or season before saving.');</script>"
+      exit
+    end
+
+    puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_Lists.cgi';</script>"
+    exit
+
+  rescue Mysql2::Error => e
+    puts "Content-type: text/html\n\n"
+    puts "<h1>Error Creating List</h1>"
+    puts "<p>MySQL Error: #{e.message}</p>"
     exit
   end
-rescue Mysql2::Error => e
-  puts "Content-type: text/html\n\n"
-  puts "<h1>Error Fetching List Details</h1>"
-  puts "<p>MySQL Error: #{e.message}</p>"
-  exit
 end
 
-# Fetch selected series and seasons for this list
-begin
-  selected_series = db.query("SELECT * FROM curatedListSeries WHERE listId = #{list_id}").to_a
-  selected_seasons = db.query("SELECT * FROM curatedListSeason WHERE listId = #{list_id}").to_a
-rescue Mysql2::Error => e
-  puts "Content-type: text/html\n\n"
-  puts "<h1>Error Fetching Selected Series and Seasons</h1>"
-  puts "<p>MySQL Error: #{e.message}</p>"
-  exit
-end
-
-# Start HTML output for editing the list
+# Start HTML output
 puts "Content-type: text/html\n\n"
 puts "<!DOCTYPE html>"
 puts "<html lang='en'>"
 puts "<head>"
 puts "  <meta charset='UTF-8'>"
 puts "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-puts "  <title>Edit List</title>"
+puts "  <title>Televised</title>"
 puts "  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
 puts "  <link rel='stylesheet' href='Televised.css'>"
+puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
 puts "</head>"
-puts "<body id='editList'>"
+puts "<body id='createNewList'>"
 puts "  <nav id='changingNav'></nav>"
-puts "  <h2 class='text-center mt-3'>Edit List</h2>"
+puts "  <h2 class='text-center mt-3'>Create a New List</h2>"
 puts "  <div class='container-fluid'>"
 puts "    <div class='row'>"
 puts "      <div class='col-12 col-md-4' id='listRow'>"
 puts "        <h3 class='text-center'>List Details</h3>"
-puts "        <form id='editListForm' method='post'>"
-puts "          <input type='hidden' name='list_id' value='#{list_id}'>"
+puts "        <form id='newListForm' method='post'>"
 puts "          <label>Name</label>"
-puts "          <input type='text' name='listName' class='form-control' value='#{list_details["listName"]}' required>"
+puts "          <input type='text' name='listName' class='form-control' placeholder='Name' required>"
 puts "          <br>"
 puts "          <label>Who Can View</label>"
 puts "          <select name='views' class='form-control'>"
-puts "            <option value='Public' #{'selected' if list_details['privacy'] == 1}>Public - anyone can view</option>"
-puts "            <option value='Private' #{'selected' if list_details['privacy'] == 0}>Private - no one can view</option>"
+puts "            <option value='Public'>Public - anyone can view</option>"
+puts "            <option value='Private'>Private - no one can view</option>"
 puts "          </select>"
 puts "          <br>"
 puts "          <label>Description</label>"
-puts "          <textarea name='description' class='form-control' rows='5'>#{list_details["description"]}</textarea>"
+puts "          <textarea name='description' class='form-control' rows='5'></textarea>"
 puts "          <br>"
 puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray'>"
 puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray'>"
-puts "          <button id='saveList' name='saveList' class='btn btn-primary'>SAVE CHANGES</button>"
+puts "          <button id='saveList' name='saveList' class='btn btn-primary'>CREATE LIST</button>"
 puts "        </form>"
 puts "      </div>"
 puts "      <div class='col-12 col-md-4' id='listColumn'>"
 puts "        <h3 class='text-center'>Selected Series/Seasons</h3>"
-puts "        <ul id='seriesList' class='list-group'>"
-puts "          <!-- Pre-populate with the selected series and seasons -->"
-puts "        </ul>"
+puts "        <ul id='seriesList' class='list-group'></ul>"
 puts "      </div>"
 puts "      <div class='col-12 col-md-4' id='searchColumn'>"
 puts "        <h3 class='text-center'>Search for a Series</h3>"
@@ -111,45 +187,8 @@ puts "        <div id='searchResults'></div>"
 puts "      </div>"
 puts "    </div>"
 puts "  </div>"
-puts '<!-- Scripts -->'
-puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
 puts '<script src="Televised.js"></script>'
-
-# Handle form submission and saving data
-if cgi['saveList'] && !cgi['listName'].empty? && !cgi['description'].empty?
-  privacy = cgi['views'] == 'Public' ? 1 : 0
-
-  begin
-    # Update the list details
-    db.query("UPDATE listOwnership SET listName = '#{db.escape(cgi['listName'])}', description = '#{db.escape(cgi['description'])}', privacy = #{privacy} WHERE id = #{list_id}")
-
-    # Delete old series and seasons
-    db.query("DELETE FROM curatedListSeries WHERE listId = #{list_id}")
-    db.query("DELETE FROM curatedListSeason WHERE listId = #{list_id}")
-
-    # Insert new series and seasons
-    seriesArray = JSON.parse(cgi['seriesArray'])
-    seasonArray = JSON.parse(cgi['seasonArray'])
-
-    seriesArray.each do |series|
-      db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
-                VALUES ('#{username}', #{series['id']}, '#{db.escape(cgi['listName'])}', '#{db.escape(cgi['description'])}', #{privacy}, NOW(), #{list_id})")
-    end
-
-    seasonArray.each do |season|
-      db.query("INSERT INTO curatedListSeason (username, seasonId, name, description, privacy, date, listId)
-                VALUES ('#{username}', #{season['seasonId']}, '#{db.escape(cgi['listName'])}', '#{db.escape(cgi['description'])}', #{privacy}, NOW(), #{list_id})")
-    end
-
-    puts "<script>alert('Your list has been successfully updated!'); window.location.href = 'Profile_Lists.cgi';</script>"
-  rescue Mysql2::Error => e
-    puts "Content-type: text/html\n\n"
-    puts "<h1>Error Updating List</h1>"
-    puts "<p>MySQL Error: #{e.message}</p>"
-  end
-
-  exit
-end
+puts "</body>"
+puts "</html>"
 
 session.close
