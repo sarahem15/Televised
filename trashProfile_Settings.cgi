@@ -95,7 +95,6 @@ puts '<a href="Want_to_Watch.cgi">Want to Watch</a>'
 puts '<a href="#!" class="active">Lists</a>'
 puts '<a href="Profile_Reviews.cgi">Reviews</a>'
 puts '<a href="Likes_Lists.cgi">Likes</a>'
-puts '<a href="Profile_Ratings.cgi">Ratings</a>'
 puts '</div>'
 puts '<hr>'
 puts '<br>'
@@ -162,19 +161,21 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   listId = listId.first['id']
 
   # Delete Button
-  puts '<form action="Profile_Lists.cgi" method="post">'
+  puts '<form action="Profile_Lists.cgi" method="post" style="display: inline-block; margin-right: 10px;">'
   puts '<input type="hidden" name="deleteListId" value="' + listId.to_s + '">'
   puts '<button type="submit" class="btn btn-danger">Delete List</button>'
   puts '</form>'
 
-  # Edit Button
-  puts '<form action="editList.cgi" method="get">'
-  puts '<input type="hidden" name="listId" value="' + listId.to_s + '">'
+  # Edit Button - Redirect to createNewList with pre-filled data
+  puts '<form action="createNewList.cgi" method="get" style="display: inline-block; margin-right: 10px;">'
+  puts '<input type="hidden" name="editListId" value="' + listId.to_s + '">'
+  puts '<input type="hidden" name="editListName" value="' + lists[i]['name'] + '">'
+  puts '<input type="hidden" name="editListDescription" value="' + lists[i]['description'] + '">'
   puts '<button type="submit" class="btn btn-primary">Edit List</button>'
   puts '</form>'
 
   # Likes handling
-  puts '<form  class="LikeAndCount" action="Profile_Lists.cgi" method="post">'
+  puts '<form  class="LikeAndCount" action="Profile_Lists.cgi" method="post" style="display: inline-block;">'
   alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.to_s + "';")
   if (alreadyLiked.to_a != [])
     puts '<button class="LIKES" style="color: pink;">&#10084</button>'
@@ -185,7 +186,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   (0...currentLikes.count).each do |row|
     likeCount += 1
   end
-  puts '<h3>' + likeCount.to_s + ' Likes</h3>'
+  puts '<span style="font-size: 16px; margin-left: 5px;">' + likeCount.to_s + ' Likes</span>'
   puts '<input type="hidden" name="likedList" value="TRUE">'
   puts '<input type="hidden" name="listId" value="' + listId.to_s + '">'
   puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
