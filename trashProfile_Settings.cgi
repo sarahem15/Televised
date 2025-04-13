@@ -129,7 +129,7 @@ puts '</div>'
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
 
 (0...lists.size).each do |i|
-  puts '<div class="listImages">'
+  puts '<div class="listImages" style="margin-bottom: 20px;">'  # Added margin-bottom for spacing
   puts '<div class="listWrapper">'
   puts '<section class="carousel-section" id="listsPlease">'
   if seriesTab == "SERIES"
