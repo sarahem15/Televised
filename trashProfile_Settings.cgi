@@ -129,8 +129,8 @@ puts '</div>'
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
 
 (0...lists.size).each do |i|
-  puts '<div class="listImages" style="margin-bottom: 20px;">'  # Added margin-bottom for spacing
-  puts '<div class="listWrapper">'
+  puts '<div class="listImages">' 
+  puts '<div class="listWrapper" style="margin-bottom: 20px; margin-top: 20px;">'
   puts '<section class="carousel-section" id="listsPlease">'
   if seriesTab == "SERIES"
     listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
