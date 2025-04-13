@@ -14,25 +14,47 @@ username = session['username']
 list_id = cgi['list_id'].to_i  # Getting the list ID to edit
 
 # Set up the database connection
-db = Mysql2::Client.new(
-  host: '10.20.3.4',
-  username: 'seniorproject25',
-  password: 'TV_Group123!',
-  database: 'televised_w25'
-)
+begin
+  db = Mysql2::Client.new(
+    host: '10.20.3.4',
+    username: 'seniorproject25',
+    password: 'TV_Group123!',
+    database: 'televised_w25'
+  )
+rescue Mysql2::Error => e
+  puts "Content-type: text/html\n\n"
+  puts "<h1>Error Connecting to Database</h1>"
+  puts "<p>MySQL Error: #{e.message}</p>"
+  exit
+end
 
 # Fetch existing list details
-list_details = db.query("SELECT * FROM listOwnership WHERE id = #{list_id} AND username = '#{username}'").first
-if list_details.nil?
-  puts "<script>alert('List not found or you do not have permission to edit it.'); window.location.href = 'Profile_Lists.cgi';</script>"
+begin
+  list_details = db.query("SELECT * FROM listOwnership WHERE id = #{list_id} AND username = '#{username}'").first
+  if list_details.nil?
+    puts "<script>alert('List not found or you do not have permission to edit it.'); window.location.href = 'Profile_Lists.cgi';</script>"
+    exit
+  end
+rescue Mysql2::Error => e
+  puts "Content-type: text/html\n\n"
+  puts "<h1>Error Fetching List Details</h1>"
+  puts "<p>MySQL Error: #{e.message}</p>"
   exit
 end
 
 # Fetch selected series and seasons for this list
-selected_series = db.query("SELECT * FROM curatedListSeries WHERE listId = #{list_id}").to_a
-selected_seasons = db.query("SELECT * FROM curatedListSeason WHERE listId = #{list_id}").to_a
+begin
+  selected_series = db.query("SELECT * FROM curatedListSeries WHERE listId = #{list_id}").to_a
+  selected_seasons = db.query("SELECT * FROM curatedListSeason WHERE listId = #{list_id}").to_a
+rescue Mysql2::Error => e
+  puts "Content-type: text/html\n\n"
+  puts "<h1>Error Fetching Selected Series and Seasons</h1>"
+  puts "<p>MySQL Error: #{e.message}</p>"
+  exit
+end
 
 # Start HTML output for editing the list
+puts "Content-type: text/html\n\n"
 puts "<!DOCTYPE html>"
 puts "<html lang='en'>"
 puts "<head>"
@@ -93,131 +115,40 @@ puts '<!-- Scripts -->'
 puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
 puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
 puts '<script src="Televised.js"></script>'
-puts <<~JAVASCRIPT
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    sessionStorage.removeItem('seriesArray');
-    sessionStorage.removeItem('seasonArray');
-    sessionStorage.removeItem('episodeArray');
-    updateAllLists();
 
-    document.getElementById('searchForm').addEventListener('submit', function (event) {
-      event.preventDefault();
-      let searchInput = document.querySelector('input[name="mediaEntered"]').value;
-      let type = document.querySelector('select[name="typeSearch"]').value;
-      fetch('EditList.cgi', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })
-      })
-      .then(response => response.text())
-      .then(data => { document.getElementById('searchResults').innerHTML = data; });
-    });
-
-    document.addEventListener("click", function (event) {
-      if (event.target.classList.contains("addToList")) {
-        event.preventDefault();
-        let seriesId = event.target.dataset.seriesId;
-        let seriesName = event.target.dataset.seriesName;
-        let parent = event.target.closest("p");
-
-        if (document.querySelector("select.seasonSelect", parent)) {
-          let seasonNum = parent.querySelector("select.seasonSelect").selectedIndex + 1;
-          let seasonArray = JSON.parse(sessionStorage.getItem("seasonArray")) || [];
-          if (!seasonArray.some(s => s.seriesId === seriesId && s.season === seasonNum)) {
-            seasonArray.push({ seriesId: seriesId, name: seriesName, season: seasonNum });
-            sessionStorage.setItem("seasonArray", JSON.stringify(seasonArray));
-            updateAllLists();
-          }
-        } else {
-          let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
-          if (!seriesArray.some(s => s.id === seriesId)) {
-            seriesArray.push({ id: seriesId, name: seriesName });
-            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));
-            updateAllLists();
-          }
-        }
-      }
-
-      if (event.target.classList.contains("removeFromList")) {
-        event.preventDefault();
-        const type = event.target.dataset.type;
-        const index = parseInt(event.target.dataset.index, 10);
-        let key = `${type}Array`;
-        let arr = JSON.parse(sessionStorage.getItem(key)) || [];
-        arr.splice(index, 1);
-        sessionStorage.setItem(key, JSON.stringify(arr));
-        updateAllLists();
-      }
-    });
-
-    function updateAllLists() {
-      let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
-      let seasonArray = JSON.parse(sessionStorage.getItem("seasonArray")) || [];
-
-      document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);
-      document.getElementById('seasonArrayInput').value = JSON.stringify(seasonArray);
-
-      let container = document.getElementById("seriesList");
-      container.innerHTML = "";
-
-      seriesArray.forEach((s, i) => {
-        container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>
-          \${s.name} <button class='removeFromList btn btn-danger btn-sm' data-type='series' data-index='\${i}'>X</button>
-        </li>`;
-      });
-
-      seasonArray.forEach((s, i) => {
-        container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>
-          \${s.name} Season \${s.season} <button class='removeFromList btn btn-danger btn-sm' data-type='season' data-index='\${i}'>X</button>
-        </li>`;
-      });
-
-      const typeSelect = document.getElementById("type");
-      if (seriesArray.length > 0) {
-        typeSelect.value = "Series";
-        typeSelect.disabled = true;
-      } else if (seasonArray.length > 0) {
-        typeSelect.value = "Season";
-        typeSelect.disabled = true;
-      } else {
-        typeSelect.disabled = false;
-      }
-    }
-  });
-</script>
-JAVASCRIPT
-puts "</body>"
-puts "</html>"
-
-# Handle updating list data when the form is submitted
+# Handle form submission and saving data
 if cgi['saveList'] && !cgi['listName'].empty? && !cgi['description'].empty?
   privacy = cgi['views'] == 'Public' ? 1 : 0
 
-  # Update the list details
-  db.query("UPDATE listOwnership SET listName = '#{db.escape(cgi['listName'])}', description = '#{db.escape(cgi['description'])}', privacy = #{privacy} WHERE id = #{list_id}")
+  begin
+    # Update the list details
+    db.query("UPDATE listOwnership SET listName = '#{db.escape(cgi['listName'])}', description = '#{db.escape(cgi['description'])}', privacy = #{privacy} WHERE id = #{list_id}")
 
-  # Update the selected series and seasons
-  db.query("DELETE FROM curatedListSeries WHERE listId = #{list_id}")
-  db.query("DELETE FROM curatedListSeason WHERE listId = #{list_id}")
+    # Delete old series and seasons
+    db.query("DELETE FROM curatedListSeries WHERE listId = #{list_id}")
+    db.query("DELETE FROM curatedListSeason WHERE listId = #{list_id}")
 
-  # Add updated series and seasons
-  seriesArray = JSON.parse(cgi['seriesArray'])
-  seasonArray = JSON.parse(cgi['seasonArray'])
+    # Insert new series and seasons
+    seriesArray = JSON.parse(cgi['seriesArray'])
+    seasonArray = JSON.parse(cgi['seasonArray'])
 
-  # Insert series data
-  seriesArray.each do |series|
-    db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
-              VALUES ('#{username}', #{series['id']}, '#{db.escape(cgi['listName'])}', '#{db.escape(cgi['description'])}', #{privacy}, NOW(), #{list_id})")
+    seriesArray.each do |series|
+      db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
+                VALUES ('#{username}', #{series['id']}, '#{db.escape(cgi['listName'])}', '#{db.escape(cgi['description'])}', #{privacy}, NOW(), #{list_id})")
+    end
+
+    seasonArray.each do |season|
+      db.query("INSERT INTO curatedListSeason (username, seasonId, name, description, privacy, date, listId)
+                VALUES ('#{username}', #{season['seasonId']}, '#{db.escape(cgi['listName'])}', '#{db.escape(cgi['description'])}', #{privacy}, NOW(), #{list_id})")
+    end
+
+    puts "<script>alert('Your list has been successfully updated!'); window.location.href = 'Profile_Lists.cgi';</script>"
+  rescue Mysql2::Error => e
+    puts "Content-type: text/html\n\n"
+    puts "<h1>Error Updating List</h1>"
+    puts "<p>MySQL Error: #{e.message}</p>"
   end
 
-  # Insert season data
-  seasonArray.each do |season|
-    db.query("INSERT INTO curatedListSeason (username, seasonId, name, description, privacy, date, listId)
-              VALUES ('#{username}', #{season['seasonId']}, '#{db.escape(cgi['listName'])}', '#{db.escape(cgi['description'])}', #{privacy}, NOW(), #{list_id})")
-  end
-
-  puts "<script>alert('Your list has been successfully updated!'); window.location.href = 'Profile_Lists.cgi';</script>"
   exit
 end
 
