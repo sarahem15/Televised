@@ -139,7 +139,7 @@ if is_editing
   end
 end
 
-# Start HTML output
+# Start HTML output (keep your original HTML structure intact)
 puts "<!DOCTYPE html>"
 puts "<html lang='en'>"
 puts "<head>"
