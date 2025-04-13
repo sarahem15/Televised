@@ -1,3 +1,7 @@
+/mnt/web/www/Televised/Profile_Lists.cgi:161:in `+': no implicit conversion of Date into String (TypeError) from /mnt/web/www/Televised/Profile_Lists.cgi:161:in `block in
+' from /mnt/web/www/Televised/Profile_Lists.cgi:132:in `each' from /mnt/web/www/Televised/Profile_Lists.cgi:132:in `
+' 
+
 #!/usr/bin/ruby
 # Switch images to queries from the database
 # Enable debugging
