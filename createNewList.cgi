@@ -1,3 +1,5 @@
+#not filling in the list items
+
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
