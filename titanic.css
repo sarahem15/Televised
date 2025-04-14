@@ -1,4 +1,9 @@
 /* CSS */ 
+/* FILE: titanic.css */ 
+/* Image links: */
+/* https://www.google.com/url?sa=i&url=https%3A%2F%2Fpeople.com%2Fkate-winslet-reveals-water-titanic-door-scene-waist-high-leonardo-dicaprio-kneeling-8717253&psig=AOvVaw2uKkzsSH3NXjUf2l0p5jfF&ust=1744745179617000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCNjznrig2IwDFQAAAAAdAAAAABAE
+   https://www.google.com/url?sa=i&url=https%3A%2F%2Fscreenrant.com%2Ftitanic-best-jack-dawson-quotes%2F&psig=AOvVaw3OZxB8jcoulOCOAzQTToUK&ust=1744733262032000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCMjF9IP014wDFQAAAAAdAAAAABAE
+   https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.reddit.com%2Fr%2Fshittymoviedetails%2Fcomments%2F13y1330%2Fin_titanic_1997_rose_decides_not_to_jump_to_her%2F&psig=AOvVaw0qbtqPpQbtMmPMzXWkEWp6&ust=1744745289832000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCNCR4O6g2IwDFQAAAAAdAAAAABAE  */
 
 /* Navigation Bar */
  .navbar ul {
@@ -27,6 +32,8 @@
     color: #f5d984;
 }
 
+/* Background images and page styling */
+
 #home, #attributes, #passengerSearch, #passengerInformation {
     background-color:  black;
     color: white;
@@ -34,10 +41,7 @@
     min-height: 100vh;
     width:  100%;
 }
-
-
-/* Home */
-/* Background Image -- https://www.w3schools.com/html/html_images_background.asp */
+/* How to set up background Image -- https://www.w3schools.com/html/html_images_background.asp */
 #home {
     background-image: url('titanicHome.jpg');
     background-repeat: no-repeat;
@@ -46,7 +50,15 @@
     position: relative;
     margin: 50px 0 px;
 }
-
+#home h1 {
+    margin:  auto;
+    font-size: 200px;
+    text-align: center;
+}
+.celine{
+    margin-left: 7%;
+    margin-top: 15%;
+}
 
 #passengerInformation {
     background-image: url('titanicPassInfo.jpg');
@@ -57,45 +69,33 @@
     margin: 50px 0 px;
 }
 
-#home h1 {
-    margin:  auto;
-    font-size: 200px;
-    text-align: center;
-}
-
-/* Table Styling */
-.passInfo {
-    width:  90%;
-    background-color: black;
-    border: 10px solid black;
-    border-radius: 20px;
-}
-
-.attrInfo {
-    height: 800px;
-    overflow: scroll;
-    scrollbar-color: #191375 #2e2e2e;
-    padding: 20;
-}
-
-.passInfo th {
-    background-color: gray;
-}
-
-.passInfo tr:nth-child(even) {
-  background-color: #6d7b85;
-} 
-
-
 .body {
     margin: 2% 2% 2% 2%;
     display:  grid;
     grid-template-columns: 30% 70%;
 }
 
-.celine{
-    margin-left: 7%;
-    margin-top: 15%;
+
+/* Table Styling */
+
+.passInfo {
+    width:  90%;
+    background-color: black;
+    border: 10px solid black;
+    border-radius: 20px;
+}
+.passInfo th {
+    background-color: gray;
+}
+.passInfo tr:nth-child(even) {
+  background-color: #6d7b85;
+} 
+
+.attrInfo {
+    height: 650px;
+    overflow: scroll;
+    scrollbar-color: #191375 #2e2e2e;
+    padding: 20;
 }
 
 .adminInfo {
@@ -105,7 +105,6 @@
     background-color: black;
     margin: auto;
 }
-
 .adminInfo .passInfo {
     color: white;
 }
@@ -119,6 +118,7 @@
 
 
 /* Passenger Information */
+
 .infoBody {
      margin: 2% 2% 2% 2%;
 }
@@ -137,12 +137,10 @@
     overflow: scroll;
     scrollbar-color: #191375 #2e2e2e;
 }
-
 .relationships h3 {
     font-size: 30px;
     padding-left: 40;
 }
-
 .relationships a {
     margin-left: 5%;
     text-decoration: none;
@@ -159,7 +157,6 @@
   width: 40px;
   text-align: center;
 }
-
 .infoQuestion .moreInfo {
   visibility: hidden;
   text-align: center;
@@ -172,6 +169,7 @@
 }
 
 /* Search and Attribute Pages */
+
 #passengerSearch .infoQuestion {
   position: relative;
   display: inline-block;
@@ -182,7 +180,6 @@
   padding: 1;
   text-align: center;
 }
-
 #passengerSearch, #attributes {
     background-image: url('titanicUser.jpg');
     background-repeat: no-repeat;
@@ -191,11 +188,10 @@
     position: relative;
     margin: 50px 0 px;
 }
-
 #passengerSearch .infoQuestion .moreInfo {
   visibility: hidden;
   text-align: center;
-  font-size: 12px;
+  font-size: 13px;
   width: 400px;
   left: 150%;
   padding: 5px 0;
@@ -214,7 +210,6 @@
   padding: 1;
   text-align: center;
 }
-
 #attributes .infoQuestion .moreInfo {
   visibility: hidden;
   text-align: center;
@@ -227,17 +222,14 @@
   z-index: 1;
 }
 
-
 .infoQuestion:hover .moreInfo {visibility: visible;}
 #passengerSearch .infoQuestion:hover .moreInfo {visibility: visible;}
 #attributes .infoQuestion:hover .moreInfo {visibility: visible;}
-
 
 #passengerSearch h1, #attributes h1 {
     text-align: center;
     font-size: 50px;
 }
-
 #passengerSearch hr {
     margin: 0 50% 0 1%;
 }
@@ -247,9 +239,6 @@
 }
 
 #passengerSearch .body a:hover {color: #d9b959; text-decoration: underline;}
-
-
-
 #attributes .passInfo a:hover {color: #d9b959; text-decoration: underline;}
 .relationships a:hover {color: #d9b959; text-decoration: underline;}
 
@@ -267,27 +256,14 @@
     font-size: 25px;
 }
 
-.sliding .on {
+.sort .on {
     border-color: blue;
     border-width: 3px;
     border-radius: 20%;
 }
 
-
-/* Admin Access */
-.enterForm {
-    background-color: #191375;
-    height: 50%;
-    width: 50%;
-    margin: auto;
-    font-size: 50px;
-    text-align: center;
-    border-radius: 5px;
-    padding: 2;
-}
-
 .forms {
-    height: 800px;
+    height: 650px;
     max-width: 600px;
     overflow: scroll;
     scrollbar-color: #191375 #2e2e2e;
@@ -295,5 +271,11 @@
     padding-left: 30;
     padding-top: 10;
     border-radius: 20px;
+}
+
+.forms h3 {
+    text-align: center;
+    padding-left: 20;
+    padding-right: 20;
 }
 

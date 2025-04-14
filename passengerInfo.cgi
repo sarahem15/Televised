@@ -2,8 +2,10 @@
 # M'Kiyah Baird and Sarah McLoney
 # Databases, Winter 2025
 # passengerInfo.cgi
-# Takes in a passenger's id and gets their information from the database to be displayed. Also references their last names, ticket numbers, and cabin numbers to find
+# Takes in a passenger's id and gets their information from the database to be displayed. Also uses their last names, ticket numbers, and cabin numbers to find
 #   other passengers who may be related
+# .infoQuestion -- the question mark (for css purposes), .moreInfo -- tells the user how relationships are calculated on hover
+#
 # References:
 #   Emojis and Symbols (W3Schools) -- https://www.w3schools.com/charsets/ref_emoji_smileys.asp
 #
@@ -117,18 +119,23 @@ puts '<section class="infoBody">'
     puts '</section>'
     puts '<br>'
     puts '</section>'
-
     puts '<hr>'
 
     # Possible Relationships
     puts '<section class="relationships">'
     puts '<h3>Relationships <div class="infoQuestion">&#10067<span class="moreInfo"><i>Passengers who may be related will appear below. These are determined by last name, ticket# and cabin.</i></span></div></h3>'
         if lodging.first['cabin'] != 'N/A'
-            relationships = db.query("SELECT DISTINCT passenger.id, passenger.honorific, passenger.fName, passenger.lName FROM passenger JOIN lodging ON passenger.id = lodging.passenger WHERE 
-                (passenger.lName = '" + passengerInfo.first['lName'] + "' OR lodging.cabin = '" + lodging.first['cabin'] + "' OR lodging.ticketNumber = '" + lodging.first['ticketNumber'].to_s + "') AND NOT passenger.id = '" + passengerId.to_s + "';").to_a
+            begin
+                relationships = db.query("SELECT DISTINCT passenger.id, passenger.honorific, passenger.fName, passenger.lName FROM passenger JOIN lodging ON passenger.id = lodging.passenger WHERE 
+                    (passenger.lName = '" + passengerInfo.first['lName'] + "' OR lodging.cabin = '" + lodging.first['cabin'] + "' OR lodging.ticketNumber = '" + lodging.first['ticketNumber'].to_s + "') AND NOT passenger.id = '" + passengerId.to_s + "';").to_a
+            rescue => e
+            end
         else
-            relationships = db.query("SELECT DISTINCT passenger.id, passenger.honorific, passenger.fName, passenger.lName FROM passenger JOIN lodging ON passenger.id = lodging.passenger WHERE 
-                (passenger.lName = '" + passengerInfo.first['lName'] + "' OR lodging.ticketNumber = '" + lodging.first['ticketNumber'].to_s + "') AND NOT passenger.id = '" + passengerId.to_s + "';").to_a
+            begin
+                relationships = db.query("SELECT DISTINCT passenger.id, passenger.honorific, passenger.fName, passenger.lName FROM passenger JOIN lodging ON passenger.id = lodging.passenger WHERE 
+                    (passenger.lName = '" + passengerInfo.first['lName'] + "' OR lodging.ticketNumber = '" + lodging.first['ticketNumber'].to_s + "') AND NOT passenger.id = '" + passengerId.to_s + "';").to_a
+            rescue => e
+            end
         end
         (0...relationships.size).each do |i|
             puts '<a href="passengerInfo.cgi?id=' + relationships[i]['id'].to_s + '">'
