@@ -1,4 +1,4 @@
-#not filling in the list items
+#not filling in the list items for edit. Need to create fake episode list table for each of our accounts. When user presses edit on p_l then this needs to populate. 
 
 #!/usr/bin/ruby
 $stdout.sync = true
