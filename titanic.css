@@ -1,0 +1,299 @@
+/* CSS */ 
+
+/* Navigation Bar */
+ .navbar ul {
+  list-style-type: none;
+  margin: 0 2%;
+  padding: 0;
+  text-align: right;
+  height: 4%;
+} 
+.navbar li {
+  display: inline;
+  margin: 20% 0 0 0;
+}
+.navbar a {
+    text-decoration: none;
+    color:  white;
+    font-size: 20px;
+    padding: 5;
+    text-align: center;
+}
+.navbar a:hover {color: lightblue;}
+.navbar {
+    background-color:  #191375;
+}
+.navbar .active {
+    color: #f5d984;
+}
+
+#home, #attributes, #passengerSearch, #passengerInformation {
+    background-color:  black;
+    color: white;
+    margin: auto;
+    min-height: 100vh;
+    width:  100%;
+}
+
+
+/* Home */
+/* Background Image -- https://www.w3schools.com/html/html_images_background.asp */
+#home {
+    background-image: url('titanicHome.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    position: relative;
+    margin: 50px 0 px;
+}
+
+
+#passengerInformation {
+    background-image: url('titanicPassInfo.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    position: relative;
+    margin: 50px 0 px;
+}
+
+#home h1 {
+    margin:  auto;
+    font-size: 200px;
+    text-align: center;
+}
+
+/* Table Styling */
+.passInfo {
+    width:  90%;
+    background-color: black;
+    border: 10px solid black;
+    border-radius: 20px;
+}
+
+.attrInfo {
+    height: 800px;
+    overflow: scroll;
+    scrollbar-color: #191375 #2e2e2e;
+    padding: 20;
+}
+
+.passInfo th {
+    background-color: gray;
+}
+
+.passInfo tr:nth-child(even) {
+  background-color: #6d7b85;
+} 
+
+
+.body {
+    margin: 2% 2% 2% 2%;
+    display:  grid;
+    grid-template-columns: 30% 70%;
+}
+
+.celine{
+    margin-left: 7%;
+    margin-top: 15%;
+}
+
+.adminInfo {
+    height: 700px;
+    overflow: scroll;
+    scrollbar-color: #191375 #2e2e2e;
+    background-color: black;
+    margin: auto;
+}
+
+.adminInfo .passInfo {
+    color: white;
+}
+
+#modAndDelete .currentState {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    width: 95%;
+    margin: auto;
+}
+
+
+/* Passenger Information */
+.infoBody {
+     margin: 2% 2% 2% 2%;
+}
+.info {
+    background-color: black;
+    width: 35%;
+    padding: 20;
+}
+
+.relationships {
+    background-color: black;
+    width: 90%;
+    height: 25%;
+    padding: 20;
+    margin: auto;
+    overflow: scroll;
+    scrollbar-color: #191375 #2e2e2e;
+}
+
+.relationships h3 {
+    font-size: 30px;
+    padding-left: 40;
+}
+
+.relationships a {
+    margin-left: 5%;
+    text-decoration: none;
+    color: white;
+    font-size: 25px;
+}
+
+.infoQuestion {
+  position: relative;
+  display: inline-block;
+  background-color: transparent;
+  border: 2px solid red;
+  border-radius: 100%;
+  width: 40px;
+  text-align: center;
+}
+
+.infoQuestion .moreInfo {
+  visibility: hidden;
+  text-align: center;
+  font-size: 15px;
+  width: 850px;
+  padding: 5px 0;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1;
+}
+
+/* Search and Attribute Pages */
+#passengerSearch .infoQuestion {
+  position: relative;
+  display: inline-block;
+  background-color: transparent;
+  border: 2px solid red;
+  border-radius: 100%;
+  width: 25px;
+  padding: 1;
+  text-align: center;
+}
+
+#passengerSearch, #attributes {
+    background-image: url('titanicUser.jpg');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+    position: relative;
+    margin: 50px 0 px;
+}
+
+#passengerSearch .infoQuestion .moreInfo {
+  visibility: hidden;
+  text-align: center;
+  font-size: 12px;
+  width: 400px;
+  left: 150%;
+  padding: 5px 0;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1;
+}
+
+#attributes .infoQuestion {
+  position: relative;
+  display: inline-block;
+  background-color: transparent;
+  border: 2px solid red;
+  border-radius: 100%;
+  width: 20px;
+  padding: 1;
+  text-align: center;
+}
+
+#attributes .infoQuestion .moreInfo {
+  visibility: hidden;
+  text-align: center;
+  font-size: 15px;
+  width: 250px;
+  left: 10%;
+  padding: 5px 0;
+  border-radius: 6px;
+  position: absolute;
+  z-index: 1;
+}
+
+
+.infoQuestion:hover .moreInfo {visibility: visible;}
+#passengerSearch .infoQuestion:hover .moreInfo {visibility: visible;}
+#attributes .infoQuestion:hover .moreInfo {visibility: visible;}
+
+
+#passengerSearch h1, #attributes h1 {
+    text-align: center;
+    font-size: 50px;
+}
+
+#passengerSearch hr {
+    margin: 0 50% 0 1%;
+}
+#passengerSearch .body a, #attributes .body a{
+    text-decoration: none;
+    color: white;
+}
+
+#passengerSearch .body a:hover {color: #d9b959; text-decoration: underline;}
+
+
+
+#attributes .passInfo a:hover {color: #d9b959; text-decoration: underline;}
+.relationships a:hover {color: #d9b959; text-decoration: underline;}
+
+#passengerInformation .infoBody h1{
+    font-size: 80px;
+    padding: none;
+    text-align: center;
+}
+#passengerInformation .infoBody h3{
+    font-size: 40px;
+    padding: none;
+}
+#passengerInformation .info {
+    margin-left: 5%;
+    font-size: 25px;
+}
+
+.sliding .on {
+    border-color: blue;
+    border-width: 3px;
+    border-radius: 20%;
+}
+
+
+/* Admin Access */
+.enterForm {
+    background-color: #191375;
+    height: 50%;
+    width: 50%;
+    margin: auto;
+    font-size: 50px;
+    text-align: center;
+    border-radius: 5px;
+    padding: 2;
+}
+
+.forms {
+    height: 800px;
+    max-width: 600px;
+    overflow: scroll;
+    scrollbar-color: #191375 #2e2e2e;
+    background-color: black;
+    padding-left: 30;
+    padding-top: 10;
+    border-radius: 20px;
+}
+

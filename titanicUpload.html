@@ -1,0 +1,28 @@
+<!--FILE: upload.html-->
+<!--M'Kiyah Baird & Sarah McLoney-->
+<!--4/10/25-->
+
+<html>
+<head><title> Upload and Populate Form</title></head>
+<body>
+	<h2>Upload a .csv file.</h2>
+
+	<form enctype='multipart/form-data' action="titanicUpload.cgi" method="post" style="margin-left: 5%;"> 
+		Upload a file: 
+		<br>
+		<input type="file" name="fileName" accept=".csv" required>
+		<br>
+		<br>
+		Select at least one table to populate:
+		<br>
+		<input type="checkbox" name="tableName" value="passenger">Passenger
+		<br>
+		<input type="checkbox" name="tableName" value="lodging">Lodging
+		<br>
+		<input type="checkbox" name="tableName" value="unmarriedName">Unmarried Name
+		<br>
+		<br>
+		<input type="submit" value="Submit">
+	</form>
+</body>
+</html>
