@@ -13,7 +13,7 @@ cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
 
-episodeName = cgi['ep_name'].gsub("'", "\\\\'")
+episodeName = cgi['ep_name']
 showName = cgi['show_name']
 epNum = cgi['ep_num']
 seasonNumber = cgi['seasonNumber']
@@ -30,7 +30,7 @@ db = Mysql2::Client.new(
   )
 
 #seriesImage = db.query("SELECT imageName FROM series WHERE showName = '" + showName + "';")
-episode = db.query("SELECT episode.* FROM episode JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE episode.epName = '" + episodeName + "' AND series.showName = '" + showName.gsub("'", "\\\\'") + "';")
+episode = db.query("SELECT episode.* FROM episode JOIN season ON episode.seasonId = season.seasonId JOIN series ON season.seriesId = series.showId WHERE episode.epName = '" + episodeName + "' AND series.showName = '" + showName + "';")
 
 episodeRating = 0
 sumRating = 0
@@ -181,6 +181,7 @@ puts "<body id=\"episodePage\">"
         puts '<input type="hidden" name="wantToWatch" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
+=begin
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Existing List</button>"
         #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
@@ -189,6 +190,7 @@ puts "<body id=\"episodePage\">"
         puts '<input type="hidden" name="addToExisting" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
+=end
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to New List</button>"
         #puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
@@ -232,7 +234,7 @@ else
     reviewDisplayName = db.query("SELECT displayName FROM account WHERE username = '" + epReviews[i]['username'] + "';")
         puts '<section class="UserDisplay">'
             puts '<img src="./ProfileImages/' + epReviews[i]['username'] + '.jpg" alt="" style="height: 50px; width: 50px; corner-rounding: 100%">'
-            puts '<h3>' + reviewDisplayName.first['displayName'] + '</h3>'
+            puts '<a href="othersProfiles.cgi?username=' + epReviews[i]['username'] + '"><h3>' + reviewDisplayName.first['displayName'] + '</h3></a>'
             #RATING!
         puts '</section>'
         puts '<br>'

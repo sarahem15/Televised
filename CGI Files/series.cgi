@@ -205,12 +205,12 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
 
-
+=begin
         #puts '<form action="threebuttons.cgi" method="POST">'
         #puts "<button>Add to Existing List</button>"
         #puts "<button onclick=\"openAddToExistingModal()\">Add to Existing List</button>"
         puts "<button data-bs-toggle=\"modal\" data-bs-target=\"#addToExisting\">Add to Existing List</button>"
-=begin
+
         puts '<div id="addToExisting">'
         puts '<div class="modal-content">'
         puts '<span class="close" onclick="document.getElementById(\'addToExisting\').style.display=\'none\'">&times;</span>'
@@ -375,12 +375,16 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
+
+=begin
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Existing List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '<input type="hidden" name="seasonId" value="' + seasonId.to_s + '">'
         puts '</form>'
+=end
+
         puts '<form action="createNewList.cgi" method="POST">'
         puts "<button>Add to New List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
@@ -486,6 +490,8 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="wantToWatch" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
+
+=begin
         puts '<form action="threebuttons.cgi" method="POST">'
         puts "<button>Add to Existing List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
@@ -493,6 +499,7 @@ puts "<body id=\"showsPage\">"
         puts '<input type="hidden" name="addToExisting" value="TRUE">'
         puts '<input type="hidden" name="seasonNumber" value="' + seasonNumber.to_s + '">'
         puts '</form>'
+=end
         puts '<form action="createNewList.cgi" method="POST">'
         puts "<button>Add to New List</button>"
         puts '<input type="hidden" name="seriesID" value="' + seriesId.to_s + '">'
