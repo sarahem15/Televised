@@ -98,7 +98,7 @@ epNum = 0
 (0...ratings.size).each do |i|
   puts '<br>'
 
-    puts '<div class="listWrapper" style="width: 30%;">'
+    puts '<div class="listWrapper">'
         if seriesTab != "EP"
           puts '<form action="series.cgi">'
             puts '<input type="hidden" name="clicked_image" value="' + rateImages[i]['imageName'] + '">'
@@ -118,11 +118,11 @@ epNum = 0
             puts '<input type="hidden" name="ep_num" value="' + epNum.to_s + '">'
             puts '<input type="hidden" name="seasonNumber" value="' + rateImages[i]['seasonNum'].to_s + '">'
         end  
-        puts "<input type='image' src=\"" + rateImages[i]['imageName'] + "\"alt=\"" + rateImages[i]['imageName'] + "\" style='width: 150px; height: 220px; object-fit:cover;'>" 
+        puts "<input type='image' src=\"" + rateImages[i]['imageName'] + "\"alt=\"" + rateImages[i]['imageName'] + "\" style='width: 200px; height: 270px; object-fit:cover;'>" 
         puts '</form>'
-  puts '<div class="content-R">'
+  puts '<div class="content-R" style="width: 1500px;">'
       puts '<br>'
-      puts '<section class="NameAndYear">'
+      puts '<section class="NameAndYear" style="width: 500px;">'
       puts '<h3>' + rateImages[i]['showName'] + '</h3>'
       puts '<h3 style="color: #436eb1;">' + rateImages[i]['year'].to_s + '</h3>'
       puts '</section>'

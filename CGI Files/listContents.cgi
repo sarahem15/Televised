@@ -63,12 +63,12 @@ puts '<body id="listContent">'
   
   puts '<section class="contentList">'
   puts '<section class="UserDisplay" style="max-width: 390px">'
-    puts '<img src="./ProfileImages/' + listContent.first['username'] + '.jpg" alt="">'
+    puts '<img src="./ProfileImages/' + listContent.first['username'] + '.jpg" alt="" style="background-color: gray;">'
     puts '<h3>List by <a href="othersProfiles.cgi?username=' + listContent.first['username'] + '">' + displayName.first['displayName'] + '</a></h3>'
   puts '</section>'
   puts '<br>'
   puts '<section class="titleLike">'
-  puts '<h1>' + listTitle.to_s + '</h1>'
+  puts '<h1>' + listTitle.to_s + ' <i style="font-size:15px;">(' + type + ')</i></h1>'
   (0...likes.size).each do |j|
   if likes[j]['userWhoLiked'] == username.to_s
     alreadyLiked = true
@@ -90,7 +90,6 @@ puts '<form  class="LikeAndCount" action="listContents.cgi" method="post">'
         puts '<input type="hidden" name="listCreator" value="' + listContent.first['username'] + '">'
         puts '<input type="hidden" name="title" value="' + listTitle + '">'
         puts '<input type="hidden" name="contentType" value="' + type + '">'
-        
     puts '</form>'
     puts '</section>'
   puts '<hr>'

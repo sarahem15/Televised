@@ -155,7 +155,7 @@ puts '<div class="originalReview">'
       elsif seriesTab != "SERIES"
         puts '<h3>S' + seriesImage.first['seasonNum'].to_s + ' ' + seriesImage.first['epName'] + '</h3>'
       end
-      puts '<a>'
+      puts '</a>'
       puts '<h3 style="color: #436eb1;">' + seriesImage.first['year'].to_s + '</h3>'
       puts '</section>'
 	puts '<section class="Rating">'

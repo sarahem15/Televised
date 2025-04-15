@@ -145,11 +145,19 @@ if (watchedButton == "TRUE" && epId == "" && seasonId == "")
             if (alreadyWatchedEp.to_a.to_s == "[]")
                 db.query('INSERT INTO haveWatchedEpisode VALUES ("' + username.to_s + '", "' + episodes[i]['epId'].to_s + '");')
             end
+            begin 
+                db.query("DELETE FROM wantToWatchEpisode WHERE username = '" + username.to_s + "' AND epId = '" + episodes[i]['epId'].to_s + "';")
+            rescue => e
+            end
         end
         (0...seasons.size).each do |i|
             alreadyWatchedSeason = db.query("SELECT * FROM haveWatchedSeason WHERE seasonId = '" + seasons[i]['seasonId'].to_s + "' AND username = '" + username.to_s + "';")
             if (alreadyWatchedSeason.to_a.to_s == "[]")
                 db.query('INSERT INTO haveWatchedSeason VALUES ("' + username.to_s + '", "' + seasons[i]['seasonId'].to_s + '");')
+            end
+            begin 
+                db.query("DELETE FROM wantToWatchSeason WHERE username = '" + username.to_s + "' AND seasonId = '" + seasons[i]['seasonId'].to_s + "';")
+            rescue => e
             end
         end
     end
@@ -176,6 +184,10 @@ elsif (watchedButton == "TRUE" && seasonId != "")
             alreadyWatchedEp = db.query("SELECT * FROM haveWatchedEpisode WHERE epId = '" + episodes[i]['epId'].to_s + "' AND username = '" + username.to_s + "';")
             if (alreadyWatchedEp.to_a.to_s == "[]")
                 db.query('INSERT INTO haveWatchedEpisode VALUES ("' + username.to_s + '", "' + episodes[i]['epId'].to_s + '");')
+            end
+            begin 
+                db.query("DELETE FROM wantToWatchEpisode WHERE username = '" + username.to_s + "' AND epId = '" + episodes[i]['epId'].to_s + "';")
+            rescue => e
             end
         end
     end
@@ -211,7 +223,7 @@ elsif (wantToWatch == "TRUE" && seasonId != "")
         db.query('DELETE FROM wantToWatchSeason WHERE username = "' + username.to_s + '" AND seasonId = "' + seasonId.to_s + '";')
     end
     begin 
-        db.query("DELETE FROM haveWatchedSeason WHERE username = '" + username.to_s + "' AND seasonId = '" + seriesId.to_s + "';")
+        db.query("DELETE FROM haveWatchedSeason WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonId.to_s + "';")
     rescue => e
     end
 elsif (wantToWatch == "TRUE" && epId != "")
@@ -221,7 +233,7 @@ elsif (wantToWatch == "TRUE" && epId != "")
         db.query('DELETE FROM wantToWatchEpisode WHERE username = "' + username.to_s + '" AND epId = "' + epId.to_s + '";')
     end
     begin 
-        db.query("DELETE FROM haveWatchedEpisode WHERE username = '" + username.to_s + "' AND epId = '" + seriesId.to_s + "';")
+        db.query("DELETE FROM haveWatchedEpisode WHERE username = '" + username.to_s + "' AND epId = '" + epId.to_s + "';")
     rescue => e
     end
     #puts '<br>'
