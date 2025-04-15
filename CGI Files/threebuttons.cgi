@@ -33,8 +33,11 @@ review = cgi['review']
 alreadyReviewedSeries = cgi['alreadyReviewedSeries']
 alreadyReviewedSeason = cgi['alreadyReviewedSeason']
 alreadyReviewedEp = cgi['alreadyReviewedEp']
+alreadyReplied = cgi['alreadyReplied']
+puts alreadyReplied
 
 reply = cgi['reply']
+replyId = cgi['replyId']
 reviewId = cgi['reviewId']
 fromReviewIndiv = cgi['fromReviewIndiv']
 type = cgi['type']
@@ -133,6 +136,10 @@ if (watchedButton == "TRUE" && epId == "" && seasonId == "")
         end
     else
         db.query('INSERT INTO haveWatchedSeries VALUES ("' + username.to_s + '", "' + seriesId.to_s + '");') 
+        begin 
+            db.query("DELETE FROM wantToWatchSeries WHERE username = '" + username.to_s + "' AND seriesId = '" + seriesId.to_s + "';")
+        rescue => e
+        end
         (0...episodes.size).each do |i|
             alreadyWatchedEp = db.query("SELECT * FROM haveWatchedEpisode WHERE epId = '" + episodes[i]['epId'].to_s + "' AND username = '" + username.to_s + "';")
             if (alreadyWatchedEp.to_a.to_s == "[]")
@@ -161,6 +168,10 @@ elsif (watchedButton == "TRUE" && seasonId != "")
         end
     else    
         db.query('INSERT INTO haveWatchedSeason VALUES ("' + username.to_s + '", "' + seasonId.to_s + '");')
+        begin 
+            db.query("DELETE FROM wantToWatchSeason WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonId.to_s + "';")
+        rescue => e
+        end
         (0...episodes.size).each do |i|
             alreadyWatchedEp = db.query("SELECT * FROM haveWatchedEpisode WHERE epId = '" + episodes[i]['epId'].to_s + "' AND username = '" + username.to_s + "';")
             if (alreadyWatchedEp.to_a.to_s == "[]")
@@ -174,6 +185,10 @@ elsif (watchedButton == "TRUE" && epId != "")
         db.query("DELETE FROM haveWatchedEpisode WHERE username = '" + username.to_s + "' AND epId = '" + epId.to_s + "';")
     else
         db.query('INSERT INTO haveWatchedEpisode VALUES ("' + username.to_s + '", "' + epId.to_s + '");')
+        begin 
+            db.query("DELETE FROM wantToWatchEpisode WHERE username = '" + username.to_s + "' AND epId = '" + epId.to_s + "';")
+        rescue => e
+        end
         #db.query('INSERT INTO haveWatchedEpisode VALUES ("' + username.to_s + '", "' + episodes)
     end
 end
@@ -185,10 +200,30 @@ if (wantToWatch == "TRUE" && epId == "" && seasonId == "")
     rescue => e
         db.query('DELETE FROM wantToWatchSeries WHERE username = "' + username.to_s + '" AND seriesId = "' + seriesId.to_s + '";')
     end
+    begin 
+        db.query("DELETE FROM haveWatchedSeries WHERE username = '" + username.to_s + "' AND seriesId = '" + seriesId.to_s + "';")
+    rescue => e
+    end
 elsif (wantToWatch == "TRUE" && seasonId != "")
-    db.query('INSERT INTO wantToWatchSeason VALUES ("' + username.to_s + '", "' + seasonId.to_s + '");')
+    begin
+        db.query('INSERT INTO wantToWatchSeason VALUES ("' + username.to_s + '", "' + seasonId.to_s + '");')
+    rescue => e
+        db.query('DELETE FROM wantToWatchSeason WHERE username = "' + username.to_s + '" AND seasonId = "' + seasonId.to_s + '";')
+    end
+    begin 
+        db.query("DELETE FROM haveWatchedSeason WHERE username = '" + username.to_s + "' AND seasonId = '" + seriesId.to_s + "';")
+    rescue => e
+    end
 elsif (wantToWatch == "TRUE" && epId != "")
-    db.query('INSERT INTO wantToWatchEpisode VALUES ("' + username.to_s + '", "' + epId.to_s + '");')
+    begin
+        db.query('INSERT INTO wantToWatchEpisode VALUES ("' + username.to_s + '", "' + epId.to_s + '");')
+    rescue => e
+        db.query('DELETE FROM wantToWatchEpisode WHERE username = "' + username.to_s + '" AND epId = "' + epId.to_s + '";')
+    end
+    begin 
+        db.query("DELETE FROM haveWatchedEpisode WHERE username = '" + username.to_s + "' AND epId = '" + seriesId.to_s + "';")
+    rescue => e
+    end
     #puts '<br>'
     #puts 'ADDED TO WANT TO WATCH LIST'
 end
@@ -250,6 +285,10 @@ if review != ""
             rateId = rateId.first['id'].to_s
             db.query("INSERT INTO seriesReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seriesId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
         end
+        begin
+            db.query("INSERT INTO haveWatchedSeries VALUES ('" + username.to_s + "', '" + seriesId.to_s + "');")
+        rescue => e
+        end
     end
     if seasonRating != ""
         if rateId != ""
@@ -267,6 +306,10 @@ if review != ""
             rateId = db.query("SELECT id from seasonRating WHERE username = '" + username.to_s + "' AND seasonId = '" + seasonId.to_s + "';")
             rateId = rateId.first['id'].to_s
             db.query("INSERT INTO seasonReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seasonId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
+        end
+         begin
+            db.query("INSERT INTO haveWatchedSeason VALUES ('" + username.to_s + "', '" + seasonId.to_s + "');")
+        rescue => e
         end
     end
 
@@ -287,22 +330,36 @@ if review != ""
             rateId = rateId.first['id'].to_s
             db.query("INSERT INTO episodeReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + epId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
         end
+         begin
+            db.query("INSERT INTO haveWatchedEpisode VALUES ('" + username.to_s + "', '" + epId.to_s + "');")
+        rescue => e
+        end
     end
 
 end
 
 # REPLY STUFF STARTS HERE
 if reply != ""
+    date = year + "-" + month + "-" + day
+    puts type
     if type == "SEASON"
-        date = year + "-" + month + "-" + day
-        db.query("INSERT INTO seasonReply VALUES (NULL, '" + reply.gsub("'", "\\\\'") + "', '" + username + "', '" + seasonId.to_s + "', '" + reviewId.to_s + "', '" + date + "');")
+        if alreadyReplied == 'TRUE'
+            db.query("UPDATE seasonReply SET reply = '" + reply.gsub("'", "\\\\'") + "', date = '" + date + "' WHERE id = '" + replyId.to_s + "' AND username = '" + username.to_s + "';")
+        else
+            db.query("INSERT INTO seasonReply VALUES (NULL, '" + reply.gsub("'", "\\\\'") + "', '" + username + "', '" + seasonId.to_s + "', '" + reviewId.to_s + "', '" + date + "');")
+        end
     elsif type == "EP"
-        date = year + "-" + month + "-" + day
-        puts epId.to_s + date
-        db.query("INSERT INTO episodeReply VALUES (NULL, '" + reply.gsub("'", "\\\\'") + "', '" + username + "', '" + epId.to_s + "', '" + reviewId.to_s + "', '" + date + "');")
+        if alreadyReplied == 'TRUE'
+            db.query("UPDATE episodeReply SET reply = '" + reply.gsub("'", "\\\\'") + "', date = '" + date + "' WHERE id = '" + replyId.to_s + "' AND username = '" + username.to_s + "';")
+        else
+            db.query("INSERT INTO episodeReply VALUES (NULL, '" + reply.gsub("'", "\\\\'") + "', '" + username + "', '" + epId.to_s + "', '" + reviewId.to_s + "', '" + date + "');")
+        end
     else
-        date = year + "-" + month + "-" + day
-        db.query("INSERT INTO seriesReply VALUES (NULL, '" + reply.gsub("'", "\\\\'") + "', '" + username + "', '" + seriesId.to_s + "', '" + reviewId.to_s + "', '" + date + "');")
+        if alreadyReplied == 'TRUE'
+            db.query("UPDATE seriesReply SET reply = '" + reply.gsub("'", "\\\\'") + "', date = '" + date + "' WHERE id = '" + replyId.to_s + "' AND username = '" + username.to_s + "';")
+        else
+            db.query("INSERT INTO seriesReply VALUES (NULL, '" + reply.gsub("'", "\\\\'") + "', '" + username + "', '" + seriesId.to_s + "', '" + reviewId.to_s + "', '" + date + "');")
+        end
     end
 end
 
