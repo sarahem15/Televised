@@ -415,9 +415,8 @@ button:hover {
   .homeReviews{
     display: grid;
     grid-template-columns: repeat(3, 30%);
-    grid-template-rows: repeat(2, auto);
-    width: 90%;
-    height: 20%;
+    width: 80%;
+    height: 25%;
     margin: auto;
   }
 
@@ -1108,3 +1107,30 @@ button:hover {
     background-color: transparent;
     color: transparent;
 }
+
+.container-fluid .testingButton {
+    width: 10%;
+    margin:  auto;
+}
+
+#userProfile .content-R a:hover {color: pink; text-decoration: underline;}
+
+#userProfile .content-R a {
+    text-decoration: none;
+    color: white;
+}
+
+#userProfile form a {
+    text-decoration: none;
+    color: white;
+}
+
+#listContent .UserDisplay a {
+    text-decoration: none;
+    color: white;
+}
+
+#userProfile .titleDate a:hover {color: pink; text-decoration: underline;}
+#userProfile form a:hover {color: pink; text-decoration: underline;}
+
+#listContent .UserDisplay a:hover {color: pink; text-decoration: underline;}
