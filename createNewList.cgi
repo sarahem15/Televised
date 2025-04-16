@@ -76,21 +76,21 @@ end
 
 # Handle list creation
 if cgi['saveList'] && !listName.empty? && !description.empty?
-  existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{db.escape(username)}' AND listName = '#{db.escape(listName)}'")
+  existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
 
   if existing_list.count > 0
     puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
     exit
   end
 
-  db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{db.escape(username)}', '#{db.escape(listName)}')")
+  db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
   list_id = db.last_id
 
   if !seriesArray.empty?
     seriesArray.each do |series|
       series_id = series["id"].to_i
       db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
-                VALUES ('#{db.escape(username)}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
+                VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
     end
   end
 
@@ -102,7 +102,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
       if result.count > 0
         season_id = result.first["seasonId"].to_i
         db.query("INSERT INTO curatedListSeason (username, seasonId, name, description, privacy, date, listId)
-                  VALUES ('#{db.escape(username)}', #{season_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
+                  VALUES ('#{username}', #{season_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
       end
     end
   end
@@ -114,27 +114,6 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
 
   puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_Lists.cgi';</script>"
   exit
-end
-
-# Handle list editing
-list_id = cgi['list_id']
-if list_id && !list_id.empty?
-  list_details = db.query("SELECT * FROM listOwnership WHERE id = #{db.escape(list_id)} AND username = '#{db.escape(username)}'").first
-  if list_details
-    listName = list_details["listName"]
-    description = list_details["description"]
-    privacy = list_details["privacy"] == 1 ? "Public" : "Private"
-
-    # Fetch existing series for the list
-    seriesArray = db.query("SELECT seriesId, name FROM curatedListSeries WHERE listId = #{db.escape(list_id)} AND username = '#{db.escape(username)}'").map do |row|
-      { "id" => row["seriesId"], "name" => row["name"] }
-    end
-
-    # Fetch existing seasons for the list
-    seasonArray = db.query("SELECT seasonId, seriesId, name, season FROM curatedListSeason WHERE listId = #{db.escape(list_id)} AND username = '#{db.escape(username)}'").map do |row|
-      { "seriesId" => row["seriesId"], "name" => row["name"], "season" => row["season"] }
-    end
-  end
 end
 
 # Start HTML output
@@ -150,27 +129,27 @@ puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
 puts "</head>"
 puts "<body id='createNewList'>"
 puts "  <nav id='changingNav'></nav>"
-puts "  <h2 class='text-center mt-3'>Create or Edit List</h2>"
+puts "  <h2 class='text-center mt-3'>Create a New List</h2>"
 puts "  <div class='container-fluid'>"
 puts "    <div class='row'>"
 puts "      <div class='col-12 col-md-4' id='listRow'>"
 puts "        <h3 class='text-center'>List Details</h3>"
 puts "        <form id='newListForm' method='post'>"
 puts "          <label>Name</label>"
-puts "          <input type='text' name='listName' class='form-control' placeholder='Name' value='#{listName}' required>"
+puts "          <input type='text' name='listName' class='form-control' placeholder='Name' required>"
 puts "          <br>"
 puts "          <label>Who Can View</label>"
 puts "          <select name='views' class='form-control'>"
-puts "            <option value='Public' #{'selected' if privacy == 'Public'}>Public - anyone can view</option>"
-puts "            <option value='Private' #{'selected' if privacy == 'Private'}>Private - no one can view</option>"
+puts "            <option value='Public'>Public - anyone can view</option>"
+puts "            <option value='Private'>Private - no one can view</option>"
 puts "          </select>"
 puts "          <br>"
 puts "          <label>Description</label>"
-puts "          <textarea name='description' class='form-control' rows='5'>#{description}</textarea>"
+puts "          <textarea name='description' class='form-control' rows='5'></textarea>"
 puts "          <br>"
-puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray' value='#{JSON.generate(seriesArray)}'>"
-puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray' value='#{JSON.generate(seasonArray)}'>"
-puts "          <button id='saveList' name='saveList' class='btn btn-primary'>SAVE LIST</button>"
+puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray'>"
+puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray'>"
+puts "          <button id='saveList' name='saveList' class='btn btn-primary'>CREATE LIST</button>"
 puts "        </form>"
 puts "      </div>"
 puts "      <div class='col-12 col-md-4' id='listColumn'>"
@@ -201,13 +180,13 @@ puts <<~JAVASCRIPT
   document.addEventListener('DOMContentLoaded', function () {
     sessionStorage.removeItem('seriesArray');
     sessionStorage.removeItem('seasonArray');
-    sessionStorage.removeItem('episodeArray');
     updateAllLists();
 
     document.getElementById('searchForm').addEventListener('submit', function (event) {
       event.preventDefault();
       let searchInput = document.querySelector('input[name="mediaEntered"]').value;
       let type = document.querySelector('select[name="typeSearch"]').value;
+
       fetch('createNewList.cgi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -266,17 +245,18 @@ puts <<~JAVASCRIPT
         document.getElementById("seriesList").appendChild(li);
       });
 
-      let seasonList = document.createElement("ul");
       seasonArray.forEach((season, index) => {
         let li = document.createElement("li");
         li.className = "list-group-item";
         li.innerHTML = `${season.name} - Season ${season.season} <button class='removeFromList btn btn-danger' data-type="season" data-index="${index}">Remove</button>`;
-        seasonList.appendChild(li);
+        document.getElementById("seriesList").appendChild(li);
       });
-
-      document.getElementById("seriesList").appendChild(seasonList);
     }
   });
 </script>
+</body>
+</html>
 JAVASCRIPT
-puts "</body></html>"
+
+# Close the session at the end
+session.close
