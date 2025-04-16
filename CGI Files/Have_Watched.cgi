@@ -74,7 +74,7 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
       puts '<a href="Have_Watched.cgi?seriesTab=SEASON">Seasons</a>'
       puts '<a href="Have_Watched.cgi?seriesTab=EP">Episodes</a>'
 
-      images = db.query("SELECT series.imageName, series.showName FROM haveWatchedSeries JOIN series ON haveWatchedSeries.seriesId = series.showId WHERE haveWatchedSeries.username = '" + username.to_s + "';")
+      images = db.query("SELECT series.imageName, series.showName, FROM haveWatchedSeries JOIN series ON haveWatchedSeries.seriesId = series.showId WHERE haveWatchedSeries.username = '" + username.to_s + "';")
       images = images.to_a
   elsif seriesTab == "SEASON"
       puts '<a href="Have_Watched.cgi?seriesTab=SERIES">Series</a>'
@@ -108,7 +108,7 @@ puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
               puts '<form action="series.cgi" method="POST">'
               puts '<input type="hidden" name="clicked_image" value="' + images[size]['imageName'] + '">'
             else
-              allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + images[size]['showName'] + "';")
+              allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + images[size]['showName'].gsub("'", "\\\\'") + "';")
               allEps = allEps.to_a
               (0...allEps.size).each do |j|
                 if allEps[j]['epName'] == images[size]['epName']
