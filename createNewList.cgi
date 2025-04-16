@@ -221,17 +221,17 @@ puts "<script>"
 puts "  const prefillSeries = #{series_json.to_json};"
 puts "  const prefillSeason = #{season_json.to_json};"
 puts "</script>"
-puts "<script src='Televised.js'></script>"
-puts "<script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'></script>"
 puts "<script>"
 puts <<~JS
 document.addEventListener('DOMContentLoaded', () => {
   if (prefillSeries.length > 0) sessionStorage.setItem("seriesArray", JSON.stringify(prefillSeries));
   if (prefillSeason.length > 0) sessionStorage.setItem("seasonArray", JSON.stringify(prefillSeason));
-  updateAllLists();  // This should now be properly defined.
+  updateAllLists();
 });
 JS
 puts "</script>"
+puts "<script src='Televised.js'></script>"
+puts "<script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'></script>"
 puts "</body>"
 puts "</html>"
 
