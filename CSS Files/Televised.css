@@ -1134,3 +1134,28 @@ button:hover {
 #userProfile form a:hover {color: pink; text-decoration: underline;}
 
 #listContent .UserDisplay a:hover {color: pink; text-decoration: underline;}
+
+#showsPage .ReviewContent a{
+    text-decoration: none;
+    color: white;
+}
+
+#showsPage .ReviewContent a:hover {color: pink; text-decoration: underline;}
+#episodePage .ReviewContent a{
+    text-decoration: none;
+    color: white;
+}
+
+#episodePage .ReviewContent a:hover {color: pink; text-decoration: underline;}
+
+#profileReviews .NameAndYear a {
+    text-decoration: none;
+    color: white;
+}
+
+#profileReviews .NameAndYear a:hover {color: pink; text-decoration: underline;}
+
+#profileReviews .NameAndYear {
+    display: grid;
+    grid-template-columns: auto auto;
+}
