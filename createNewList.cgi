@@ -1,7 +1,3 @@
-/usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `_query': You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'AND username = 'alayna@gmail.com'' at line 1 (Mysql2::Error) from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:131:in `block in query' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `handle_interrupt' from /usr/share/gems/gems/mysql2-0.5.3/lib/mysql2/client.rb:130:in `query' from /mnt/web/www/Televised/createNewList.cgi:50:in `
-' 
-
-
 #!/usr/bin/ruby
 $stdout.sync = true
 $stderr.reopen $stdout
@@ -46,29 +42,6 @@ db = Mysql2::Client.new(
   database: 'televised_w25'
 )
 
-list_id = cgi['list_id'] # Get the list ID if we are editing an existing list
-
-# Check if we're editing an existing list
-if list_id
-  # Fetch existing list details
-  list_details = db.query("SELECT * FROM listOwnership WHERE id = #{list_id} AND username = '#{username}'").first
-  if list_details
-    listName = list_details["listName"]
-    description = list_details["description"]
-    privacy = list_details["privacy"] == 1 ? "Public" : "Private"
-
-    # Fetch existing series for the list
-    seriesArray = db.query("SELECT seriesId, name FROM curatedListSeries WHERE listId = #{list_id} AND username = '#{username}'").map do |row|
-      { "id" => row["seriesId"], "name" => row["name"] }
-    end
-
-    # Fetch existing seasons for the list
-    seasonArray = db.query("SELECT seasonId, seriesId, name, season FROM curatedListSeason WHERE listId = #{list_id} AND username = '#{username}'").map do |row|
-      { "seriesId" => row["seriesId"], "name" => row["name"], "season" => row["season"] }
-    end
-  end
-end
-
 # Handle AJAX search functionality
 if search != ""
   if type == "Series"
@@ -101,34 +74,26 @@ if search != ""
   exit
 end
 
-# Handle list creation or updating
+# Handle list creation
 if cgi['saveList'] && !listName.empty? && !description.empty?
-  if list_id # Updating an existing list
-    db.query("UPDATE listOwnership SET listName = '#{db.escape(listName)}', description = '#{db.escape(description)}', privacy = #{privacy} WHERE id = #{list_id}")
-  else # Creating a new list
-    existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
-    if existing_list.count > 0
-      puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
-      exit
-    end
-    db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
-    list_id = db.last_id
+  existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{db.escape(username)}' AND listName = '#{db.escape(listName)}'")
+
+  if existing_list.count > 0
+    puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
+    exit
   end
 
-  # Clear existing series and seasons before adding new ones
-  db.query("DELETE FROM curatedListSeries WHERE listId = #{list_id} AND username = '#{username}'")
-  db.query("DELETE FROM curatedListSeason WHERE listId = #{list_id} AND username = '#{username}'")
+  db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{db.escape(username)}', '#{db.escape(listName)}')")
+  list_id = db.last_id
 
-  # Insert new series
   if !seriesArray.empty?
     seriesArray.each do |series|
       series_id = series["id"].to_i
       db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
-                VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
+                VALUES ('#{db.escape(username)}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
     end
   end
 
-  # Insert new seasons
   if !seasonArray.empty?
     seasonArray.each do |season|
       show_id = season["seriesId"].to_i
@@ -137,7 +102,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
       if result.count > 0
         season_id = result.first["seasonId"].to_i
         db.query("INSERT INTO curatedListSeason (username, seasonId, name, description, privacy, date, listId)
-                  VALUES ('#{username}', #{season_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
+                  VALUES ('#{db.escape(username)}', #{season_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
       end
     end
   end
@@ -147,8 +112,29 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
     exit
   end
 
-  puts "<script>alert('Your list has been successfully #{list_id ? 'updated' : 'created'}!'); window.location.href = 'Profile_Lists.cgi';</script>"
+  puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_Lists.cgi';</script>"
   exit
+end
+
+# Handle list editing
+list_id = cgi['list_id']
+if list_id && !list_id.empty?
+  list_details = db.query("SELECT * FROM listOwnership WHERE id = #{db.escape(list_id)} AND username = '#{db.escape(username)}'").first
+  if list_details
+    listName = list_details["listName"]
+    description = list_details["description"]
+    privacy = list_details["privacy"] == 1 ? "Public" : "Private"
+
+    # Fetch existing series for the list
+    seriesArray = db.query("SELECT seriesId, name FROM curatedListSeries WHERE listId = #{db.escape(list_id)} AND username = '#{db.escape(username)}'").map do |row|
+      { "id" => row["seriesId"], "name" => row["name"] }
+    end
+
+    # Fetch existing seasons for the list
+    seasonArray = db.query("SELECT seasonId, seriesId, name, season FROM curatedListSeason WHERE listId = #{db.escape(list_id)} AND username = '#{db.escape(username)}'").map do |row|
+      { "seriesId" => row["seriesId"], "name" => row["name"], "season" => row["season"] }
+    end
+  end
 end
 
 # Start HTML output
@@ -164,14 +150,14 @@ puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
 puts "</head>"
 puts "<body id='createNewList'>"
 puts "  <nav id='changingNav'></nav>"
-puts "  <h2 class='text-center mt-3'>#{list_id ? 'Edit List' : 'Create a New List'}</h2>"
+puts "  <h2 class='text-center mt-3'>Create or Edit List</h2>"
 puts "  <div class='container-fluid'>"
 puts "    <div class='row'>"
 puts "      <div class='col-12 col-md-4' id='listRow'>"
 puts "        <h3 class='text-center'>List Details</h3>"
 puts "        <form id='newListForm' method='post'>"
 puts "          <label>Name</label>"
-puts "          <input type='text' name='listName' class='form-control' placeholder='Name' required value='#{listName}'>"
+puts "          <input type='text' name='listName' class='form-control' placeholder='Name' value='#{listName}' required>"
 puts "          <br>"
 puts "          <label>Who Can View</label>"
 puts "          <select name='views' class='form-control'>"
@@ -182,29 +168,115 @@ puts "          <br>"
 puts "          <label>Description</label>"
 puts "          <textarea name='description' class='form-control' rows='5'>#{description}</textarea>"
 puts "          <br>"
-puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray'>"
-puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray'>"
-puts "          <button id='saveList' name='saveList' class='btn btn-primary'>#{list_id ? 'Update List' : 'Create List'}</button>"
+puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray' value='#{JSON.generate(seriesArray)}'>"
+puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray' value='#{JSON.generate(seasonArray)}'>"
+puts "          <button id='saveList' name='saveList' class='btn btn-primary'>SAVE LIST</button>"
 puts "        </form>"
 puts "      </div>"
 puts "      <div class='col-12 col-md-4' id='listColumn'>"
 puts "        <h3 class='text-center'>Selected Series/Seasons</h3>"
-puts "        <form id='searchForm' class='mb-3'>"
-puts "          <input type='text' name='mediaEntered' class='form-control' placeholder='Search for Series' required>"
-puts "          <select name='typeSearch' class='form-control mt-2'>"
-puts "            <option value='Series'>Series</option>"
+puts "        <ul id='seriesList' class='list-group'></ul>"
+puts "      </div>"
+puts "      <div class='col-12 col-md-4' id='searchColumn'>"
+puts "        <h3 class='text-center'>Search for a Series</h3>"
+puts "        <form id='searchForm'>"
+puts "          <select id='type' name='typeSearch' class='form-control'>"
+puts "            <option value='Series' selected>Series</option>"
 puts "            <option value='Season'>Season</option>"
 puts "          </select>"
-puts "          <button type='submit' class='btn btn-primary mt-2'>Search</button>"
+puts "          <br>"
+puts "          <input type='text' name='mediaEntered' class='form-control'>"
+puts "          <input type='submit' value='Search' class='btn btn-secondary mt-2'>"
 puts "        </form>"
 puts "        <div id='searchResults'></div>"
-puts "        <ul id='seriesList' class='list-group'></ul>"
 puts "      </div>"
 puts "    </div>"
 puts "  </div>"
-puts "<script src='Televised.js'></script>"
-puts "</body>"
-puts "</html>"
+puts '<!-- Scripts -->'
+puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
+puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
+puts '<script src="Televised.js"></script>'
+puts <<~JAVASCRIPT
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    sessionStorage.removeItem('seriesArray');
+    sessionStorage.removeItem('seasonArray');
+    sessionStorage.removeItem('episodeArray');
+    updateAllLists();
 
-# Close the session when done
-session.close
+    document.getElementById('searchForm').addEventListener('submit', function (event) {
+      event.preventDefault();
+      let searchInput = document.querySelector('input[name="mediaEntered"]').value;
+      let type = document.querySelector('select[name="typeSearch"]').value;
+      fetch('createNewList.cgi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })
+      })
+      .then(response => response.text())
+      .then(data => { document.getElementById('searchResults').innerHTML = data; });
+    });
+
+    document.addEventListener("click", function (event) {
+      if (event.target.classList.contains("addToList")) {
+        event.preventDefault();
+        let seriesId = event.target.dataset.seriesId;
+        let seriesName = event.target.dataset.seriesName;
+        let parent = event.target.closest("p");
+
+        if (document.querySelector("select.seasonSelect", parent)) {
+          let seasonNum = parent.querySelector("select.seasonSelect").selectedIndex + 1;
+          let seasonArray = JSON.parse(sessionStorage.getItem("seasonArray")) || [];
+          if (!seasonArray.some(s => s.seriesId === seriesId && s.season === seasonNum)) {
+            seasonArray.push({ seriesId: seriesId, name: seriesName, season: seasonNum });
+            sessionStorage.setItem("seasonArray", JSON.stringify(seasonArray));
+            updateAllLists();
+          }
+        } else {
+          let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
+          if (!seriesArray.some(s => s.id === seriesId)) {
+            seriesArray.push({ id: seriesId, name: seriesName });
+            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));
+            updateAllLists();
+          }
+        }
+      }
+
+      if (event.target.classList.contains("removeFromList")) {
+        event.preventDefault();
+        const type = event.target.dataset.type;
+        const index = parseInt(event.target.dataset.index, 10);
+        let key = `${type}Array`;
+        let arr = JSON.parse(sessionStorage.getItem(key)) || [];
+        arr.splice(index, 1);
+        sessionStorage.setItem(key, JSON.stringify(arr));
+        updateAllLists();
+      }
+    });
+
+    function updateAllLists() {
+      let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
+      let seasonArray = JSON.parse(sessionStorage.getItem("seasonArray")) || [];
+
+      document.getElementById("seriesList").innerHTML = "";
+      seriesArray.forEach((series, index) => {
+        let li = document.createElement("li");
+        li.className = "list-group-item";
+        li.innerHTML = `${series.name} <button class='removeFromList btn btn-danger' data-type="series" data-index="${index}">Remove</button>`;
+        document.getElementById("seriesList").appendChild(li);
+      });
+
+      let seasonList = document.createElement("ul");
+      seasonArray.forEach((season, index) => {
+        let li = document.createElement("li");
+        li.className = "list-group-item";
+        li.innerHTML = `${season.name} - Season ${season.season} <button class='removeFromList btn btn-danger' data-type="season" data-index="${index}">Remove</button>`;
+        seasonList.appendChild(li);
+      });
+
+      document.getElementById("seriesList").appendChild(seasonList);
+    }
+  });
+</script>
+JAVASCRIPT
+puts "</body></html>"
