@@ -355,11 +355,12 @@ puts "                <input type='hidden' name='month' value='#{time.month}'>"
 puts "                <input type='hidden' name='day' value='#{time.day}'>"
 
 puts "                <input type='hidden' name='epRating' value='#{episodeRating}'>"
-puts "                <input type='hidden' name='seriesID' value='#{seriesId}'>"
+puts "                <input type='hidden' name='seriesID' value='" + seriesId.to_s + "'>"
 #puts "                <input type='hidden' name='seasonId' value='#{seasonId}'>"
 puts "                <input type='hidden' name='seasonNumber' value='#{seasonNumber}'>"
 puts "                <input type='hidden' name='ratingId' value='#{ratingId}'>"
 puts "                <input type='hidden' name='epname' value='" + episode.first['epName'] + "'>"
+puts "                <input type='hidden' name='epname' value='" + showName + "'>"
 puts "                <input type='hidden' name='rated' value='TRUE'>"
 puts "                <input type='hidden' name='review' value='true'>"
 puts '                <input type="hidden" name="fromIndivEp" value="TRUE">'

@@ -128,7 +128,7 @@ puts '<div class="originalReview">'
   if seriesTab != "EP"
     puts '<form action="series.cgi" method="POST">'
       puts '<input type="hidden" name="clicked_image" value="' + seriesImage.first['imageName'] + '">'
-      puts '<input type="hidden" name="seasonNumber" value="' + seriesImage.first['seasonNum'].to_s + '">'
+      puts '<input type="hidden" name="seasonNumber" value="1">'
   else
     allEps = db.query("SELECT epName FROM episode JOIN season ON season.seasonId = episode.seasonId JOIN series ON series.showId = season.seriesId WHERE showName = '" + seriesImage.first['showName'] + "';")
           allEps = allEps.to_a

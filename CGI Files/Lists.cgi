@@ -14,7 +14,6 @@ require 'cgi/session'
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
-#username = "try@try"
 
 db = Mysql2::Client.new(
     host: '10.20.3.4', 
@@ -51,7 +50,9 @@ puts '<body id="ListsPage">'
   puts '<br>'
   puts '<h1 class="text-center text-white mt-5">Find a List!</h1>'
   puts '<br>'
+  puts '<div class="testingButton">'
   puts '<a href="createNewList.cgi"><button id="newListProfile" class="createListButton" style="margin: auto;">Create a New List</button></a>'
+  puts '</div>'
   puts '<h5 class="text-center text-white mt-5">See some lists created by fellow users.</h5>'
   #puts '<br>'
   #puts '<hr style="margin-left: 80px; margin-right: 80px">'

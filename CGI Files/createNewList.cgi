@@ -153,7 +153,7 @@ puts "          <button id='saveList' name='saveList' class='btn btn-primary'>CR
 puts "        </form>"
 puts "      </div>"
 puts "      <div class='col-12 col-md-4' id='listColumn'>"
-puts "        <h3 class='text-center'>Selected Series/Seasons</h3>"
+puts "        <h3 class='text-center'>Selected Media</h3>"
 puts "        <ul id='seriesList' class='list-group'></ul>"
 puts "      </div>"
 puts "      <div class='col-12 col-md-4' id='searchColumn'>"

@@ -335,7 +335,7 @@ puts "<body id=\"showsPage\">"
         if doneReview != "[]"
           puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeasonReview\" style='color: #00156d;'>&#128488</button>"
         else 
-          puts "<span class='infoQuestion'><button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeriesReview\">&#128488</button><i><h5><p class=\"info\"> To review a season, click the icon above! </p></h5></i></span>"
+          puts "<span class='infoQuestion'><button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateSeasonReview\">&#128488</button><i><h5><p class=\"info\"> To review a season, click the icon above! </p></h5></i></span>"
         end
         # puts "<button class=\"rateButton\">STARS</button>"
         alreadyRatedSeason = db.query("SELECT * FROM seasonRating WHERE username = '" + username + "' AND seasonId = '" + seasonId.to_s + "';")

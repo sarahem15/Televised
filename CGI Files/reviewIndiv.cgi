@@ -146,9 +146,8 @@ puts '<div class="originalReview">'
         puts '<input type="hidden" name="reviewCreator" value="' + reviewContent.first['username'].to_s + '">'
       puts '</form>'
        puts '<br>'
-       puts '<br>'
-       puts '<br>'
        puts '<i><h5 style="color: #436eb1">' + reviewContent.first['date'].to_s + '</h5></i>'
+       puts '<br>'
 
 	puts '</div>'
   # START DIV FOR TEXT BOX

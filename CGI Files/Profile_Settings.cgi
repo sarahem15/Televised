@@ -211,7 +211,7 @@ puts '<body id="profileSettings">'
                 end
                 puts '</select>'
             end
-                puts '<input type="text" name="top5search" class="top5search">'
+                puts '<input type="text" name="top5search" class="top5search" value = "' + search + '">'
                 puts '<input type="submit" value="Search">'
             puts '</form>'
 
@@ -318,7 +318,6 @@ puts '<body id="profileSettings">'
                             puts '<option value="5">5</option>'
                         puts '</select>'
                         puts '<input type="submit" value="select" style="width: 60px;">'
-                        #puts '<input type="hidden" name="top5search" value="' + search + '">'
                         puts '</form>'
                         puts '<br>'
                         images[i]['imageName'] = ""

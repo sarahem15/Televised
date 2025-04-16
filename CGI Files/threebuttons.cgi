@@ -66,9 +66,9 @@ epName = db.query("SELECT epName from episode WHERE epId = '" + epId + "';")
 puts "0: " + epId.to_s
 puts "1: " + epName.first['epName']
 puts "2: " + imageName.first['showName']
-puts "3: " + seriesId
+puts "3: " + seriesId.to_s
 puts "4: " + epNum.to_s
-puts "5: " + seasonNumber
+puts "5: " + seasonNumber.to_s
 =end
 # Start HTML output
 puts "<!DOCTYPE html>"
@@ -78,7 +78,7 @@ puts "<meta charset='UTF-8'>"
 puts "<title>Watched</title>"
 puts "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
 if fromIndivEp == 'TRUE'
-    print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/indivEp.cgi?ep_name=" + epName.first['epName'].to_s + "&show_name=" + imageName.first['showName'] + "&seriesID=" + seriesId + "&ep_num=" + epNum + "&seasonNumber=" + seasonNumber + "'>\n"
+    print "<meta http-equiv='refresh' content='10; url=http://www.cs.transy.edu/Televised/indivEp.cgi?ep_name=" + epName.first['epName'].to_s + "&show_name=" + imageName.first['showName'] + "&seriesID=" + seriesId.to_s + "&ep_num=" + epNum.to_s + "&seasonNumber=" + seasonNumber.to_s + "'>\n"
 elsif likedList == "TRUE" && profileLikedList == ""
     print "<meta http-equiv='refresh' content='0; url=http://www.cs.transy.edu/Televised/Lists.cgi'>\n"
 elsif otherList == "TRUE"
@@ -319,7 +319,7 @@ if review != ""
             rateId = rateId.first['id'].to_s
             db.query("INSERT INTO seasonReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + seasonId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
         end
-         begin
+        begin
             db.query("INSERT INTO haveWatchedSeason VALUES ('" + username.to_s + "', '" + seasonId.to_s + "');")
         rescue => e
         end
@@ -342,7 +342,7 @@ if review != ""
             rateId = rateId.first['id'].to_s
             db.query("INSERT INTO episodeReview VALUES (NULL, '" + reviewText.gsub("'", "\\\\'") + "', '" + username.to_s + "', '" + epId.to_s + "', '" + rateId.to_s + "', '" +  date + "');")
         end
-         begin
+        begin
             db.query("INSERT INTO haveWatchedEpisode VALUES ('" + username.to_s + "', '" + epId.to_s + "');")
         rescue => e
         end

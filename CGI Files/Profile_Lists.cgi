@@ -20,7 +20,7 @@ db = Mysql2::Client.new(
     username: 'seniorproject25', 
     password: 'TV_Group123!', 
     database: 'televised_w25'
-  )
+)
 
 # Fetch user information
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
@@ -89,7 +89,7 @@ puts '<h4>' + bio.first['bio'].to_s + '</h4>'
 puts '</section>'
 puts '<hr>'
 puts '<div class="profileHeader">'
-puts '<a href="Profile.cgi">Profile</a>'
+puts '<a href="Profile.cgi">Favorites</a>'
 puts '<a href="Have_Watched.cgi">Have Watched</a>'
 puts '<a href="Want_to_Watch.cgi">Want to Watch</a>'
 puts '<a href="#!" class="active">Lists</a>'
@@ -130,8 +130,8 @@ puts '</div>'
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
 
 (0...lists.size).each do |i|
-  puts '<div class="listImages">'
-  puts '<div class="listWrapper">'
+  puts '<div class="listImages">' 
+  puts '<div class="listWrapper" style="margin-bottom: 20px; margin-top: 20px;">'
   puts '<section class="carousel-section" id="listsPlease">'
   if seriesTab == "SERIES"
     listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
@@ -162,12 +162,21 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   listId = listId.first['id']
 
   # Delete Button
-  puts '<form action="Profile_Lists.cgi" method="post">'
+  puts '<form action="Profile_Lists.cgi" method="post" style="display: inline-block; margin-right: 10px;">'
   puts '<input type="hidden" name="deleteListId" value="' + listId.to_s + '">'
   puts '<button type="submit" class="btn btn-danger">Delete List</button>'
   puts '</form>'
-  puts '<form  class="LikeAndCount" action="Profile_Lists.cgi" method="post">'
+
+  # Edit Button - Redirect to createNewList with pre-filled data
+  puts '<form action="createNewList.cgi" method="get" style="display: inline-block; margin-right: 10px;">'
+  puts '<input type="hidden" name="editListId" value="' + listId.to_s + '">'
+  puts '<input type="hidden" name="editListName" value="' + lists[i]['name'] + '">'
+  puts '<input type="hidden" name="editListDescription" value="' + lists[i]['description'] + '">'
+  puts '<button type="submit" class="btn btn-primary">Edit List</button>'
+  puts '</form>'
+
   # Likes handling
+  puts '<form  class="LikeAndCount" action="Profile_Lists.cgi" method="post" style="display: inline-block;">'
   alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.to_s + "';")
   if (alreadyLiked.to_a != [])
     puts '<button class="LIKES" style="color: pink;">&#10084</button>'
@@ -175,25 +184,20 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
     puts '<button class="LIKES">&#10084</button>'
   end
   currentLikes = db.query("SELECT * FROM likedList WHERE listId = '" + listId.to_s + "';")
-  (0...currentLikes.size).each do |i|
-    likeCount = likeCount + 1
+  (0...currentLikes.count).each do |row|
+    likeCount += 1
   end
-  puts '<a href="whoHasLiked.cgi?listName=' + lists[i]['name'] + '&listCreator=' + lists[i]['username'] + '&listId=' + listId.to_s + '">' + likeCount.to_s + '</a>'
+  puts '<span style="font-size: 16px; margin-left: 5px;">' + likeCount.to_s + ' Likes</span>'
   puts '<input type="hidden" name="likedList" value="TRUE">'
   puts '<input type="hidden" name="listId" value="' + listId.to_s + '">'
   puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
   puts '</form>'
   puts '</div>'
   puts '</div>'
-  puts '<br>'
-  puts '<hr style="margin-left: 80px; margin-right: 80px">'
-  likeCount = 0
 end
-
-puts '<!-- Scripts -->'
-puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-puts '<script src="Televised.js"></script>'
+ puts '<!-- Scripts -->'
+  puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
+  puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
+  puts '<script src="Televised.js"></script>'
 puts '</body>'
 puts '</html>'
-session.close

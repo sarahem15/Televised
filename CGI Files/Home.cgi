@@ -223,7 +223,7 @@ puts '<div class="ReviewIndiv">'
     puts '<input type="hidden" name="reviewId" value="' + reviews[i]['id'].to_s + '">'
     puts '<input type="hidden" name="reviewCreator" value="' + reviews[i]['username'].to_s + '">'
     puts '</form>'
-
+    puts '<br>'
 
 
   puts '</div>'
@@ -234,7 +234,7 @@ end
 
 puts '</section>'
 puts '<br>'
-
+puts '<br>'
 
 
 

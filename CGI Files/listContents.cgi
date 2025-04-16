@@ -37,14 +37,14 @@ end
 listContent = listContent.to_a
 haveWatched = haveWatched.to_a
 listId = db.query("SELECT id FROM listOwnership WHERE listName = '" + listTitle + "';")
-likes = db.query("SELECT * FROM likedList WHERE listId = '" + listId.first['id'].to_s + "';")
-likes = likes.to_a
+
 
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + listContent.first['username'] + "';")
 if likedList == "TRUE"
   begin
     db.query("INSERT INTO likedList VALUES ('" + username.to_s + "', '" + listContent.first['username'] + "', '" + listId.first['id'].to_s + "');")
-  rescue 
+  rescue => e
+  #puts e.message 
     db.query("DELETE FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND listId = '" + listId.first['id'].to_s + "';")
   end
 end
@@ -69,15 +69,16 @@ puts '<body id="listContent">'
   puts '<br>'
   puts '<section class="titleLike">'
   puts '<h1>' + listTitle.to_s + ' <i style="font-size:15px;">(' + type + ')</i></h1>'
+  likes = db.query("SELECT * FROM likedList WHERE listId = '" + listId.first['id'].to_s + "';")
+  likes = likes.to_a
   (0...likes.size).each do |j|
   if likes[j]['userWhoLiked'] == username.to_s
     alreadyLiked = true
   end
 end
 
-puts '<form  class="LikeAndCount" action="listContents.cgi" method="post">'
+puts '<form class="LikeAndCount" action="listContents.cgi" method="post">'
       #alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.first['id'].to_s + "';")
-      
       if (alreadyLiked)
         puts '<button class="LIKES" style="color: pink;">&#10084</button>'
       else
