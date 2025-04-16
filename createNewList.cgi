@@ -228,7 +228,7 @@ puts <<~JS
 document.addEventListener('DOMContentLoaded', () => {
   if (prefillSeries.length > 0) sessionStorage.setItem("seriesArray", JSON.stringify(prefillSeries));
   if (prefillSeason.length > 0) sessionStorage.setItem("seasonArray", JSON.stringify(prefillSeason));
-  updateAllLists();
+  updateAllLists();  // This should now be properly defined.
 });
 JS
 puts "</script>"
