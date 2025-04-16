@@ -14,7 +14,7 @@ username = session['username']
 list_id = cgi['listId']&.to_i
 
 print cgi.header(
-  'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
+  'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true, 'sameSite' => 'Lax')
 )
 
 search = cgi['mediaEntered']
@@ -22,7 +22,7 @@ type = cgi['typeSearch']
 
 listName = cgi['listName']
 description = cgi['description']
-privacy = cgi['views'] == "Public" ? 1 : 0  
+privacy = cgi['views'] == "Public" ? 1 : 0
 
 begin
   seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
@@ -37,9 +37,9 @@ rescue JSON::ParserError
 end
 
 db = Mysql2::Client.new(
-  host: '10.20.3.4', 
-  username: 'seniorproject25', 
-  password: 'TV_Group123!', 
+  host: '10.20.3.4',
+  username: 'seniorproject25',
+  password: 'TV_Group123!',
   database: 'televised_w25'
 )
 
@@ -75,15 +75,13 @@ if search != ""
   exit
 end
 
-# Handle saving (new or update)
+# Handle saving
 if cgi['saveList'] && !listName.empty? && !description.empty?
   if list_id
-    # Updating existing list
     db.query("UPDATE listOwnership SET listName = '#{db.escape(listName)}' WHERE id = #{list_id} AND username = '#{username}'")
     db.query("DELETE FROM curatedListSeries WHERE listId = #{list_id}")
     db.query("DELETE FROM curatedListSeason WHERE listId = #{list_id}")
   else
-    # Creating new list
     existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
     if existing_list.count > 0
       puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
@@ -123,7 +121,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
   exit
 end
 
-# If editing, load current data
+# Autofill data for editing
 list_data = {}
 series_json = []
 season_json = []
@@ -131,9 +129,8 @@ season_json = []
 if list_id
   result = db.query("SELECT listName, username FROM listOwnership WHERE id = #{list_id}")
   if row = result.first
-    redirect_script = "<script>alert('Unauthorized access.'); window.location.href='Profile_Lists.cgi';</script>"
     if row["username"] != username
-      puts redirect_script
+      puts "<script>alert('Unauthorized access.'); window.location.href='Profile_Lists.cgi';</script>"
       exit
     end
 
@@ -162,77 +159,100 @@ if list_id
 end
 
 # START HTML
-puts "<!DOCTYPE html>"
-puts "<html lang='en'>"
-puts "<head>"
-puts "  <meta charset='UTF-8'>"
-puts "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-puts "  <title>#{list_id ? 'Edit List' : 'Create a New List'}</title>"
-puts "  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
-puts "  <link rel='stylesheet' href='Televised.css'>"
-puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
-puts "</head>"
-puts "<body id='createNewList'>"
-puts "  <nav id='changingNav'></nav>"
-puts "  <h2 class='text-center mt-3'>#{list_id ? 'Edit Your List' : 'Create a New List'}</h2>"
-puts "  <div class='container-fluid'>"
-puts "    <div class='row'>"
-puts "      <div class='col-12 col-md-4' id='listRow'>"
-puts "        <h3 class='text-center'>List Details</h3>"
-puts "        <form id='newListForm' method='post'>"
-puts "          <input type='hidden' name='listId' value='#{list_id if list_id}'>"
-puts "          <label>Name</label>"
-puts "          <input type='text' name='listName' class='form-control' value='#{CGI.escapeHTML(list_data['listName'] || '')}' required>"
-puts "          <br>"
-puts "          <label>Who Can View</label>"
-puts "          <select name='views' class='form-control'>"
-puts "            <option value='Public' #{list_data['privacy'] == 1 ? 'selected' : ''}>Public</option>"
-puts "            <option value='Private' #{list_data['privacy'] == 0 ? 'selected' : ''}>Private</option>"
-puts "          </select>"
-puts "          <br>"
-puts "          <label>Description</label>"
-puts "          <textarea name='description' class='form-control' rows='5'>#{CGI.escapeHTML(list_data['description'] || '')}</textarea>"
-puts "          <br>"
-puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray'>"
-puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray'>"
-puts "          <button id='saveList' name='saveList' class='btn btn-primary'>#{list_id ? 'SAVE CHANGES' : 'CREATE LIST'}</button>"
-puts "        </form>"
-puts "      </div>"
-puts "      <div class='col-12 col-md-4' id='listColumn'>"
-puts "        <h3 class='text-center'>Selected Series/Seasons</h3>"
-puts "        <ul id='seriesList' class='list-group'></ul>"
-puts "      </div>"
-puts "      <div class='col-12 col-md-4' id='searchColumn'>"
-puts "        <h3 class='text-center'>Search for a Series</h3>"
-puts "        <form id='searchForm'>"
-puts "          <select id='type' name='typeSearch' class='form-control'>"
-puts "            <option value='Series' selected>Series</option>"
-puts "            <option value='Season'>Season</option>"
-puts "          </select>"
-puts "          <br>"
-puts "          <input type='text' name='mediaEntered' class='form-control'>"
-puts "          <input type='submit' value='Search' class='btn btn-secondary mt-2'>"
-puts "        </form>"
-puts "        <div id='searchResults'></div>"
-puts "      </div>"
-puts "    </div>"
-puts "  </div>"
-puts "<script>"
-puts "  const prefillSeries = #{series_json.to_json};"
-puts "  const prefillSeason = #{season_json.to_json};"
-puts "</script>"
-puts "<script>"
-puts <<~JS
-document.addEventListener('DOMContentLoaded', () => {
-  if (prefillSeries.length > 0) sessionStorage.setItem("seriesArray", JSON.stringify(prefillSeries));
-  if (prefillSeason.length > 0) sessionStorage.setItem("seasonArray", JSON.stringify(prefillSeason));
-  updateAllLists();
-});
-JS
-puts "</script>"
-puts "<script src='Televised.js'></script>"
-puts "<script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'></script>"
-puts "</body>"
-puts "</html>"
+puts <<~HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>#{list_id ? 'Edit List' : 'Create a New List'}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="Televised.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body id="createNewList">
+  <nav id="changingNav"></nav>
+  <h2 class="text-center mt-3">#{list_id ? 'Edit Your List' : 'Create a New List'}</h2>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12 col-md-4" id="listRow">
+        <h3 class="text-center">List Details</h3>
+        <form id="newListForm" method="post">
+          <input type="hidden" name="listId" value="#{list_id if list_id}">
+          <label>Name</label>
+          <input type="text" name="listName" class="form-control" value="#{CGI.escapeHTML(list_data['listName'] || '')}" required>
+          <br>
+          <label>Who Can View</label>
+          <select name="views" class="form-control">
+            <option value="Public" #{list_data['privacy'] == 1 ? 'selected' : ''}>Public</option>
+            <option value="Private" #{list_data['privacy'] == 0 ? 'selected' : ''}>Private</option>
+          </select>
+          <br>
+          <label>Description</label>
+          <textarea name="description" class="form-control" rows="5">#{CGI.escapeHTML(list_data['description'] || '')}</textarea>
+          <br>
+          <input type="hidden" id="seriesArrayInput" name="seriesArray">
+          <input type="hidden" id="seasonArrayInput" name="seasonArray">
+          <button id="saveList" name="saveList" class="btn btn-primary">#{list_id ? 'SAVE CHANGES' : 'CREATE LIST'}</button>
+        </form>
+      </div>
+      <div class="col-12 col-md-4" id="listColumn">
+        <h3 class="text-center">Selected Series/Seasons</h3>
+        <ul id="seriesList" class="list-group"></ul>
+      </div>
+      <div class="col-12 col-md-4" id="searchColumn">
+        <h3 class="text-center">Search for a Series</h3>
+        <form id="searchForm">
+          <select id="type" name="typeSearch" class="form-control">
+            <option value="Series" selected>Series</option>
+            <option value="Season">Season</option>
+          </select>
+          <br>
+          <input type="text" name="mediaEntered" class="form-control">
+          <input type="submit" value="Search" class="btn btn-secondary mt-2">
+        </form>
+        <div id="searchResults"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const prefillSeries = #{series_json.to_json};
+    const prefillSeason = #{season_json.to_json};
+
+    function updateAllLists() {
+      const seriesList = document.getElementById('seriesList');
+      seriesList.innerHTML = '';
+
+      const seriesArray = JSON.parse(sessionStorage.getItem('seriesArray') || '[]');
+      const seasonArray = JSON.parse(sessionStorage.getItem('seasonArray') || '[]');
+
+      seriesArray.forEach(series => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.textContent = series.name + ' (Series)';
+        seriesList.appendChild(li);
+      });
+
+      seasonArray.forEach(season => {
+        const li = document.createElement('li');
+        li.className = 'list-group-item';
+        li.textContent = season.name + ' - Season ' + season.season;
+        seriesList.appendChild(li);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (prefillSeries.length > 0) sessionStorage.setItem("seriesArray", JSON.stringify(prefillSeries));
+      if (prefillSeason.length > 0) sessionStorage.setItem("seasonArray", JSON.stringify(prefillSeason));
+      updateAllLists();
+    });
+  </script>
+
+  <script src="Televised.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+HTML
 
 session.close
