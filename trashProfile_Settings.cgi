@@ -20,7 +20,7 @@ db = Mysql2::Client.new(
     username: 'seniorproject25', 
     password: 'TV_Group123!', 
     database: 'televised_w25'
-  )
+)
 
 # Fetch user information
 displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
