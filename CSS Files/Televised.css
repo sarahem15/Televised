@@ -420,9 +420,9 @@ button:hover {
     margin: auto;
   }
 
-  .homeReviews .ReviewIndiv .SeriesImg img {
-    height:  200px;
-    width:  150px;
+  .homeReviews .ReviewIndiv .SeriesImg form input {
+    height:  170px;
+    width:  120px;
     object-fit:  cover;
 }
 
@@ -460,7 +460,7 @@ button:hover {
     padding: 20px;
   }
 
-  .ReviewIndiv .SeriesImg img {
+  .ReviewIndiv .SeriesImg form {
     width: 160px;
     height: auto;
     padding: 20px;
@@ -856,6 +856,7 @@ button:hover {
     margin-top: 0%;
     color: #5C70C4;
 }
+
 
 .originalReview, #userRatings .listWrapper {
     display: grid;
