@@ -74,18 +74,24 @@ if search != ""
   exit
 end
 
-# Handle list creation
+# Handle list creation (or editing)
 if cgi['saveList'] && !listName.empty? && !description.empty?
-  existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
+  # Check if this is an edit by looking for an "editMode" flag
+  edit_mode = cgi['editMode'] == 'true'
 
-  if existing_list.count > 0
-    puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
-    exit
+  if !edit_mode
+    existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
+    if existing_list.count > 0
+      puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
+      exit
+    end
   end
 
+  # Insert new list ownership record
   db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
   list_id = db.last_id
 
+  # Insert new series entries
   if !seriesArray.empty?
     seriesArray.each do |series|
       series_id = series["id"].to_i
@@ -94,6 +100,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
     end
   end
 
+  # Insert new season entries
   if !seasonArray.empty?
     seasonArray.each do |season|
       show_id = season["seriesId"].to_i
@@ -112,7 +119,7 @@ if cgi['saveList'] && !listName.empty? && !description.empty?
     exit
   end
 
-  puts "<script>alert('Your list has been successfully created!'); window.location.href = 'Profile_Lists.cgi';</script>"
+  puts "<script>alert('Your list has been successfully #{edit_mode ? 'updated' : 'created'}!'); window.location.href = 'Profile_Lists.cgi';</script>"
   exit
 end
 
@@ -126,34 +133,30 @@ puts "  <title>Televised</title>"
 puts "  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
 puts "  <link rel='stylesheet' href='Televised.css'>"
 puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
-puts "<style>"
-puts " body {"
-puts "   overflow-x: hidden;"
-puts " }"
-puts " </style>"
 puts "</head>"
 puts "<body id='createNewList'>"
 puts "  <nav id='changingNav'></nav>"
 puts "  <h2 class='text-center mt-3'>Create a New List</h2>"
-puts "  <div class='container-fluid' style='padding-left: 395px;'>"
+puts "  <div class='container-fluid'>"
 puts "    <div class='row'>"
 puts "      <div class='col-12 col-md-4' id='listRow'>"
 puts "        <h3 class='text-center'>List Details</h3>"
 puts "        <form id='newListForm' method='post'>"
 puts "          <label>Name</label>"
-puts "          <input type='text' name='listName' class='form-control' placeholder='Name' required>"
+puts "          <input type='text' id='listName' name='listName' class='form-control' placeholder='Name' required>"
 puts "          <br>"
 puts "          <label>Who Can View</label>"
-puts "          <select name='views' class='form-control'>"
+puts "          <select id='views' name='views' class='form-control'>"
 puts "            <option value='Public'>Public - anyone can view</option>"
 puts "            <option value='Private'>Private - no one can view</option>"
 puts "          </select>"
 puts "          <br>"
 puts "          <label>Description</label>"
-puts "          <textarea name='description' class='form-control' rows='5'></textarea>"
+puts "          <textarea id='description' name='description' class='form-control' rows='5'></textarea>"
 puts "          <br>"
 puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray'>"
 puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray'>"
+puts "          <input type='hidden' id='editMode' name='editMode'>"
 puts "          <button id='saveList' name='saveList' class='btn btn-primary'>CREATE LIST</button>"
 puts "        </form>"
 puts "      </div>"
@@ -162,7 +165,7 @@ puts "        <h3 class='text-center'>Selected Media</h3>"
 puts "        <ul id='seriesList' class='list-group'></ul>"
 puts "      </div>"
 puts "      <div class='col-12 col-md-4' id='searchColumn'>"
-puts "        <h3 class='text-center'>Search for Media</h3>"
+puts "        <h3 class='text-center'>Search for a Series</h3>"
 puts "        <form id='searchForm'>"
 puts "          <select id='type' name='typeSearch' class='form-control'>"
 puts "            <option value='Series' selected>Series</option>"
@@ -176,16 +179,28 @@ puts "        <div id='searchResults'></div>"
 puts "      </div>"
 puts "    </div>"
 puts "  </div>"
-puts '<!-- Scripts -->'
-puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
 puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
 puts '<script src="Televised.js"></script>'
 puts <<~JAVASCRIPT
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    sessionStorage.removeItem('seriesArray');
-    sessionStorage.removeItem('seasonArray');
-    sessionStorage.removeItem('episodeArray');
+    let existingListData = sessionStorage.getItem('existingListData');
+    if (existingListData) {
+      let listData = JSON.parse(existingListData);
+      document.getElementById('listName').value = listData.name;
+      document.getElementById('description').value = listData.description;
+      document.getElementById('views').value = listData.privacy == 1 ? 'Public' : 'Private';
+      sessionStorage.setItem("seriesArray", JSON.stringify(listData.seriesArray || []));
+      sessionStorage.setItem("seasonArray", JSON.stringify(listData.seasonArray || []));
+      document.getElementById('editMode').value = 'true';
+      document.getElementById('saveList').innerText = 'SAVE CHANGES';
+      sessionStorage.removeItem('existingListData');
+    } else {
+      sessionStorage.removeItem('seriesArray');
+      sessionStorage.removeItem('seasonArray');
+      sessionStorage.removeItem('episodeArray');
+    }
+
     updateAllLists();
 
     document.getElementById('searchForm').addEventListener('submit', function (event) {
