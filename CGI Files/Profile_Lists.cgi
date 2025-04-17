@@ -167,14 +167,6 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<button type="submit" class="btn btn-danger">Delete List</button>'
   puts '</form>'
 
-  # Edit Button - Redirect to createNewList with pre-filled data
-  puts '<form action="createNewList.cgi" method="get" style="display: inline-block; margin-right: 10px;">'
-  puts '<input type="hidden" name="editListId" value="' + listId.to_s + '">'
-  puts '<input type="hidden" name="editListName" value="' + lists[i]['name'] + '">'
-  puts '<input type="hidden" name="editListDescription" value="' + lists[i]['description'] + '">'
-  puts '<button type="submit" class="btn btn-primary">Edit List</button>'
-  puts '</form>'
-
   # Likes handling
   puts '<form  class="LikeAndCount" action="Profile_Lists.cgi" method="post" style="display: inline-block;">'
   alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.to_s + "';")
