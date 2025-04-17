@@ -145,7 +145,14 @@ puts "<body id=\"episodePage\">"
         puts '<input type="hidden" name="fromIndivEp" value="TRUE">'
         puts '<input type="hidden" name="epNum" value="' + epNum + '">'
         puts '</form>'
-        puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateEpisodeReview\">&#128488</button>"
+
+        alreadyReviewed = db.query("SELECT * FROM episodeReview WHERE username = '" + username.to_s + "' AND epId = '" + episode.first['epId'].to_s + "';")
+        #puts testing.first.class
+        if alreadyReviewed.first.class.to_s == 'NilClass'
+         puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateEpisodeReview\">&#128488</button>"
+        else 
+          puts "<button class=\"reviewButton\" data-bs-toggle=\"modal\" data-bs-target=\"#CreateEpisodeReview\" style='color: #00156d;'>&#128488</button>"
+        end
 
         alreadyRatedEpisode = db.query("SELECT * FROM episodeRating WHERE username = '" + username + "' AND epId = '" + episode.first['epId'].to_s + "';")
           if (alreadyRatedEpisode.to_a.to_s != "[]")

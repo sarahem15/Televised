@@ -134,9 +134,9 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<div class="listWrapper" style="margin-bottom: 20px; margin-top: 20px;">'
   puts '<section class="carousel-section" id="listsPlease">'
   if seriesTab == "SERIES"
-    listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+    listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'].gsub("'", "\\\\'") + "';")
   elsif seriesTab == "SEASON"
-      listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+      listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'].gsub("'", "\\\\'") + "';")
   end
   listImages = listImages.to_a
   (0...5).each do |j|
@@ -152,13 +152,13 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '</div>'
   puts '<div class="createdLists">'
   puts '<section class="titleDate">'
-  puts '<a href="listContents.cgi?title=' + lists[i]['name'] + '&contentType=' + seriesTab + '">' + lists[i]['name'] + '</a>'
+  puts '<a href="listContents.cgi?title=' + lists[i]['name'].gsub("'", "\\\\'") + '&contentType=' + seriesTab + '">' + lists[i]['name'] + '</a>'
   puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
   puts '</section>'
   puts '<h3>' + lists[i]['description'] +'</h3>'
   
   # Fetch listId
-  listId = db.query("SELECT id FROM listOwnership WHERE username = '" + lists[i]['username'] + "' AND listName = '" + lists[i]['name'] + "';")
+  listId = db.query("SELECT id FROM listOwnership WHERE username = '" + lists[i]['username'] + "' AND listName = '" + lists[i]['name'].gsub("'", "\\\\'") + "';")
   listId = listId.first['id']
 
   # Delete Button
@@ -179,14 +179,18 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   (0...currentLikes.count).each do |row|
     likeCount += 1
   end
-  puts '<span style="font-size: 16px; margin-left: 5px;">' + likeCount.to_s + ' Likes</span>'
+  puts '<span style="font-size: 16px; margin-left: 5px;">' + likeCount.to_s + '</span>'
   puts '<input type="hidden" name="likedList" value="TRUE">'
   puts '<input type="hidden" name="listId" value="' + listId.to_s + '">'
   puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
   puts '</form>'
   puts '</div>'
   puts '</div>'
+  puts '<hr style="margin-left: 80px; margin-right: 80px">'
+  puts '<br>'
+  likeCount = 0
 end
+puts '<br>'
  puts '<!-- Scripts -->'
   puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
   puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'

@@ -68,7 +68,7 @@ puts '<body id="listContent">'
   puts '</section>'
   puts '<br>'
   puts '<section class="titleLike">'
-  puts '<h1>' + listTitle.to_s + ' <i style="font-size:15px;">(' + type + ')</i></h1>'
+  puts '<h1>' + listTitle.to_s.gsub("\\'", "'") + ' <i style="font-size:15px;">(' + type + ')</i></h1>'
   likes = db.query("SELECT * FROM likedList WHERE listId = '" + listId.first['id'].to_s + "';")
   likes = likes.to_a
   (0...likes.size).each do |j|

@@ -132,7 +132,7 @@ puts '<div class="originalReview">'
             alreadyLiked = true
           end
         end
-       puts '<form class="LikeAndCount" action="reviewIndiv.cgi">'
+       puts '<form class="LikeAndCount" action="reviewIndiv.cgi" method="post">'
        if alreadyLiked
         puts '<button class="LIKES" style="color: pink;">&#10084</button>'
       else
@@ -144,6 +144,8 @@ puts '<div class="originalReview">'
         puts '<input type="hidden" name="seasonNumber" value="' + seriesImage.first['seasonNum'].to_s + '">'
         puts '<input type="hidden" name="reviewId" value="' + reviewContent.first['id'].to_s + '">'
         puts '<input type="hidden" name="reviewCreator" value="' + reviewContent.first['username'].to_s + '">'
+        puts '<input type="hidden" name="contentType" value="' + type + '">'
+        puts '<input type="hidden" name="likedReview" value="TRUE">'
       puts '</form>'
        puts '<br>'
        puts '<i><h5 style="color: #436eb1">' + reviewContent.first['date'].to_s + '</h5></i>'

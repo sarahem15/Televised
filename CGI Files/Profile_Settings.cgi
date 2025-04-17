@@ -309,7 +309,7 @@ puts '<body id="profileSettings">'
                                 puts '<option value="' + episodes[h]['epId'].to_s + '">' + episodes[h]['epName'] + '</option>'
                             end
                         puts '</select>'
-                        puts '<select id="type" name="rank" class="form-control" style="width: 60px;">'
+                        puts '<select id="type" name="rank" class="form-control" style="width: 70px;">'
                             puts '<option value="SELECT">Rank</option>'
                             puts '<option value="1">1</option>'
                             puts '<option value="2">2</option>'

@@ -134,7 +134,7 @@ end
         puts '<h3 style="color: #a3afe1;">Likes for ' + displayName.first['displayName'].to_s + '\'s List</h3>'
       puts '</section>'
       puts '<br>'
-      puts '<h1>' + listName + '</h1>'
+      puts '<h1>' + listName.gsub("\\'", "'") + '</h1>'
       puts '<hr style="border-width: 5px; color: #a3afe1;">'
       puts '<div class="Content-type">'
       puts '<section>'
