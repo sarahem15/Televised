@@ -1,79 +1,81 @@
 #!/usr/bin/ruby
+# Switch images to queries from the database
+# Enable debugging
 $stdout.sync = true
 $stderr.reopen $stdout
 
+puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
 require 'cgi/session'
-require 'json'
 
+# Initialize CGI
 cgi = CGI.new
 session = CGI::Session.new(cgi)
 username = session['username']
-
-print cgi.header(
-  'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
-)
+#username = "try@try"
 
 db = Mysql2::Client.new(
-  host: '10.20.3.4',
-  username: 'seniorproject25',
-  password: 'TV_Group123!',
-  database: 'televised_w25'
+    host: '10.20.3.4', 
+    username: 'seniorproject25', 
+    password: 'TV_Group123!', 
+    database: 'televised_w25'
 )
 
-# Handle list deletion via edit
-if cgi['editList']
-  list_name = cgi['editList']
+# Fetch user information
+displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
+bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
+pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
+likeCount = 0
+seriesTab = cgi['seriesTab']
+if seriesTab == ""
+  seriesTab = "SERIES"
+end
+
+if cgi['likedList'] == "TRUE"
+  db.query("INSERT INTO likedList VALUES('" + username.to_s + "', '" + cgi['listCreator'] + "', '" + cgi['listId'] + "');")
+end
+
+# Handle delete request only if form is submitted
+if cgi.request_method == 'POST' && cgi['deleteListId']
+  delete_list_id = cgi['deleteListId'].to_i
+
+  begin
+    # Start a transaction to ensure atomicity
+    db.query("START TRANSACTION")
+
+    # Delete from likedList, curatedListSeries, and listOwnership
+    db.query("DELETE FROM likedList WHERE listId = #{delete_list_id}")
+    db.query("DELETE FROM curatedListSeason WHERE listId = #{delete_list_id}")
+    db.query("DELETE FROM curatedListSeries WHERE listId = #{delete_list_id}")
+    db.query("DELETE FROM listOwnership WHERE id = #{delete_list_id}")
+
+    # Commit the transaction
+    db.query("COMMIT")
+    
+    # Redirect back to Profile_Lists.cgi after deletion
+    puts "<html><body><script>window.location.href='Profile_Lists.cgi';</script></body></html>"
+    exit
+  rescue Mysql2::Error => e
+    # If there's an error, rollback the transaction
+    db.query("ROLLBACK")
+    puts "<html><body><script>alert('Error deleting list: #{e.message}'); window.location.href='Profile_Lists.cgi';</script></body></html>"
+    exit
+  end
+end
+
+# Handle edit request
+if cgi['editListId']
+  list_id = cgi['editListId'].to_i
+  list_name = cgi['editListName']
+  list_description = cgi['editListDescription']
+  # Fetch list data to pass to createNewList.cgi
   list_data = {
     listName: list_name,
-    description: "",
-    views: "Public",
-    seriesArray: [],
-    seasonArray: []
+    description: list_description
   }
 
-  # Get list metadata
-  description_result = db.query("SELECT description, privacy FROM curatedListSeries WHERE username = '#{username}' AND name = '#{db.escape(list_name)}' LIMIT 1")
-  if description_result.count > 0
-    row = description_result.first
-    list_data[:description] = row["description"]
-    list_data[:views] = row["privacy"] == 1 ? "Public" : "Private"
-  else
-    season_result = db.query("SELECT description, privacy FROM curatedListSeason WHERE username = '#{username}' AND name = '#{db.escape(list_name)}' LIMIT 1")
-    if season_result.count > 0
-      row = season_result.first
-      list_data[:description] = row["description"]
-      list_data[:views] = row["privacy"] == 1 ? "Public" : "Private"
-    end
-  end
-
-  # Fetch series
-  series = db.query("SELECT seriesId, name FROM curatedListSeries WHERE username = '#{username}' AND name = '#{db.escape(list_name)}'")
-  series.each do |row|
-    list_data[:seriesArray] << { id: row["seriesId"].to_s, name: row["name"] }
-  end
-
-  # Fetch seasons
-  seasons = db.query("SELECT seasonId, name FROM curatedListSeason WHERE username = '#{username}' AND name = '#{db.escape(list_name)}'")
-  seasons.each do |row|
-    # Convert seasonId to season number
-    season_row = db.query("SELECT seriesId FROM season WHERE seasonId = #{row["seasonId"]}").first
-    if season_row
-      series_id = season_row["seriesId"]
-      all_seasons = db.query("SELECT seasonId FROM season WHERE seriesId = #{series_id} ORDER BY seasonId ASC").to_a
-      index = all_seasons.find_index { |s| s["seasonId"] == row["seasonId"] }
-      season_number = index ? index + 1 : 1
-      list_data[:seasonArray] << { seriesId: series_id.to_s, name: row["name"], season: season_number }
-    end
-  end
-
-  # Delete from DB
-  db.query("DELETE FROM curatedListSeries WHERE username = '#{username}' AND name = '#{db.escape(list_name)}'")
-  db.query("DELETE FROM curatedListSeason WHERE username = '#{username}' AND name = '#{db.escape(list_name)}'")
-  db.query("DELETE FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(list_name)}'")
-
-  # Output JS to set sessionStorage and redirect
+  # Output JavaScript to set sessionStorage and redirect to createNewList.cgi
   puts "<script>"
   puts "sessionStorage.setItem('listEditData', #{list_data.to_json});"
   puts "window.location.href = 'createNewList.cgi';"
@@ -81,22 +83,140 @@ if cgi['editList']
   exit
 end
 
-# HTML output (simplified to keep focused)
-puts "<!DOCTYPE html>"
-puts "<html><head><title>Your Lists</title></head><body>"
-puts "<h2>Welcome, #{username}</h2>"
+puts '<!DOCTYPE html>'
+puts '<html lang="en">'
 
-user_lists = db.query("SELECT listName FROM listOwnership WHERE username = '#{username}'")
-user_lists.each do |row|
-  puts "<div class='listItem'>"
-  puts "<h3>#{row['listName']}</h3>"
-  puts "<form method='post'>"
-  puts "<input type='hidden' name='editList' value='#{row['listName']}'>"
-  puts "<button class='btn btn-warning'>Edit</button>"
-  puts "</form>"
-  puts "</div>"
+puts '<head>'
+puts '<meta charset="UTF-8">'
+puts '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+puts '<title>Televised</title>'
+puts '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">'
+puts '<link rel="stylesheet" href="Televised.css">'
+puts '</head>'
+
+puts '<body id="profile">'
+puts '<nav id="changingNav"></nav> <!-- This is where the navbar will be dynamically loaded -->'
+puts '<div class="container-fluid">'
+puts '<br>'
+puts '<section class="ProfileInfo">'
+puts '<section class="UserDisplay">'
+puts '<img src="ProfileImages/' + username.to_s + '.jpg" alt="">'
+puts '<h3 id="DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
+puts '</section>'
+puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
+puts '<h4>' + bio.first['bio'].to_s + '</h4>'
+puts '</section>'
+puts '<hr>'
+puts '<div class="profileHeader">'
+puts '<a href="Profile.cgi">Favorites</a>'
+puts '<a href="Have_Watched.cgi">Have Watched</a>'
+puts '<a href="Want_to_Watch.cgi">Want to Watch</a>'
+puts '<a href="#!" class="active">Lists</a>'
+puts '<a href="Profile_Reviews.cgi">Reviews</a>'
+puts '<a href="Likes_Lists.cgi">Likes</a>'
+puts '<a href="Profile_Ratings.cgi">Ratings</a>'
+puts '</div>'
+puts '<hr>'
+puts '<br>'
+
+puts '<div class="listProfileButtons">'
+puts '<div class="profileListHeader">'
+
+# Handle seriesTab filter
+if seriesTab == "SERIES"
+  puts '<a href="#"class="active">Series</a>'
+  puts '<a href="Profile_Lists.cgi?seriesTab=SEASON">Seasons</a>'
+  puts '<a href="Profile_Lists.cgi?seriesTab=EP">Episodes</a>'
+  lists = db.query("SELECT DISTINCT name, description, date, username FROM curatedListSeries WHERE username = '" + username.to_s + "';")
+  lists = lists.to_a
+elsif seriesTab == "SEASON"
+  puts '<a href="Profile_Lists.cgi?seriesTab=SERIES">Series</a>'
+  puts '<a href="#" class="active">Seasons</a>'
+  puts '<a href="Profile_Lists.cgi?seriesTab=EP">Episodes</a>'
+  lists = db.query("SELECT DISTINCT name, description, username FROM curatedListSeason WHERE username = '" + username.to_s + "';")
+  lists = lists.to_a
+elsif seriesTab == "EP"
+  puts '<a href="Profile_Lists.cgi?seriesTab=SERIES">Series</a>'
+  puts '<a href="Profile_Lists.cgi?seriesTab=SEASON">Seasons</a>'
+  puts '<a href="#" class="active">Episodes</a>'
+  lists = db.query("SELECT DISTINCT name, description, username FROM curatedListEpisode WHERE username = '" + username.to_s + "';")
+  lists = lists.to_a
 end
+puts '</div>'
+puts '<a href="createNewList.cgi"><button id="newListProfile" class="createListButton">Create a New List</button></a>'
+puts '</div>'
 
-puts "</body></html>"
+puts '<hr style="margin-left: 80px; margin-right: 80px">'
 
-session.close
+(0...lists.size).each do |i|
+  puts '<div class="listImages">'
+  puts '<div class="listWrapper" style="margin-bottom: 20px; margin-top: 20px;">'
+  puts '<section class="carousel-section" id="listsPlease">'
+  if seriesTab == "SERIES"
+    listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+  elsif seriesTab == "SEASON"
+    listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+  end
+  listImages = listImages.to_a
+  (0...5).each do |j|
+    puts '<div class="itemS">'
+    if (j < listImages.size)
+      puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '" style="height:270px; object-fit: cover;">'
+    else
+      puts '<img src="" alt="">'
+    end
+    puts '</div>'
+  end
+  puts '</section>'
+  puts '</div>'
+  puts '<div class="createdLists">'
+  puts '<section class="titleDate">'
+  puts '<a href="listContents.cgi?title=' + lists[i]['name'] + '&contentType=' + seriesTab + '">' + lists[i]['name'] + '</a>'
+  puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
+  puts '</section>'
+  puts '<h3>' + lists[i]['description'] +'</h3>'
+
+  # Fetch listId
+  listId = db.query("SELECT id FROM listOwnership WHERE username = '" + lists[i]['username'] + "' AND listName = '" + lists[i]['name'] + "';")
+  listId = listId.first['id']
+
+  # Delete Button
+  puts '<form action="Profile_Lists.cgi" method="post" style="display: inline-block; margin-right: 10px;">'
+  puts '<input type="hidden" name="deleteListId" value="' + listId.to_s + '">'
+  puts '<button type="submit" class="btn btn-danger">Delete List</button>'
+  puts '</form>'
+
+  # Edit Button - Redirect to createNewList with pre-filled data
+  puts '<form action="createNewList.cgi" method="get" style="display: inline-block; margin-right: 10px;">'
+  puts '<input type="hidden" name="editListId" value="' + listId.to_s + '">'
+  puts '<input type="hidden" name="editListName" value="' + lists[i]['name'] + '">'
+  puts '<input type="hidden" name="editListDescription" value="' + lists[i]['description'] + '">'
+  puts '<button type="submit" class="btn btn-primary">Edit List</button>'
+  puts '</form>'
+
+  # Likes handling
+  puts '<form  class="LikeAndCount" action="Profile_Lists.cgi" method="post" style="display: inline-block;">'
+  alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.to_s + "';")
+  if (alreadyLiked.to_a != [])
+    puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+  else
+    puts '<button class="LIKES">&#10084</button>'
+  end
+  currentLikes = db.query("SELECT * FROM likedList WHERE listId = '" + listId.to_s + "';")
+  (0...currentLikes.count).each do |row|
+    likeCount += 1
+  end
+  puts '<span style="font-size: 16px; margin-left: 5px;">' + likeCount.to_s + ' Likes</span>'
+  puts '<input type="hidden" name="likedList" value="TRUE">'
+  puts '<input type="hidden" name="listId" value="' + listId.to_s + '">'
+  puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
+  puts '</form>'
+  puts '</div>'
+  puts '</div>'
+end
+puts '<!-- Scripts -->'
+puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
+puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
+puts '<script src="Televised.js"></script>'
+puts '</body>'
+puts '</html>'
