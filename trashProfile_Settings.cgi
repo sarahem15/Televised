@@ -64,25 +64,6 @@ if cgi.request_method == 'POST' && cgi['deleteListId']
   end
 end
 
-# Handle edit request
-if cgi['editListId']
-  list_id = cgi['editListId'].to_i
-  list_name = cgi['editListName']
-  list_description = cgi['editListDescription']
-  # Fetch list data to pass to createNewList.cgi
-  list_data = {
-    listName: list_name,
-    description: list_description
-  }
-
-  # Output JavaScript to set sessionStorage and redirect to createNewList.cgi
-  puts "<script>"
-  puts "sessionStorage.setItem('listEditData', #{list_data.to_json});"
-  puts "window.location.href = 'createNewList.cgi';"
-  puts "</script>"
-  exit
-end
-
 puts '<!DOCTYPE html>'
 puts '<html lang="en">'
 
@@ -149,13 +130,13 @@ puts '</div>'
 puts '<hr style="margin-left: 80px; margin-right: 80px">'
 
 (0...lists.size).each do |i|
-  puts '<div class="listImages">'
+  puts '<div class="listImages">' 
   puts '<div class="listWrapper" style="margin-bottom: 20px; margin-top: 20px;">'
   puts '<section class="carousel-section" id="listsPlease">'
   if seriesTab == "SERIES"
     listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
   elsif seriesTab == "SEASON"
-    listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+      listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
   end
   listImages = listImages.to_a
   (0...5).each do |j|
@@ -175,7 +156,7 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
   puts '</section>'
   puts '<h3>' + lists[i]['description'] +'</h3>'
-
+  
   # Fetch listId
   listId = db.query("SELECT id FROM listOwnership WHERE username = '" + lists[i]['username'] + "' AND listName = '" + lists[i]['name'] + "';")
   listId = listId.first['id']
@@ -208,15 +189,18 @@ puts '<hr style="margin-left: 80px; margin-right: 80px">'
   end
   puts '<span style="font-size: 16px; margin-left: 5px;">' + likeCount.to_s + ' Likes</span>'
   puts '<input type="hidden" name="likedList" value="TRUE">'
-  puts '<input type="hidden" name="listId" value="' + listId.to_s + '">'
   puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
+  puts '<input type="hidden" name="listId" value="' + listId.to_s + '">'
   puts '</form>'
+
+  # Store list data for editing in sessionStorage
+  list_data = { 'name' => lists[i]['name'], 'description' => lists[i]['description'], 'listId' => listId }
+  json_data = list_data.to_json # Convert the Ruby hash to JSON
+  escaped_json = CGI.escapeHTML(json_data) # Escape it for safe use in JavaScript
+  puts "sessionStorage.setItem('listEditData', '#{escaped_json}');"
+  
   puts '</div>'
   puts '</div>'
 end
-puts '<!-- Scripts -->'
-puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
-puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-puts '<script src="Televised.js"></script>'
-puts '</body>'
-puts '</html>'
+
+puts '</body></html>'
