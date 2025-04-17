@@ -1,295 +1,203 @@
 #!/usr/bin/ruby
+# Switch images to queries from the database
+# Enable debugging
 $stdout.sync = true
 $stderr.reopen $stdout
 
+puts "Content-type: text/html\n\n"
 require 'mysql2'
 require 'cgi'
 require 'cgi/session'
-require 'json'
 
+# Initialize CGI
 cgi = CGI.new
 session = CGI::Session.new(cgi)
-
 username = session['username']
-
-print cgi.header(
-  'cookie' => CGI::Cookie.new('name' => 'CGISESSID', 'value' => session.session_id, 'httponly' => true, 'secure' => true)
-)
-
-search = cgi['mediaEntered']
-type = cgi['typeSearch']
-
-listName = cgi['listName']
-description = cgi['description']
-privacy = cgi['views'] == "Public" ? 1 : 0  
-
-begin
-  seriesArray = cgi['seriesArray'] && !cgi['seriesArray'].empty? ? JSON.parse(cgi['seriesArray']) : []
-rescue JSON::ParserError
-  seriesArray = []
-end
-
-begin
-  seasonArray = cgi['seasonArray'] && !cgi['seasonArray'].empty? ? JSON.parse(cgi['seasonArray']) : []
-rescue JSON::ParserError
-  seasonArray = []
-end
+#username = "try@try"
 
 db = Mysql2::Client.new(
-  host: '10.20.3.4', 
-  username: 'seniorproject25', 
-  password: 'TV_Group123!', 
-  database: 'televised_w25'
+    host: '10.20.3.4', 
+    username: 'seniorproject25', 
+    password: 'TV_Group123!', 
+    database: 'televised_w25'
 )
 
-# Handle AJAX search functionality
-if search != ""
-  if type == "Series"
-    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-    if results.count > 0
-      results.each do |row|
-        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button></p>"
-      end
-    else
-      puts "<p>We can't seem to find this title!</p>"
-    end
-  elsif type == "Season"
-    results = db.query("SELECT showName, imageName, showId FROM series WHERE showName LIKE '#{db.escape(search)}%'")
-    if results.count > 0
-      results.each do |row|
-        seasons = db.query("SELECT seasonId FROM season WHERE seriesId = '#{row['showId']}'").to_a
-        puts "<p>#{row['showName']} <img src='#{row['imageName']}' alt='#{row['showName']}' style='height: 50px; width: 35px; object-fit: cover;'>"
-        puts "<button class='addToList btn btn-success' data-series-id='#{row['showId']}' data-series-name='#{row['showName']}'>ADD</button>"
-        puts "<select class='seasonSelect' data-series-id='#{row['showId']}'>"
-        seasons.each_with_index do |season, index|
-          puts "<option value='#{season['seasonId']}'>Season #{index + 1}</option>"
-        end
-        puts "</select></p>"
-      end
-    else
-      puts "<p>We can't seem to find this title!</p>"
-    end
-  end
-  exit
+# Fetch user information
+displayName = db.query("SELECT displayName FROM account WHERE username = '" + username.to_s + "';")
+bio = db.query("SELECT bio FROM account WHERE username = '" + username.to_s + "';")
+pronouns = db.query("SELECT pronouns FROM account WHERE username = '" + username.to_s + "';")
+likeCount = 0
+seriesTab = cgi['seriesTab']
+if seriesTab == ""
+  seriesTab = "SERIES"
 end
 
-# Handle list creation (or editing)
-if cgi['saveList'] && !listName.empty? && !description.empty?
-  # Check if this is an edit by looking for an "editMode" flag
-  edit_mode = cgi['editMode'] == 'true'
+if cgi['likedList'] == "TRUE"
+  db.query("INSERT INTO likedList VALUES('" + username.to_s + "', '" + cgi['listCreator'] + "', '" + cgi['listId'] + "');")
+end
 
-  if !edit_mode
-    existing_list = db.query("SELECT id FROM listOwnership WHERE username = '#{username}' AND listName = '#{db.escape(listName)}'")
-    if existing_list.count > 0
-      puts "<script>alert('Sorry, but you already have a list with this name. Try a different name.');</script>"
-      exit
-    end
-  end
+# Handle delete request only if form is submitted
+if cgi.request_method == 'POST' && cgi['deleteListId']
+  delete_list_id = cgi['deleteListId'].to_i
 
-  # Insert new list ownership record
-  db.query("INSERT INTO listOwnership (username, listName) VALUES ('#{username}', '#{db.escape(listName)}')")
-  list_id = db.last_id
+  begin
+    # Start a transaction to ensure atomicity
+    db.query("START TRANSACTION")
 
-  # Insert new series entries
-  if !seriesArray.empty?
-    seriesArray.each do |series|
-      series_id = series["id"].to_i
-      db.query("INSERT INTO curatedListSeries (username, seriesId, name, description, privacy, date, listId)
-                VALUES ('#{username}', #{series_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
-    end
-  end
+    # Delete from likedList, curatedListSeries, and listOwnership
+    db.query("DELETE FROM likedList WHERE listId = #{delete_list_id}")
+    db.query("DELETE FROM curatedListSeason WHERE listId = #{delete_list_id}")
+    db.query("DELETE FROM curatedListSeries WHERE listId = #{delete_list_id}")
+    db.query("DELETE FROM listOwnership WHERE id = #{delete_list_id}")
 
-  # Insert new season entries
-  if !seasonArray.empty?
-    seasonArray.each do |season|
-      show_id = season["seriesId"].to_i
-      season_num = season["season"].to_i
-      result = db.query("SELECT seasonId FROM season WHERE seriesId = #{show_id} ORDER BY seasonId ASC LIMIT 1 OFFSET #{season_num - 1}")
-      if result.count > 0
-        season_id = result.first["seasonId"].to_i
-        db.query("INSERT INTO curatedListSeason (username, seasonId, name, description, privacy, date, listId)
-                  VALUES ('#{username}', #{season_id}, '#{db.escape(listName)}', '#{db.escape(description)}', #{privacy}, NOW(), #{list_id})")
-      end
-    end
-  end
-
-  if seriesArray.empty? && seasonArray.empty?
-    puts "<script>alert('Please select at least one series or season before saving.');</script>"
+    # Commit the transaction
+    db.query("COMMIT")
+    
+    # Redirect back to Profile_Lists.cgi after deletion
+    puts "<html><body><script>window.location.href='Profile_Lists.cgi';</script></body></html>"
+    exit
+  rescue Mysql2::Error => e
+    # If there's an error, rollback the transaction
+    db.query("ROLLBACK")
+    puts "<html><body><script>alert('Error deleting list: #{e.message}'); window.location.href='Profile_Lists.cgi';</script></body></html>"
     exit
   end
-
-  puts "<script>alert('Your list has been successfully #{edit_mode ? 'updated' : 'created'}!'); window.location.href = 'Profile_Lists.cgi';</script>"
-  exit
 end
 
-# Start HTML output
-puts "<!DOCTYPE html>"
-puts "<html lang='en'>"
-puts "<head>"
-puts "  <meta charset='UTF-8'>"
-puts "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-puts "  <title>Televised</title>"
-puts "  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>"
-puts "  <link rel='stylesheet' href='Televised.css'>"
-puts "  <script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>"
-puts "</head>"
-puts "<body id='createNewList'>"
-puts "  <nav id='changingNav'></nav>"
-puts "  <h2 class='text-center mt-3'>Create a New List</h2>"
-puts "  <div class='container-fluid'>"
-puts "    <div class='row'>"
-puts "      <div class='col-12 col-md-4' id='listRow'>"
-puts "        <h3 class='text-center'>List Details</h3>"
-puts "        <form id='newListForm' method='post'>"
-puts "          <label>Name</label>"
-puts "          <input type='text' id='listName' name='listName' class='form-control' placeholder='Name' required>"
-puts "          <br>"
-puts "          <label>Who Can View</label>"
-puts "          <select id='views' name='views' class='form-control'>"
-puts "            <option value='Public'>Public - anyone can view</option>"
-puts "            <option value='Private'>Private - no one can view</option>"
-puts "          </select>"
-puts "          <br>"
-puts "          <label>Description</label>"
-puts "          <textarea id='description' name='description' class='form-control' rows='5'></textarea>"
-puts "          <br>"
-puts "          <input type='hidden' id='seriesArrayInput' name='seriesArray'>"
-puts "          <input type='hidden' id='seasonArrayInput' name='seasonArray'>"
-puts "          <input type='hidden' id='editMode' name='editMode'>"
-puts "          <button id='saveList' name='saveList' class='btn btn-primary'>CREATE LIST</button>"
-puts "        </form>"
-puts "      </div>"
-puts "      <div class='col-12 col-md-4' id='listColumn'>"
-puts "        <h3 class='text-center'>Selected Media</h3>"
-puts "        <ul id='seriesList' class='list-group'></ul>"
-puts "      </div>"
-puts "      <div class='col-12 col-md-4' id='searchColumn'>"
-puts "        <h3 class='text-center'>Search for a Series</h3>"
-puts "        <form id='searchForm'>"
-puts "          <select id='type' name='typeSearch' class='form-control'>"
-puts "            <option value='Series' selected>Series</option>"
-puts "            <option value='Season'>Season</option>"
-puts "          </select>"
-puts "          <br>"
-puts "          <input type='text' name='mediaEntered' class='form-control'>"
-puts "          <input type='submit' value='Search' class='btn btn-secondary mt-2'>"
-puts "        </form>"
-puts "        <div id='searchResults'></div>"
-puts "      </div>"
-puts "    </div>"
-puts "  </div>"
-puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
-puts '<script src="Televised.js"></script>'
-puts <<~JAVASCRIPT
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    let existingListData = sessionStorage.getItem('existingListData');
-    if (existingListData) {
-      let listData = JSON.parse(existingListData);
-      document.getElementById('listName').value = listData.name;
-      document.getElementById('description').value = listData.description;
-      document.getElementById('views').value = listData.privacy == 1 ? 'Public' : 'Private';
-      sessionStorage.setItem("seriesArray", JSON.stringify(listData.seriesArray || []));
-      sessionStorage.setItem("seasonArray", JSON.stringify(listData.seasonArray || []));
-      document.getElementById('editMode').value = 'true';
-      document.getElementById('saveList').innerText = 'SAVE CHANGES';
-      sessionStorage.removeItem('existingListData');
-    } else {
-      sessionStorage.removeItem('seriesArray');
-      sessionStorage.removeItem('seasonArray');
-      sessionStorage.removeItem('episodeArray');
-    }
+puts '<!DOCTYPE html>'
+puts '<html lang="en">'
 
-    updateAllLists();
+puts '<head>'
+puts '<meta charset="UTF-8">'
+puts '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+puts '<title>Televised</title>'
+puts '<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">'
+puts '<link rel="stylesheet" href="Televised.css">'
+puts '</head>'
 
-    document.getElementById('searchForm').addEventListener('submit', function (event) {
-      event.preventDefault();
-      let searchInput = document.querySelector('input[name="mediaEntered"]').value;
-      let type = document.querySelector('select[name="typeSearch"]').value;
-      fetch('createNewList.cgi', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({ mediaEntered: searchInput, typeSearch: type })
-      })
-      .then(response => response.text())
-      .then(data => { document.getElementById('searchResults').innerHTML = data; });
-    });
+puts '<body id="profile">'
+puts '<nav id="changingNav"></nav> <!-- This is where the navbar will be dynamically loaded -->'
+puts '<div class="container-fluid">'
+puts '<br>'
+puts '<section class="ProfileInfo">'
+puts '<section class="UserDisplay">'
+puts '<img src="ProfileImages/' + username.to_s + '.jpg" alt="">'
+puts '<h3 id="DisplayName">' + displayName.first['displayName'].to_s + '</h3>'
+puts '</section>'
+puts '<h4>' + pronouns.first['pronouns'].to_s + '</h4>'
+puts '<h4>' + bio.first['bio'].to_s + '</h4>'
+puts '</section>'
+puts '<hr>'
+puts '<div class="profileHeader">'
+puts '<a href="Profile.cgi">Favorites</a>'
+puts '<a href="Have_Watched.cgi">Have Watched</a>'
+puts '<a href="Want_to_Watch.cgi">Want to Watch</a>'
+puts '<a href="#!" class="active">Lists</a>'
+puts '<a href="Profile_Reviews.cgi">Reviews</a>'
+puts '<a href="Likes_Lists.cgi">Likes</a>'
+puts '<a href="Profile_Ratings.cgi">Ratings</a>'
+puts '</div>'
+puts '<hr>'
+puts '<br>'
 
-    document.addEventListener("click", function (event) {
-      if (event.target.classList.contains("addToList")) {
-        event.preventDefault();
-        let seriesId = event.target.dataset.seriesId;
-        let seriesName = event.target.dataset.seriesName;
-        let parent = event.target.closest("p");
+puts '<div class="listProfileButtons">'
+puts '<div class="profileListHeader">'
 
-        if (document.querySelector("select.seasonSelect", parent)) {
-          let seasonNum = parent.querySelector("select.seasonSelect").selectedIndex + 1;
-          let seasonArray = JSON.parse(sessionStorage.getItem("seasonArray")) || [];
-          if (!seasonArray.some(s => s.seriesId === seriesId && s.season === seasonNum)) {
-            seasonArray.push({ seriesId: seriesId, name: seriesName, season: seasonNum });
-            sessionStorage.setItem("seasonArray", JSON.stringify(seasonArray));
-            updateAllLists();
-          }
-        } else {
-          let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
-          if (!seriesArray.some(s => s.id === seriesId)) {
-            seriesArray.push({ id: seriesId, name: seriesName });
-            sessionStorage.setItem("seriesArray", JSON.stringify(seriesArray));
-            updateAllLists();
-          }
-        }
-      }
+# Handle seriesTab filter
+if seriesTab == "SERIES"
+  puts '<a href="#"class="active">Series</a>'
+  puts '<a href="Profile_Lists.cgi?seriesTab=SEASON">Seasons</a>'
+  puts '<a href="Profile_Lists.cgi?seriesTab=EP">Episodes</a>'
+  lists = db.query("SELECT DISTINCT name, description, date, username FROM curatedListSeries WHERE username = '" + username.to_s + "';")
+  lists = lists.to_a
+elsif seriesTab == "SEASON"
+  puts '<a href="Profile_Lists.cgi?seriesTab=SERIES">Series</a>'
+  puts '<a href="#" class="active">Seasons</a>'
+  puts '<a href="Profile_Lists.cgi?seriesTab=EP">Episodes</a>'
+  lists = db.query("SELECT DISTINCT name, description, username FROM curatedListSeason WHERE username = '" + username.to_s + "';")
+  lists = lists.to_a
+elsif seriesTab == "EP"
+  puts '<a href="Profile_Lists.cgi?seriesTab=SERIES">Series</a>'
+  puts '<a href="Profile_Lists.cgi?seriesTab=SEASON">Seasons</a>'
+  puts '<a href="#" class="active">Episodes</a>'
+  lists = db.query("SELECT DISTINCT name, description, username FROM curatedListEpisode WHERE username = '" + username.to_s + "';")
+  lists = lists.to_a
+end
+puts '</div>'
+puts '<a href="createNewList.cgi"><button id="newListProfile" class="createListButton">Create a New List</button></a>'
+puts '</div>'
 
-      if (event.target.classList.contains("removeFromList")) {
-        event.preventDefault();
-        const type = event.target.dataset.type;
-        const index = parseInt(event.target.dataset.index, 10);
-        let key = `${type}Array`;
-        let arr = JSON.parse(sessionStorage.getItem(key)) || [];
-        arr.splice(index, 1);
-        sessionStorage.setItem(key, JSON.stringify(arr));
-        updateAllLists();
-      }
-    });
+puts '<hr style="margin-left: 80px; margin-right: 80px">'
 
-    function updateAllLists() {
-      let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
-      let seasonArray = JSON.parse(sessionStorage.getItem("seasonArray")) || [];
+(0...lists.size).each do |i|
+  puts '<div class="listImages">' 
+  puts '<div class="listWrapper" style="margin-bottom: 20px; margin-top: 20px;">'
+  puts '<section class="carousel-section" id="listsPlease">'
+  if seriesTab == "SERIES"
+    listImages = db.query("SELECT imageName FROM series JOIN curatedListSeries ON series.showId = curatedListSeries.seriesId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+  elsif seriesTab == "SEASON"
+      listImages = db.query("SELECT imageName FROM series JOIN season ON season.seriesId = series.showId JOIN curatedListSeason ON season.seasonId = curatedListSeason.seasonId WHERE username = '" + username.to_s + "' AND name = '" + lists[i]['name'] + "';")
+  end
+  listImages = listImages.to_a
+  (0...5).each do |j|
+    puts '<div class="itemS">'
+    if (j < listImages.size)
+      puts '<img src="' + listImages[j]['imageName'] + '" alt="' + listImages[j]['imageName'] + '" style="height:270px; object-fit: cover;">'
+    else
+      puts '<img src="" alt="">'
+    end
+    puts '</div>'
+  end
+  puts '</section>'
+  puts '</div>'
+  puts '<div class="createdLists">'
+  puts '<section class="titleDate">'
+  puts '<a href="listContents.cgi?title=' + lists[i]['name'] + '&contentType=' + seriesTab + '">' + lists[i]['name'] + '</a>'
+  puts '<i><h4>' + lists[i]['date'].to_s + '</h4></i>'
+  puts '</section>'
+  puts '<h3>' + lists[i]['description'] +'</h3>'
+  
+  # Fetch listId
+  listId = db.query("SELECT id FROM listOwnership WHERE username = '" + lists[i]['username'] + "' AND listName = '" + lists[i]['name'] + "';")
+  listId = listId.first['id']
 
-      document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);
-      document.getElementById('seasonArrayInput').value = JSON.stringify(seasonArray);
+  # Delete Button
+  puts '<form action="Profile_Lists.cgi" method="post" style="display: inline-block; margin-right: 10px;">'
+  puts '<input type="hidden" name="deleteListId" value="' + listId.to_s + '">'
+  puts '<button type="submit" class="btn btn-danger">Delete List</button>'
+  puts '</form>'
 
-      let container = document.getElementById("seriesList");
-      container.innerHTML = "";
+  # Edit Button - Redirect to createNewList with pre-filled data
+  puts '<form action="createNewList.cgi" method="get" style="display: inline-block; margin-right: 10px;">'
+  puts '<input type="hidden" name="editListId" value="' + listId.to_s + '">'
+  puts '<input type="hidden" name="editListName" value="' + lists[i]['name'] + '">'
+  puts '<input type="hidden" name="editListDescription" value="' + lists[i]['description'] + '">'
+  puts '<button type="submit" class="btn btn-primary">Edit List</button>'
+  puts '</form>'
 
-      seriesArray.forEach((s, i) => {
-        container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>
-          \${s.name} <button class='removeFromList btn btn-danger btn-sm' data-type='series' data-index='\${i}'>X</button>
-        </li>`;
-      });
-
-      seasonArray.forEach((s, i) => {
-        container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>
-          \${s.name} Season \${s.season} <button class='removeFromList btn btn-danger btn-sm' data-type='season' data-index='\${i}'>X</button>
-        </li>`;
-      });
-
-      const typeSelect = document.getElementById("type");
-      if (seriesArray.length > 0) {
-        typeSelect.value = "Series";
-        typeSelect.disabled = true;
-      } else if (seasonArray.length > 0) {
-        typeSelect.value = "Season";
-        typeSelect.disabled = true;
-      } else {
-        typeSelect.disabled = false;
-      }
-    }
-  });
-</script>
-JAVASCRIPT
-puts "</body>"
-puts "</html>"
-
-session.close
+  # Likes handling
+  puts '<form  class="LikeAndCount" action="Profile_Lists.cgi" method="post" style="display: inline-block;">'
+  alreadyLiked = db.query("SELECT * FROM likedList WHERE userWhoLiked = '" + username.to_s + "' AND userWhoCreated = '" + lists[i]['username'] + "' AND listId = '" + listId.to_s + "';")
+  if (alreadyLiked.to_a != [])
+    puts '<button class="LIKES" style="color: pink;">&#10084</button>'
+  else
+    puts '<button class="LIKES">&#10084</button>'
+  end
+  currentLikes = db.query("SELECT * FROM likedList WHERE listId = '" + listId.to_s + "';")
+  (0...currentLikes.count).each do |row|
+    likeCount += 1
+  end
+  puts '<span style="font-size: 16px; margin-left: 5px;">' + likeCount.to_s + ' Likes</span>'
+  puts '<input type="hidden" name="likedList" value="TRUE">'
+  puts '<input type="hidden" name="listId" value="' + listId.to_s + '">'
+  puts '<input type="hidden" name="listCreator" value="' + lists[i]['username'] + '">'
+  puts '</form>'
+  puts '</div>'
+  puts '</div>'
+end
+ puts '<!-- Scripts -->'
+  puts '<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>'
+  puts '<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>'
+  puts '<script src="Televised.js"></script>'
+puts '</body>'
+puts '</html>'
