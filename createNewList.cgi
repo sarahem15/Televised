@@ -130,7 +130,7 @@ puts "</head>"
 puts "<body id='createNewList'>"
 puts "  <nav id='changingNav'></nav>"
 puts "  <h2 class='text-center mt-3'>Create a New List</h2>"
-puts "  <div class='container-fluid'>"
+puts "  <div class='container-fluid' >"
 puts "    <div class='row'>"
 puts "      <div class='col-12 col-md-4' id='listRow'>"
 puts "        <h3 class='text-center'>List Details</h3>"
@@ -153,11 +153,11 @@ puts "          <button id='saveList' name='saveList' class='btn btn-primary'>CR
 puts "        </form>"
 puts "      </div>"
 puts "      <div class='col-12 col-md-4' id='listColumn'>"
-puts "        <h3 class='text-center'>Selected Series/Seasons</h3>"
+puts "        <h3 class='text-center'>Selected Media</h3>"
 puts "        <ul id='seriesList' class='list-group'></ul>"
 puts "      </div>"
 puts "      <div class='col-12 col-md-4' id='searchColumn'>"
-puts "        <h3 class='text-center'>Search for a Series</h3>"
+puts "        <h3 class='text-center'>Search for Media</h3>"
 puts "        <form id='searchForm'>"
 puts "          <select id='type' name='typeSearch' class='form-control'>"
 puts "            <option value='Series' selected>Series</option>"
@@ -180,13 +180,13 @@ puts <<~JAVASCRIPT
   document.addEventListener('DOMContentLoaded', function () {
     sessionStorage.removeItem('seriesArray');
     sessionStorage.removeItem('seasonArray');
+    sessionStorage.removeItem('episodeArray');
     updateAllLists();
 
     document.getElementById('searchForm').addEventListener('submit', function (event) {
       event.preventDefault();
       let searchInput = document.querySelector('input[name="mediaEntered"]').value;
       let type = document.querySelector('select[name="typeSearch"]').value;
-
       fetch('createNewList.cgi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -237,26 +237,39 @@ puts <<~JAVASCRIPT
       let seriesArray = JSON.parse(sessionStorage.getItem("seriesArray")) || [];
       let seasonArray = JSON.parse(sessionStorage.getItem("seasonArray")) || [];
 
-      document.getElementById("seriesList").innerHTML = "";
-      seriesArray.forEach((series, index) => {
-        let li = document.createElement("li");
-        li.className = "list-group-item";
-        li.innerHTML = `${series.name} <button class='removeFromList btn btn-danger' data-type="series" data-index="${index}">Remove</button>`;
-        document.getElementById("seriesList").appendChild(li);
+      document.getElementById('seriesArrayInput').value = JSON.stringify(seriesArray);
+      document.getElementById('seasonArrayInput').value = JSON.stringify(seasonArray);
+
+      let container = document.getElementById("seriesList");
+      container.innerHTML = "";
+
+      seriesArray.forEach((s, i) => {
+        container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>
+          \${s.name} <button class='removeFromList btn btn-danger btn-sm' data-type='series' data-index='\${i}'>X</button>
+        </li>`;
       });
 
-      seasonArray.forEach((season, index) => {
-        let li = document.createElement("li");
-        li.className = "list-group-item";
-        li.innerHTML = `${season.name} - Season ${season.season} <button class='removeFromList btn btn-danger' data-type="season" data-index="${index}">Remove</button>`;
-        document.getElementById("seriesList").appendChild(li);
+      seasonArray.forEach((s, i) => {
+        container.innerHTML += `<li class='list-group-item d-flex justify-content-between align-items-center'>
+          \${s.name} Season \${s.season} <button class='removeFromList btn btn-danger btn-sm' data-type='season' data-index='\${i}'>X</button>
+        </li>`;
       });
+
+      const typeSelect = document.getElementById("type");
+      if (seriesArray.length > 0) {
+        typeSelect.value = "Series";
+        typeSelect.disabled = true;
+      } else if (seasonArray.length > 0) {
+        typeSelect.value = "Season";
+        typeSelect.disabled = true;
+      } else {
+        typeSelect.disabled = false;
+      }
     }
   });
 </script>
-</body>
-</html>
 JAVASCRIPT
+puts "</body>"
+puts "</html>"
 
-# Close the session at the end
 session.close
